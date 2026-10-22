@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { fontDisplay, fontBody } from "@/lib/fonts";
 import SmoothScroll from "@/components/animations/SmoothScroll";
+import { Navbar, Footer } from "@/components/layout";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -30,8 +31,14 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-body bg-surface text-ink antialiased selection:bg-accent selection:text-ink">
-        <SmoothScroll>{children}</SmoothScroll>
+      <body className="font-body bg-surface text-ink antialiased selection:bg-accent selection:text-ink min-h-screen flex flex-col">
+        <SmoothScroll>
+          <Navbar />
+          <main id="main-content" className="flex-1">
+            {children}
+          </main>
+          <Footer />
+        </SmoothScroll>
       </body>
     </html>
   );

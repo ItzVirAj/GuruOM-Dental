@@ -47,7 +47,9 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
     });
 
     lenisRef.current = lenis;
-    setLenisInstance(lenis);
+    queueMicrotask(() => {
+      setLenisInstance(lenis);
+    });
 
     // Make accessible on window in browser console for testing & debugging
     if (process.env.NODE_ENV !== "production") {

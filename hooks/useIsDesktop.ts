@@ -1,34 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 /**
  * Hook to detect desktop viewports (default >= 1024px).
- * SSR-safe, updates reactively on window resize.
+ * SSR-safe, updates reactively on window resize without cascading renders.
  */
 export function useIsDesktop(breakpoint = 1024): boolean {
-  const [isDesktop, setIsDesktop] = useState<boolean>(false);
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => {
+      if (typeof window === "undefined" || !window.matchMedia) {
+        return () => {};
+      }
+      const mediaQuery = window.matchMedia(`(min-width: ${breakpoint}px)`);
+      mediaQuery.addEventListener("change", onStoreChange);
+      return () => mediaQuery.removeEventListener("change", onStoreChange);
+    },
+    [breakpoint]
+  );
 
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) {
-      return;
-    }
+  const getSnapshot = () => {
+    if (typeof window === "undefined" || !window.matchMedia) return false;
+    return window.matchMedia(`(min-width: ${breakpoint}px)`).matches;
+  };
 
-    const query = `(min-width: ${breakpoint}px)`;
-    const mediaQuery = window.matchMedia(query);
-    setIsDesktop(mediaQuery.matches);
+  const getServerSnapshot = () => false;
 
-    const handleChange = (event: MediaQueryListEvent) => {
-      setIsDesktop(event.matches);
-    };
-
-    mediaQuery.addEventListener("change", handleChange);
-    return () => {
-      mediaQuery.removeEventListener("change", handleChange);
-    };
-  }, [breakpoint]);
-
-  return isDesktop;
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
 export default useIsDesktop;

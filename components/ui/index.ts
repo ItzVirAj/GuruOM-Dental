@@ -7,3 +7,4 @@ export * from "./Badge";
 export * from "./Card";
 export * from "./IconCircle";
 export * from "./SmartImage";
+export * from "./PageHeader";

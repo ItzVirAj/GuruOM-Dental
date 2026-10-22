@@ -5,6 +5,9 @@
    CSS VARIABLES FOR DESIGN SYSTEM & GSAP MOTION ENGINE
    ========================================================================== */
 :root {
+  /* Layout sizing */
+  --nav-h: 5rem;
+
   /* Brand colors */
   --brand: #0E5A5F;
   --brand-dark: #072F33;

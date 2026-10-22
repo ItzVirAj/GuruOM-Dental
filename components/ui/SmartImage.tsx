@@ -1,12 +1,14 @@
 import React from "react";
 import Image from "next/image";
 import { Image as ImageIcon } from "lucide-react";
-import { AspectRatio } from "@/data/images";
+import { AspectRatio, plannedImages } from "@/data/images";
 
 export interface SmartImageProps {
+  slot?: string;
   src?: string;
-  alt: string;
+  alt?: string;
   ratio?: AspectRatio;
+  aspect?: AspectRatio; // Alias for ratio
   label?: string;
   priority?: boolean;
   className?: string;
@@ -23,22 +25,31 @@ const ratioStyles: Record<AspectRatio, string> = {
 };
 
 export const SmartImage: React.FC<SmartImageProps> = ({
+  slot,
   src,
   alt,
-  ratio = "16/9",
+  ratio,
+  aspect,
   label,
   priority = false,
   className = "",
   sizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
 }) => {
-  const ratioClass = ratioStyles[ratio];
+  const slotData = slot ? plannedImages[slot] : undefined;
+
+  const finalSrc = src ?? slotData?.src;
+  const finalAlt = alt ?? slotData?.alt ?? label ?? "GuruOm Dental image";
+  const finalRatio = ratio ?? aspect ?? slotData?.ratio ?? "16/9";
+  const finalLabel = label ?? slotData?.label ?? (slot ? `Slot: ${slot}` : finalAlt);
+
+  const ratioClass = ratioStyles[finalRatio] || "aspect-[16/9]";
 
   // Placeholder mode when src is absent or empty
-  if (!src || src.trim() === "") {
+  if (!finalSrc || finalSrc.trim() === "") {
     return (
       <div
         role="img"
-        aria-label={alt || label || "Image placeholder"}
+        aria-label={finalAlt || finalLabel || "Image placeholder"}
         className={`relative w-full overflow-hidden rounded-lg border border-line bg-gradient-to-br from-surface-alt via-surface to-accent-soft p-6 flex flex-col items-center justify-center text-center select-none shadow-soft ${ratioClass} ${className}`}
       >
         <div className="flex flex-col items-center justify-center gap-3 max-w-[85%]">
@@ -48,35 +59,37 @@ export const SmartImage: React.FC<SmartImageProps> = ({
 
           <div className="space-y-1">
             <p className="text-xs font-semibold uppercase tracking-wider text-brand">
-              {label || "Slot: " + (alt || "Planned Image")}
+              {finalLabel}
             </p>
             <p className="text-[11px] font-medium text-ink-muted">
-              Ratio: {ratio}
+              Ratio: {finalRatio}
             </p>
           </div>
         </div>
 
         {/* Subtle grid accent pattern */}
         <div
+          className="absolute inset-0 opacity-[0.03] pointer-events-none"
+          style={{
+            backgroundImage: `radial-gradient(var(--brand) 1px, transparent 1px)`,
+            backgroundSize: "16px 16px",
+          }}
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-[0.03] bg-[radial-gradient(#10262A_1px,transparent_1px)] [background-size:12px_12px]"
         />
       </div>
     );
   }
 
-  // Real Image mode
+  // Real production image when src is configured
   return (
-    <div
-      className={`relative w-full overflow-hidden rounded-lg bg-surface-alt shadow-soft ${ratioClass} ${className}`}
-    >
+    <div className={`relative w-full overflow-hidden ${ratioClass} ${className}`}>
       <Image
-        src={src}
-        alt={alt}
+        src={finalSrc}
+        alt={finalAlt}
         fill
         sizes={sizes}
         priority={priority}
-        className="object-cover transition-opacity duration-500 ease-out"
+        className="object-cover transition-transform duration-500 hover:scale-105"
       />
     </div>
   );

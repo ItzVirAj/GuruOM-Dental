@@ -29,9 +29,19 @@ export const siteConfig = {
   email: clinicInfo.email || "care@guruomdental.com",
   emailPlaceholder: "hello@guruomdental.com",
   whatsapp: "+91 98765 43210",
-  address: clinicInfo.address || "Suite 402, Lotus Tower, S.G. Highway, Ahmedabad, Gujarat 380054",
+  whatsappPlaceholder: "+91 00000 00000",
+  address: {
+    full: clinicInfo.address || "Suite 402, Lotus Tower, S.G. Highway, Ahmedabad, Gujarat 380054",
+    city: "Ahmedabad",
+    state: "Gujarat",
+  },
   googleMapsUrl: "https://maps.google.com/?q=GuruOm+Dental+Clinic+Ahmedabad",
-  workingHours: clinicInfo.timing || "Mon - Sat: 9:00 AM - 8:30 PM | Sun: By Appointment",
+  workingHours: {
+    text: clinicInfo.timing || "Mon - Sat: 9:00 AM - 8:30 PM | Sun: By Appointment",
+    weekdays: "Mon - Fri: 9:00 AM - 8:30 PM",
+    saturday: "Saturday: 9:00 AM - 6:00 PM",
+    sunday: "Sunday: By Appointment Only",
+  },
   socials: {
     instagram: "https://instagram.com/guruomdental",
     facebook: "https://facebook.com/guruomdental",
@@ -50,71 +60,68 @@ export const navLinks: NavLink[] = [
   { label: "Contact", href: "/contact" },
 ];
 
-export const megaMenuGroups: Record<string, MegaMenuGroup> = {
-  main: {
+export const megaMenuGroups: MegaMenuGroup[] = [
+  {
     title: "Main",
     items: [
-      { label: "Home", href: "/", description: "Sanctuary overview and entrance" },
-      { label: "About Us", href: "/about", description: "Our values, safety & philosophy" },
-      { label: "Treatments", href: "/services", description: "Full spectrum oral wellness" },
-      { label: "Service Details", href: "/services#details", description: "In-depth procedural steps" },
-      { label: "Specialists", href: "/doctors", description: "Meet our surgeons & faculty" },
-      { label: "Doctor Profile", href: "/doctors#dr-om-patel", description: "Credentials & expertise" },
-      { label: "Contact", href: "/contact", description: "Directions, phone & hours" },
-      { label: "Appointment", href: "/appointment", description: "Book your smile consultation" },
+      { label: "Home", href: "/", description: "Sanctuary overview & intro" },
+      { label: "About Us", href: "/about", description: "Our values, hygiene & philosophy" },
+      { label: "Services", href: "/services", description: "Full spectrum oral wellness" },
+      { label: "Service Details", href: "/services#details", description: "In-depth treatment procedures" },
+      { label: "Doctors", href: "/doctors", description: "Meet our specialist clinicians" },
+      { label: "Doctor Profile", href: "/doctors#profile", description: "Accreditations & background" },
+      { label: "Contact", href: "/contact", description: "Front desk & clinic directions" },
+      { label: "Appointment", href: "/appointment", description: "Direct booking & priority consults" },
     ],
   },
-  resources: {
+  {
     title: "Resources",
     items: [
-      { label: "Pricing & Plans", href: "/pricing", description: "Transparent treatment fees" },
-      { label: "Clinical Blog", href: "/blog", description: "Doctor guides & dental tips" },
-      { label: "Blog Article", href: "/blog#featured", description: "Deep-dive clinical articles" },
-      { label: "Careers", href: "/careers", description: "Join our nursing & dental staff" },
+      { label: "Pricing", href: "/pricing", description: "Transparent fees & insurance support" },
+      { label: "Blog", href: "/blog", description: "Dental health articles & advice" },
+      { label: "Blog Post", href: "/blog#post", description: "Deep dive patient care spotlight" },
+      { label: "Careers", href: "/careers", description: "Join our clinical medical team" },
     ],
   },
-  utility: {
+  {
     title: "Utility",
     items: [
-      { label: "Privacy Policy", href: "/privacy", description: "Confidentiality & health records" },
-      { label: "Terms & Conditions", href: "/terms", description: "Patient rights & policies" },
-      { label: "404 Error Page", href: "/404", description: "Sample not-found template" },
+      { label: "Privacy Policy", href: "/privacy", description: "Medical records confidentiality" },
+      { label: "Terms & Conditions", href: "/terms", description: "Appointment & treatment terms" },
+      { label: "404 Page", href: "/not-found-preview", description: "Custom not found redirect" },
     ],
   },
-};
+];
 
 export const footerLinkColumns: FooterLinkCol[] = [
   {
+    title: "Quick Links",
+    links: [
+      { label: "Home", href: "/" },
+      { label: "About Us", href: "/about" },
+      { label: "Our Treatments", href: "/services" },
+      { label: "Specialist Doctors", href: "/doctors" },
+      { label: "Pricing & Coverage", href: "/pricing" },
+    ],
+  },
+  {
     title: "Treatments",
     links: [
-      { label: "Cosmetic Smile Makeover", href: "/services#cosmetic-dentistry" },
-      { label: "Swiss Dental Implants", href: "/services#dental-implants" },
-      { label: "Clear Invisible Aligners", href: "/services#invisible-aligners" },
-      { label: "Microscopic Root Canal", href: "/services#microscopic-rct" },
-      { label: "Laser Periodontics", href: "/services#laser-gum-therapy" },
-      { label: "Pediatric Dentistry", href: "/services#pediatric-dentistry" },
+      { label: "Dental Implants", href: "/services#implants" },
+      { label: "Clear Aligners", href: "/services#aligners" },
+      { label: "Cosmetic Veneers", href: "/services#veneers" },
+      { label: "Painless Root Canal", href: "/services#rct" },
+      { label: "Kids Dentistry", href: "/services#pediatric" },
     ],
   },
   {
-    title: "Practice",
+    title: "Patient Center",
     links: [
-      { label: "About Our Clinic", href: "/about" },
-      { label: "Meet the Doctors", href: "/doctors" },
-      { label: "Hospital Sterilization", href: "/about#hygiene" },
-      { label: "Transparent Pricing", href: "/pricing" },
-      { label: "Patient Testimonials", href: "/animation-lab#counter" },
-      { label: "Emergency Care", href: "/contact#emergency" },
-    ],
-  },
-  {
-    title: "Resources & Legal",
-    links: [
-      { label: "Smile Health Blog", href: "/blog" },
-      { label: "Design System Showcase", href: "/design-system" },
-      { label: "Animation Lab", href: "/animation-lab" },
-      { label: "Privacy Policy", href: "/privacy" },
-      { label: "Terms of Service", href: "/terms" },
-      { label: "Cookie Settings", href: "/privacy#cookies" },
+      { label: "Book Consultation", href: "/appointment" },
+      { label: "Oral Health Blog", href: "/blog" },
+      { label: "Careers", href: "/careers" },
+      { label: "Clinic Location", href: "/contact" },
+      { label: "Emergency Support", href: "/contact#emergency" },
     ],
   },
 ];

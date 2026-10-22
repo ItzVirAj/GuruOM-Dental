@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { dentalServices } from "@/data/dental-data";
-import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
+import { gsap, useGSAP } from "@/lib/gsap";
 
 export default function Services() {
   const containerRef = useRef<HTMLDivElement>(null);

@@ -10,7 +10,6 @@ import {
   Eye,
   CheckCircle,
   ArrowUp,
-  Compass,
   Zap,
 } from "lucide-react";
 import {
@@ -22,7 +21,6 @@ import {
   Badge,
   Card,
   IconCircle,
-  SmartImage,
 } from "@/components/ui";
 import {
   Reveal,

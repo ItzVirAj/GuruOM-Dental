@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import { ScrollTrigger, useGSAP } from "@/lib/gsap";
 
 export interface PinSectionProps {

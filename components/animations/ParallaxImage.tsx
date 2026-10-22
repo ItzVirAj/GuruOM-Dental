@@ -3,7 +3,6 @@
 import React, { useRef } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
 import SmartImage, { SmartImageProps } from "@/components/ui/SmartImage";
-import { AspectRatio } from "@/data/images";
 
 export interface ParallaxImageProps extends Omit<SmartImageProps, "className"> {
   speed?: number; // Higher value = more displacement

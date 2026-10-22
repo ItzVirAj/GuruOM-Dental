@@ -6,3 +6,5 @@ export * from "./Counter";
 export * from "./ParallaxImage";
 export * from "./MagneticWrap";
 export * from "./PinSection";
+export * from "@/hooks/useIsDesktop";
+export * from "@/hooks/useReducedMotion";
