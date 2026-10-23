@@ -10,8 +10,13 @@ export default function ServicesPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Clinical Excellence"
         title="Clinical Treatments & Procedures"
         description="Every treatment at GuruOm Dental pairs Swiss & German precision engineering with painless protocols and lifetime aesthetic durability."
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Services" },
+        ]}
       />
       <Section variant="surface">
         <Container>

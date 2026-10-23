@@ -17,23 +17,31 @@ const variantStyles: Record<SectionVariant, string> = {
   white: "bg-white text-ink",
 };
 
-export const Section: React.FC<SectionProps> = ({
-  as: Component = "section",
-  variant = "surface",
-  id,
-  className = "",
-  children,
-  ...props
-}) => {
-  return (
-    <Component
-      id={id}
-      className={`py-16 md:py-24 lg:py-32 transition-colors duration-300 ${variantStyles[variant]} ${className}`}
-      {...props}
-    >
-      {children}
-    </Component>
-  );
-};
+export const Section = React.forwardRef<HTMLElement, SectionProps>(
+  (
+    {
+      as: Component = "section",
+      variant = "surface",
+      id,
+      className = "",
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    return (
+      <Component
+        ref={ref}
+        id={id}
+        className={`py-16 md:py-24 lg:py-32 transition-colors duration-300 ${variantStyles[variant]} ${className}`}
+        {...props}
+      >
+        {children}
+      </Component>
+    );
+  }
+);
+
+Section.displayName = "Section";
 
 export default Section;

@@ -166,7 +166,7 @@ export default function DesignSystemPage() {
             <div className="space-y-2 border-t border-line/60 pt-6">
               <div className="text-xs font-mono text-brand uppercase tracking-wider">.text-small (Captions, Footers, Meta)</div>
               <p className="text-small text-ink-muted">
-                Suite 402, Lotus Tower, S.G. Highway, Ahmedabad, Gujarat • Licensed NABH Accredited Facility.
+                GuruOm Dental, Abhiyanta Colony, Shriram Nagar, Sawli Housing Society, Surya Nagar, Ahilyanagar, Maharashtra 414003 • Licensed NABH Accredited Facility.
               </p>
             </div>
 

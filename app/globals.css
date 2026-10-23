@@ -72,6 +72,10 @@
   /* Typography families */
   --font-display: var(--font-display), "Instrument Serif", Georgia, serif;
   --font-body: var(--font-body), "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-aileron: var(--font-aileron), "Aileron", sans-serif;
+  --font-league-spartan: var(--font-league-spartan), sans-serif;
+  --font-arabica-menu: var(--font-arabica-menu), sans-serif;
+  --font-rainbow-miracles: var(--font-rainbow-miracles), cursive, sans-serif;
 
   /* Border radius */
   --radius-sm: var(--radius-sm);
@@ -195,7 +199,7 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   font-weight: 400;
-  color: var(--ink);
+  color: inherit;
 }
 
 /* Selection color */

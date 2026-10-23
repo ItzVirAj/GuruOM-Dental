@@ -1,372 +1,270 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 import Link from "next/link";
-import { Container, Button, SmartImage } from "@/components/ui";
-import { Marquee, Reveal, SplitHeading, useLenis } from "@/components/animations";
-import { siteConfig, footerLinkColumns } from "@/data/site";
+import { Container, NewsletterForm } from "@/components/ui";
+import { Marquee } from "@/components/animations";
+import { siteConfig } from "@/data/site";
 
 export function Footer() {
-  const lenis = useLenis();
-
-  // Hydration-safe year using useSyncExternalStore
+  // Hydration-safe current year
   const year = useSyncExternalStore(
-    () => () => {},
+    () => () => { },
     () => new Date().getFullYear(),
     () => 2026
   );
 
-  // Newsletter form state
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [errorMessage, setErrorMessage] = useState("");
+  const tickerItems = [
+    "MEMBER-ONLY EXCLUSIVES",
+    "BOOKED BY 100+ PATIENTS TODAY",
+    "24/7 PRIORITY SUPPORT",
+    "WORLD-CLASS HYGIENE PROTOCOLS",
+    "PAIN-FREE PROCEDURES",
+  ];
 
-  const handleNewsletterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage("");
-
-    // Simple email regex validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      setStatus("error");
-      setErrorMessage("Please enter a valid email address.");
-      return;
-    }
-
-    setStatus("loading");
-
-    try {
-      // TODO: Connect this to your newsletter/CRM endpoint (e.g., Mailchimp, Resend, Supabase).
-      // Example: await fetch('/api/newsletter', { method: 'POST', body: JSON.stringify({ email }) });
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      setStatus("success");
-      setEmail("");
-    } catch {
-      setStatus("error");
-      setErrorMessage("Something went wrong. Please try again later.");
-    }
-  };
-
-  const handleBackToTop = () => {
-    if (lenis) {
-      lenis.scrollTo(0, { duration: 1.2 });
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
-
-  const tickerPhrases = [
-    "Gentle Care",
-    "Digital Diagnostics",
-    "Hospital-Grade Hygiene",
-    "Emergency Support",
-    "Transparent Pricing",
+  const mainPageLinks = [
+    { label: "Home", href: "/" },
+    { label: "About", href: "/about" },
+    { label: "Service", href: "/services" },
+    { label: "Doctors", href: "/doctors" },
+    { label: "Pricing", href: "/pricing" },
+    { label: "Appointment", href: "/appointment" },
+    { label: "Blogs", href: "/blog" },
+    { label: "Contact", href: "/contact" },
   ];
 
   return (
-    <footer className="relative bg-brand-dark text-white overflow-hidden pt-16 lg:pt-24">
-      {/* 1. Top CTA Strip */}
-      <Container className="mb-16 lg:mb-20">
-        <Reveal>
-          <div className="relative rounded-3xl bg-brand/50 border border-brand-light/30 p-8 sm:p-12 lg:p-16 overflow-hidden">
-            {/* Background ambient glow */}
-            <div
-              className="pointer-events-none absolute -right-20 -bottom-20 h-72 w-72 rounded-full bg-accent/15 blur-3xl"
-              aria-hidden="true"
-            />
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              <div className="lg:col-span-7 flex flex-col gap-6">
-                <span className="text-xs font-bold uppercase tracking-widest text-accent">
-                  Book Your Consultation
-                </span>
-                <SplitHeading
-                  as="h2"
-                  type="words"
-                  className="text-white text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight"
+    <footer className="relative w-full bg-white text-[#101828] overflow-hidden" aria-label="Footer">
+      {/* 1. Top Ribbon Marquee Strip (Brand Green Background #0E5A5F) */}
+      <div className="w-full bg-brand text-white py-2.5 overflow-hidden border-b border-brand-dark/30 shadow-xs">
+        <Marquee speed={38} pauseOnHover className="py-0.5">
+          <div className="flex items-center gap-10 whitespace-nowrap text-[11px] sm:text-xs font-sans font-bold tracking-widest uppercase">
+            {tickerItems.concat(tickerItems).map((text, idx) => (
+              <span key={idx} className="inline-flex items-center gap-3">
+                {/* 8-Point Asterisk Star Icon in Accent Mint */}
+                <svg
+                  className="w-3.5 h-3.5 fill-accent opacity-90 shrink-0"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
                 >
-                  Your healthiest smile starts here.
-                </SplitHeading>
-                <p className="text-surface-alt/80 text-base max-w-xl leading-relaxed">
-                  Join hundreds of families who trust GuruOm Dental for painless checkups, 3D
-                  aligners, and restorative dentistry.
-                </p>
-
-                <div className="flex flex-wrap items-center gap-4 pt-2">
-                  <Button href="/appointment" variant="secondary" size="lg" className="font-bold text-brand-dark">
-                    Book Appointment
-                  </Button>
-                  <Button
-                    href={`tel:${siteConfig.phone.replace(/[^+\d]/g, "")}`}
-                    variant="ghost"
-                    size="lg"
-                    className="border-white/20 text-white hover:bg-white/10"
-                  >
-                    Call {siteConfig.phone}
-                  </Button>
-                </div>
-              </div>
-
-              {/* Decorative CTA SmartImage */}
-              <div className="lg:col-span-5 relative">
-                <div className="relative mx-auto max-w-sm rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
-                  <SmartImage
-                    slot="footerCta"
-                    alt="GuruOm Dental Clinic ambiance and consultation"
-                    aspect="16/9"
-                    className="w-full h-auto object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/80 via-transparent to-transparent pointer-events-none" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </Reveal>
-      </Container>
-
-      {/* 2. Main Columns Grid */}
-      <Container className="mb-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
-          {/* Column 1: Brand, info, hours, socials (Span 4) */}
-          <div className="lg:col-span-4 flex flex-col gap-6">
-            <Reveal delay={0.05}>
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-brand-dark">
-                  <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C8.5 2 6 4.5 6 8c0 3.2 1.3 5.4 2.1 7.2.7 1.6 1.4 3.3 1.9 5.8.2.8.9 1 1.5.8.7-.3.9-1.1.9-1.8 0-1.8-.4-3.5-.8-5.2-.2-.8.5-1.5 1.4-1.5s1.6.7 1.4 1.5c-.4 1.7-.8 3.4-.8 5.2 0 .7.2 1.5.9 1.8.6.2 1.3 0 1.5-.8.5-2.5 1.2-4.2 1.9-5.8.8-1.8 2.1-4 2.1-7.2 0-3.5-2.5-6-6-6z" />
-                  </svg>
-                </div>
-                <span className="font-display text-xl font-bold tracking-tight text-white">
-                  {siteConfig.name}
-                </span>
-              </div>
-            </Reveal>
-
-            <Reveal delay={0.1}>
-              <p className="text-sm text-surface-alt/70 leading-relaxed max-w-sm">
-                Providing gentle, hospital-grade dental healthcare and cosmetic smiles in {siteConfig.address.city} with advanced 3D radiography and pain-free treatments.
-              </p>
-            </Reveal>
-
-            <Reveal delay={0.15}>
-              <div className="flex flex-col gap-1 text-xs text-surface-alt/80">
-                <span className="font-semibold text-accent uppercase tracking-wider text-[11px]">
-                  Clinic Hours
-                </span>
-                <span>{siteConfig.workingHours.weekdays}</span>
-                <span>{siteConfig.workingHours.saturday}</span>
-                <span className="text-surface-alt/60">{siteConfig.workingHours.sunday}</span>
-              </div>
-            </Reveal>
-
-            {/* Social Icons that lift on hover */}
-            <Reveal delay={0.2}>
-              <div className="flex items-center gap-3 pt-2">
-                {/* Instagram */}
-                <a
-                  href={siteConfig.socials.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 border border-white/10 text-surface-alt transition-transform hover:-translate-y-1 hover:bg-white/15 hover:text-accent focus-visible:ring-2 focus-visible:ring-accent outline-none"
-                >
-                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-                  </svg>
-                </a>
-
-                {/* Facebook */}
-                <a
-                  href={siteConfig.socials.facebook}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Facebook"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 border border-white/10 text-surface-alt transition-transform hover:-translate-y-1 hover:bg-white/15 hover:text-accent focus-visible:ring-2 focus-visible:ring-accent outline-none"
-                >
-                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M9 8H6v4h3v12h5V12h3.642L18 8h-4V6.333C14 5.374 14.5 5 15.688 5H18V0h-3.808C10.597 0 9 1.583 9 4.615V8z" />
-                  </svg>
-                </a>
-
-                {/* YouTube */}
-                <a
-                  href={siteConfig.socials.youtube}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="YouTube"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 border border-white/10 text-surface-alt transition-transform hover:-translate-y-1 hover:bg-white/15 hover:text-accent focus-visible:ring-2 focus-visible:ring-accent outline-none"
-                >
-                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-                  </svg>
-                </a>
-
-                {/* WhatsApp */}
-                <a
-                  href={siteConfig.socials.whatsapp}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="WhatsApp"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 border border-white/10 text-surface-alt transition-transform hover:-translate-y-1 hover:bg-white/15 hover:text-accent focus-visible:ring-2 focus-visible:ring-accent outline-none"
-                >
-                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z" />
-                  </svg>
-                </a>
-              </div>
-            </Reveal>
-          </div>
-
-          {/* Columns 2, 3, 4: Footer Link Groups (Span 5 total) */}
-          <div className="lg:col-span-5 grid grid-cols-2 sm:grid-cols-3 gap-8">
-            {footerLinkColumns.map((col, idx) => (
-              <div key={col.title} className="flex flex-col gap-4">
-                <Reveal delay={0.1 + idx * 0.05}>
-                  <span className="text-xs font-bold uppercase tracking-widest text-accent">
-                    {col.title}
-                  </span>
-                </Reveal>
-                <ul className="flex flex-col gap-2.5">
-                  {col.links.map((link) => (
-                    <li key={link.label}>
-                      <Reveal delay={0.15 + idx * 0.05}>
-                        <Link
-                          href={link.href}
-                          className="text-sm text-surface-alt/75 transition-colors hover:text-white outline-none focus-visible:underline"
-                        >
-                          {link.label}
-                        </Link>
-                      </Reveal>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                  <path d="M12 2L13.8 8.8L20.8 7L15.8 12L20.8 17L13.8 15.2L12 22L10.2 15.2L3.2 17L8.2 12L3.2 7L10.2 8.8L12 2Z" />
+                </svg>
+                <span>{text}</span>
+              </span>
             ))}
           </div>
+        </Marquee>
+      </div>
 
-          {/* Last Column: Newsletter Signup (Span 3) */}
-          <div className="lg:col-span-3 flex flex-col gap-4">
-            <Reveal delay={0.25}>
-              <span className="text-xs font-bold uppercase tracking-widest text-accent">
-                Newsletter
+      <Container className="pt-14 sm:pt-16 lg:pt-20 pb-12 sm:pb-16">
+        {/* 2. Brand Header Row: Logo on Left, Phone & Email on Right */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-12 sm:pb-16">
+          {/* Brand Logo & Name */}
+          <Link
+            href="/"
+            className="group inline-flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-lg"
+            aria-label={`${siteConfig.name} - Return to Homepage`}
+          >
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand text-white shadow-2xs transition-transform duration-300 group-hover:scale-105">
+              {/* Botanical Emblem */}
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2C8.5 2 6 4.5 6 8c0 3.2 1.3 5.4 2.1 7.2.7 1.6 1.4 3.3 1.9 5.8.2.8.9 1 1.5.8.7-.3.9-1.1.9-1.8 0-1.8-.4-3.5-.8-5.2-.2-.8.5-1.5 1.4-1.5s1.6.7 1.4 1.5c-.4 1.7-.8 3.4-.8 5.2 0 .7.2 1.5.9 1.8.6.2 1.3 0 1.5-.8.5-2.5 1.2-4.2 1.9-5.8.8-1.8 2.1-4 2.1-7.2 0-3.5-2.5-6-6-6z" />
+              </svg>
+            </div>
+            <div className="flex items-baseline">
+              <span className="font-league-spartan text-2xl font-bold tracking-tight text-[#101828]">
+                {siteConfig.name}
               </span>
-              <h4 className="font-display text-base font-bold text-white mt-1">
-                Stay updated on dental wellness
-              </h4>
-              <p className="text-xs text-surface-alt/70 leading-relaxed">
-                Receive quarterly oral health tips, technology updates, and clinic specials.
-              </p>
-            </Reveal>
+              <span className="text-[10px] align-top ml-1 font-sans font-medium text-[#667085]">
+                TM
+              </span>
+            </div>
+          </Link>
 
-            <Reveal delay={0.3}>
-              <form onSubmit={handleNewsletterSubmit} className="flex flex-col gap-2.5 mt-2">
-                <div className="relative">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email address"
-                    disabled={status === "loading" || status === "success"}
-                    aria-label="Email address for newsletter"
-                    className="w-full rounded-xl bg-white/10 px-4 py-3 text-sm text-white placeholder-white/40 border border-white/15 focus:border-accent focus:bg-white/15 focus:outline-none focus:ring-1 focus:ring-accent transition-colors disabled:opacity-60"
-                  />
+          {/* Quick Contact Right Header */}
+          <div className="text-left sm:text-right">
+            <a
+              href={`tel:${siteConfig.phone.replace(/\s+/g, "")}`}
+              className="block text-sm font-sans font-medium text-[#101828] hover:text-brand transition-colors"
+            >
+              {siteConfig.phone}
+            </a>
+            <a
+              href={`mailto:${siteConfig.email}`}
+              className="block text-sm font-sans text-[#475467] hover:text-[#101828] transition-colors mt-0.5"
+            >
+              {siteConfig.email}
+            </a>
+          </div>
+        </div>
+
+        {/* 3. Main Content Grid: Main Page Links on Left, Newsletter & Map on Right */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-start">
+          {/* Left Column: Main Page links + Social Icons (~58% width) */}
+          <div className="lg:col-span-7 flex flex-col justify-between">
+            <div>
+              <h3 className="text-xs font-league-spartan font-bold tracking-wider text-[#101828] uppercase mb-6">
+                MAIN PAGE
+              </h3>
+              <ul className="grid grid-cols-2 sm:grid-cols-2 gap-x-12 gap-y-3.5 font-sans text-sm">
+                {mainPageLinks.map((item) => (
+                  <li key={item.label}>
+                    <Link
+                      href={item.href}
+                      className="text-[#475467] hover:text-brand transition-colors block py-0.5"
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Social Icons Row */}
+            <div className="flex items-center gap-3.5 pt-12 sm:pt-14" aria-label="Social media channels">
+              {/* Instagram */}
+              <a
+                href={siteConfig.socials.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Follow GuruOm Dental on Instagram"
+                className="w-10 h-10 rounded-full border border-[#D0D5DD] flex items-center justify-center text-[#344054] hover:bg-brand hover:text-white hover:border-brand transition-all duration-200 cursor-pointer"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                  <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                </svg>
+              </a>
+
+              {/* YouTube */}
+              <a
+                href={siteConfig.socials.youtube}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Subscribe to GuruOm Dental on YouTube"
+                className="w-10 h-10 rounded-full border border-[#D0D5DD] flex items-center justify-center text-[#344054] hover:bg-brand hover:text-white hover:border-brand transition-all duration-200 cursor-pointer"
+              >
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                </svg>
+              </a>
+
+              {/* WhatsApp */}
+              <a
+                href={siteConfig.socials.whatsapp}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Chat with GuruOm Dental on WhatsApp"
+                className="w-10 h-10 rounded-full border border-[#D0D5DD] flex items-center justify-center text-[#344054] hover:bg-brand hover:text-white hover:border-brand transition-all duration-200 cursor-pointer"
+              >
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M20.52 3.48A11.93 11.93 0 0 0 12.06 0C5.46 0 .09 5.37.09 11.97c0 2.11.55 4.16 1.6 5.97L0 24l6.23-1.63a11.9 11.9 0 0 0 5.83 1.51h.01c6.6 0 11.97-5.37 11.97-11.97 0-3.2-.1.25-1.25-4.44-3.52-6.43zm-8.46 18.36h-.01a9.9 9.9 0 0 1-5.04-1.38l-.36-.21-3.74.98 1-3.65-.24-.38a9.92 9.92 0 0 1-1.52-5.23c0-5.48 4.46-9.94 9.95-9.94 2.65 0 5.15 1.03 7.03 2.91a9.88 9.88 0 0 1 2.91 7.03c0 5.49-4.47 9.94-9.96 9.94z" />
+                </svg>
+              </a>
+
+              {/* Facebook */}
+              <a
+                href={siteConfig.socials.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Visit GuruOm Dental on Facebook"
+                className="w-10 h-10 rounded-full border border-[#D0D5DD] flex items-center justify-center text-[#344054] hover:bg-brand hover:text-white hover:border-brand transition-all duration-200 cursor-pointer"
+              >
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                </svg>
+              </a>
+            </div>
+          </div>
+
+          {/* Right Column: Newsletter Card + Direct Contact Info (~42% width) */}
+          <div className="lg:col-span-5 flex flex-col gap-6">
+            {/* Newsletter Card */}
+            <div className="rounded-2xl bg-[#F2F4F7] p-6 sm:p-8">
+              <h3 className="font-league-spartan text-xl sm:text-2xl font-bold text-[#101828] tracking-tight mb-2">
+                Stay Informed with GuruOm
+              </h3>
+              <p className="text-xs sm:text-[13.5px] text-[#475467] leading-relaxed mb-6 font-sans">
+                Join our community for exclusive updates on the GuruOm standard of care and clinical innovations.
+              </p>
+
+              {/* Email Form */}
+              <NewsletterForm variant="light" buttonText="SUBMIT NOW" />
+            </div>
+
+            {/* Direct Contact Block */}
+            <div className="pt-2 font-sans">
+              <a
+                href={`tel:${siteConfig.phone.replace(/\s+/g, "")}`}
+                className="block text-sm font-medium text-[#101828] hover:text-brand transition-colors"
+              >
+                {siteConfig.phone}
+              </a>
+              <a
+                href={`mailto:${siteConfig.email}`}
+                className="block text-sm text-[#475467] hover:text-[#101828] transition-colors mt-0.5"
+              >
+                {siteConfig.email}
+              </a>
+
+              {/* Divider */}
+              <div className="border-t border-[#EAECF0] my-5" />
+
+              {/* Address & View on Map */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-sans">
+                <div className="max-w-xs sm:max-w-md">
+                  <p className="text-xs sm:text-[13px] text-[#475467] leading-relaxed">
+                    {siteConfig.address.full}
+                  </p>
+                  <p className="text-[11px] font-mono font-semibold text-brand tracking-wider mt-1 flex items-center gap-1">
+                    <span>📍</span>
+                    <span>4QM5+F35, Ahilyanagar, Maharashtra 414003</span>
+                  </p>
                 </div>
 
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="sm"
-                  disabled={status === "loading" || status === "success"}
-                  className="w-full justify-center bg-brand-light hover:bg-brand"
-                >
-                  {status === "loading" ? "Subscribing..." : "Subscribe"}
-                </Button>
-
-                {/* Status messages */}
-                {status === "success" && (
-                  <p className="text-xs text-accent mt-1 flex items-center gap-1.5 font-medium">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Thank you, you&apos;re subscribed!
-                  </p>
-                )}
-                {status === "error" && (
-                  <p className="text-xs text-rose-300 mt-1">{errorMessage}</p>
-                )}
-              </form>
-            </Reveal>
-
-            {/* Direct Contact Snapshot */}
-            <Reveal delay={0.35}>
-              <div className="mt-4 pt-4 border-t border-white/10 flex flex-col gap-1 text-xs text-surface-alt/70">
-                <span className="text-white font-medium">Visit Clinic</span>
-                <span>{siteConfig.address.full}</span>
                 <a
                   href={siteConfig.googleMapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-accent underline hover:text-accent-soft mt-1 inline-block"
+                  title="4QM5+F35, Abhiyanta Colony, Shriram Nagar, Sawli Housing Society, Surya Nagar, Ahilyanagar, Maharashtra 414003"
+                  aria-label="Open 4QM5+F35, Ahilyanagar in Google Maps"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wider text-[#101828] hover:text-brand uppercase transition-colors shrink-0 group"
                 >
-                  View on Google Maps →
+                  <span className="underline underline-offset-4">VIEW ON MAP</span>
+                  {/* Map Pin Icon */}
+                  <svg
+                    className="w-3.5 h-3.5 text-[#101828] group-hover:text-brand transition-colors"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                  </svg>
                 </a>
               </div>
-            </Reveal>
+            </div>
           </div>
         </div>
-      </Container>
 
-      {/* 3. Bottom Ticker Marquee */}
-      <div className="border-y border-white/10 py-4 bg-brand-dark/80">
-        <Marquee speed={32} pauseOnHover>
-          {tickerPhrases.map((phrase, i) => (
-            <span
-              key={i}
-              className="mx-8 flex items-center gap-6 font-display text-lg sm:text-xl font-bold uppercase tracking-wider text-surface-alt/30 select-none"
-            >
-              <span>{phrase}</span>
-              <span className="h-1.5 w-1.5 rounded-full bg-accent/40" aria-hidden="true" />
-            </span>
-          ))}
-        </Marquee>
-      </div>
-
-      {/* 4. Bottom Legal Bar & Back to Top */}
-      <Container className="py-6">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-surface-alt/60">
-          <p>
-            © {year} {siteConfig.name}. All rights reserved.
+        {/* 4. Bottom Legal Strip */}
+        <div className="border-t border-[#EAECF0] pt-6 sm:pt-8 mt-14 sm:mt-18 flex flex-col sm:flex-row items-center justify-between gap-4 font-sans">
+          <p className="text-xs text-[#667085] text-center sm:text-left">
+            Copyright © {year} {siteConfig.name}. All rights reserved.
           </p>
 
-          <div className="flex items-center gap-6">
-            <Link href="/privacy" className="hover:text-white transition-colors">
-              Privacy Policy
+          <div className="flex items-center gap-6 text-xs font-medium tracking-wider uppercase text-[#475467]">
+            <Link href="/terms" className="hover:text-[#101828] transition-colors">
+              TERMS & CONDITIONS
             </Link>
-            <Link href="/terms" className="hover:text-white transition-colors">
-              Terms & Conditions
+            <Link href="/privacy" className="hover:text-[#101828] transition-colors">
+              PRIVACY POLICY
             </Link>
-
-            {/* Back to top button */}
-            <button
-              type="button"
-              onClick={handleBackToTop}
-              className="flex items-center gap-1.5 text-accent hover:text-accent-soft transition-colors font-medium cursor-pointer outline-none focus-visible:underline"
-            >
-              <span>Back to top</span>
-              <svg
-                className="h-3.5 w-3.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2.5"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-              </svg>
-            </button>
           </div>
         </div>
       </Container>
     </footer>
   );
 }
+
+export default Footer;

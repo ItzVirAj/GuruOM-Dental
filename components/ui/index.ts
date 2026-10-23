@@ -8,3 +8,5 @@ export * from "./Card";
 export * from "./IconCircle";
 export * from "./SmartImage";
 export * from "./PageHeader";
+export * from "./Accordion";
+export * from "./NewsletterForm";

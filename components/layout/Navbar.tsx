@@ -24,8 +24,10 @@ export function Navbar({ variant }: NavbarProps) {
   const isDesktop = useIsDesktop();
   const prefersReducedMotion = useReducedMotion();
 
-  // If variant not explicitly set, use transparent-light for homepage hero, solid for inner pages
-  const resolvedVariant = variant ?? (pathname === "/" ? "transparent-light" : "solid");
+  // Clean route-to-variant resolution: routes with PageHeader or Hero start transparent-light at the top,
+  // transitioning smoothly to solid surface on scroll past 40px.
+  const isLightTopRoute = pathname.startsWith("/design-system") || pathname.startsWith("/animation-lab");
+  const resolvedVariant = variant ?? (isLightTopRoute ? "solid" : "transparent-light");
 
   // State
   const [isScrolled, setIsScrolled] = useState(false);
@@ -37,6 +39,7 @@ export function Navbar({ variant }: NavbarProps) {
   const navContainerRef = useRef<HTMLElement | null>(null);
   const navInnerRef = useRef<HTMLDivElement | null>(null);
   const linksNavRef = useRef<HTMLDivElement | null>(null);
+  const linkRefs = useRef<(HTMLAnchorElement | HTMLButtonElement | null)[]>([]);
   const indicatorRef = useRef<HTMLSpanElement | null>(null);
   const megaPanelRef = useRef<HTMLDivElement | null>(null);
   const megaTimelineRef = useRef<gsap.core.Timeline | null>(null);
@@ -160,8 +163,8 @@ export function Navbar({ variant }: NavbarProps) {
     // Find active element (either hovered item or current route link)
     const activeEl =
       activeHoverIndex !== null
-        ? (nav.children[activeHoverIndex] as HTMLElement)
-        : (nav.querySelector("[data-active='true']") as HTMLElement);
+        ? linkRefs.current[activeHoverIndex]
+        : (nav.querySelector("a[data-active='true']") as HTMLElement);
 
     if (activeEl) {
       const left = activeEl.offsetLeft;
@@ -365,16 +368,12 @@ export function Navbar({ variant }: NavbarProps) {
         Skip to main content
       </a>
 
-      {/* Main Fixed Navbar */}
       <header
         ref={navContainerRef}
-        className={`fixed top-0 left-0 right-0 z-40 transition-colors duration-300 ${
-          isScrolled
-            ? "bg-surface/90 backdrop-blur-md shadow-xs border-b border-surface-alt/80"
-            : resolvedVariant === "transparent-light"
-            ? "bg-transparent border-b border-white/10"
-            : "bg-surface/80 backdrop-blur-xs border-b border-surface-alt/50"
-        }`}
+        className={`fixed top-0 left-0 right-0 z-40 transition-colors duration-300 ${isDarkTop
+          ? "bg-transparent border-b border-white/10"
+          : "bg-surface/90 backdrop-blur-md shadow-xs border-b border-surface-alt/80"
+          }`}
         style={{ height: "var(--nav-h, 5rem)" }}
       >
         <Container>
@@ -389,9 +388,8 @@ export function Navbar({ variant }: NavbarProps) {
               aria-label="GuruOm Dental - Home"
             >
               <div
-                className={`flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105 ${
-                  isDarkTop ? "bg-white text-brand" : "bg-brand text-white shadow-xs"
-                }`}
+                className={`flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105 ${isDarkTop ? "bg-white text-brand" : "bg-brand text-white shadow-xs"
+                  }`}
               >
                 {/* Stylized Tooth/Botanical Leaf SVG Icon */}
                 <svg
@@ -403,22 +401,12 @@ export function Navbar({ variant }: NavbarProps) {
                   <path d="M12 2C8.5 2 6 4.5 6 8c0 3.2 1.3 5.4 2.1 7.2.7 1.6 1.4 3.3 1.9 5.8.2.8.9 1 1.5.8.7-.3.9-1.1.9-1.8 0-1.8-.4-3.5-.8-5.2-.2-.8.5-1.5 1.4-1.5s1.6.7 1.4 1.5c-.4 1.7-.8 3.4-.8 5.2 0 .7.2 1.5.9 1.8.6.2 1.3 0 1.5-.8.5-2.5 1.2-4.2 1.9-5.8.8-1.8 2.1-4 2.1-7.2 0-3.5-2.5-6-6-6z" />
                 </svg>
               </div>
-              <div className="flex flex-col">
-                <span
-                  className={`font-display text-lg tracking-tight font-bold transition-colors ${
-                    isDarkTop ? "text-white" : "text-brand"
+              <span
+                className={`font-league-spartan text-xl sm:text-[22px] tracking-tight font-bold leading-none translate-y-[5px] transition-colors ${isDarkTop ? "text-white" : "text-brand"
                   }`}
-                >
-                  {siteConfig.name}
-                </span>
-                <span
-                  className={`text-[10px] uppercase tracking-widest font-medium transition-colors ${
-                    isDarkTop ? "text-white/70" : "text-ink-muted"
-                  }`}
-                >
-                  Speciality Care
-                </span>
-              </div>
+              >
+                {siteConfig.name}
+              </span>
             </Link>
 
             {/* 2. Desktop Centered Navigation Links */}
@@ -430,7 +418,8 @@ export function Navbar({ variant }: NavbarProps) {
               {/* Sliding Active Pill Indicator */}
               <span
                 ref={indicatorRef}
-                className="pointer-events-none absolute bottom-0 h-0.5 rounded-full bg-brand transition-opacity duration-200"
+                className={`pointer-events-none absolute bottom-0 h-0.5 rounded-full transition-opacity duration-200 ${isDarkTop ? "bg-accent" : "bg-brand"
+                  }`}
                 style={{ opacity: 0 }}
                 aria-hidden="true"
               />
@@ -440,14 +429,16 @@ export function Navbar({ variant }: NavbarProps) {
                 return (
                   <Link
                     key={link.href}
+                    ref={(el) => {
+                      linkRefs.current[idx] = el;
+                    }}
                     href={link.href}
                     data-active={active}
                     onMouseEnter={() => setActiveHoverIndex(idx)}
                     onMouseLeave={() => setActiveHoverIndex(null)}
                     aria-current={active ? "page" : undefined}
-                    className={`group relative px-3 py-2 text-sm font-medium transition-colors rounded-md outline-none focus-visible:ring-2 focus-visible:ring-brand ${
-                      active ? activeColorClass : textColorClass
-                    }`}
+                    className={`group relative px-3 py-2 text-sm font-medium transition-colors rounded-md outline-none focus-visible:ring-2 focus-visible:ring-brand ${active ? activeColorClass : textColorClass
+                      }`}
                   >
                     {/* Text-roll hover animation */}
                     <span className="relative inline-flex flex-col h-5 overflow-hidden">
@@ -455,9 +446,8 @@ export function Navbar({ variant }: NavbarProps) {
                         {link.label}
                       </span>
                       <span
-                        className={`absolute top-full left-0 transition-transform duration-300 ease-out group-hover:-translate-y-full ${
-                          isDarkTop ? "text-accent" : "text-brand"
-                        }`}
+                        className={`absolute top-full left-0 transition-transform duration-300 ease-out group-hover:-translate-y-full ${isDarkTop ? "text-accent" : "text-brand"
+                          }`}
                         aria-hidden="true"
                       >
                         {link.label}
@@ -470,10 +460,19 @@ export function Navbar({ variant }: NavbarProps) {
               {/* Mega Menu "Pages" Trigger */}
               <div
                 className="relative"
-                onMouseEnter={openMegaMenu}
-                onMouseLeave={scheduleCloseMegaMenu}
+                onMouseEnter={() => {
+                  setActiveHoverIndex(navLinks.length);
+                  openMegaMenu();
+                }}
+                onMouseLeave={() => {
+                  setActiveHoverIndex(null);
+                  scheduleCloseMegaMenu();
+                }}
               >
                 <button
+                  ref={(el) => {
+                    linkRefs.current[navLinks.length] = el;
+                  }}
                   type="button"
                   onClick={() => setIsMegaOpen((prev) => !prev)}
                   onKeyDown={(e) => {
@@ -485,19 +484,17 @@ export function Navbar({ variant }: NavbarProps) {
                   aria-expanded={isMegaOpen}
                   aria-haspopup="true"
                   aria-controls="desktop-mega-menu"
-                  className={`group flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md outline-none focus-visible:ring-2 focus-visible:ring-brand transition-colors ${
-                    isMegaOpen
-                      ? isDarkTop
-                        ? "text-white"
-                        : "text-brand"
-                      : textColorClass
-                  }`}
+                  className={`group flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md outline-none focus-visible:ring-2 focus-visible:ring-brand transition-colors ${isMegaOpen
+                    ? isDarkTop
+                      ? "text-white"
+                      : "text-brand"
+                    : textColorClass
+                    }`}
                 >
                   <span>Pages</span>
                   <svg
-                    className={`h-4 w-4 transition-transform duration-300 ${
-                      isMegaOpen ? "rotate-180" : ""
-                    }`}
+                    className={`h-4 w-4 transition-transform duration-300 ${isMegaOpen ? "rotate-180" : ""
+                      }`}
                     viewBox="0 0 20 20"
                     fill="currentColor"
                     aria-hidden="true"
@@ -590,9 +587,8 @@ export function Navbar({ variant }: NavbarProps) {
             <div className="hidden lg:flex items-center gap-5">
               <a
                 href={`tel:${siteConfig.phone.replace(/[^+\d]/g, "")}`}
-                className={`flex items-center gap-2 text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-md ${
-                  isDarkTop ? "text-white/80 hover:text-white" : "text-ink/80 hover:text-brand"
-                }`}
+                className={`flex items-center gap-2 text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-md ${isDarkTop ? "text-white/80 hover:text-white" : "text-ink/80 hover:text-brand"
+                  }`}
               >
                 <svg
                   className="h-4 w-4 text-brand"
@@ -625,27 +621,23 @@ export function Navbar({ variant }: NavbarProps) {
                 aria-expanded={isMobileOpen}
                 aria-controls="mobile-navigation-menu"
                 aria-label={isMobileOpen ? "Close navigation menu" : "Open navigation menu"}
-                className={`relative flex h-11 w-11 items-center justify-center rounded-xl p-2.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
-                  isDarkTop && !isMobileOpen
-                    ? "bg-white/10 text-white"
-                    : "bg-surface-alt text-ink"
-                }`}
+                className={`relative flex h-11 w-11 items-center justify-center rounded-xl p-2.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${isDarkTop && !isMobileOpen
+                  ? "bg-white/10 text-white"
+                  : "bg-surface-alt text-ink"
+                  }`}
               >
                 <div className="relative flex flex-col justify-between w-5 h-4">
                   <span
-                    className={`h-0.5 w-full rounded-full bg-current transition-all duration-300 ${
-                      isMobileOpen ? "translate-y-[7px] rotate-45" : ""
-                    }`}
+                    className={`h-0.5 w-full rounded-full bg-current transition-all duration-300 ${isMobileOpen ? "translate-y-[7px] rotate-45" : ""
+                      }`}
                   />
                   <span
-                    className={`h-0.5 w-full rounded-full bg-current transition-opacity duration-200 ${
-                      isMobileOpen ? "opacity-0" : "opacity-100"
-                    }`}
+                    className={`h-0.5 w-full rounded-full bg-current transition-opacity duration-200 ${isMobileOpen ? "opacity-0" : "opacity-100"
+                      }`}
                   />
                   <span
-                    className={`h-0.5 w-full rounded-full bg-current transition-all duration-300 ${
-                      isMobileOpen ? "-translate-y-[7px] -rotate-45" : ""
-                    }`}
+                    className={`h-0.5 w-full rounded-full bg-current transition-all duration-300 ${isMobileOpen ? "-translate-y-[7px] -rotate-45" : ""
+                      }`}
                   />
                 </div>
               </button>
@@ -678,9 +670,8 @@ export function Navbar({ variant }: NavbarProps) {
                       href={link.href}
                       onClick={() => setIsMobileOpen(false)}
                       aria-current={active ? "page" : undefined}
-                      className={`font-display text-3xl font-bold tracking-tight transition-colors hover:text-accent outline-none focus-visible:underline ${
-                        active ? "text-accent" : "text-white"
-                      }`}
+                      className={`font-display text-3xl font-bold tracking-tight transition-colors hover:text-accent outline-none focus-visible:underline ${active ? "text-accent" : "text-white"
+                        }`}
                     >
                       {link.label}
                     </Link>

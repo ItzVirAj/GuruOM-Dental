@@ -10,8 +10,13 @@ export default function AboutPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Our Story & Philosophy"
         title="About GuruOm Dental"
         description="Founded with a dedication to zero-anxiety dentistry, microscopic surgical precision, and world-class smile restoration."
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "About" },
+        ]}
       />
       <Section variant="white">
         <Container>

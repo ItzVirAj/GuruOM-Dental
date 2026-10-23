@@ -1,34 +1,42 @@
-import { PageHeader, Container, Section, Card, Badge } from "@/components/ui";
-import { doctors } from "@/data/dental-data";
+import type { Metadata } from "next";
+import { PageHeader } from "@/components/ui";
+import { DoctorsList } from "@/components/sections";
+import { doctorsData } from "@/data/doctors";
+import { siteConfig } from "@/data/site";
 
-export const metadata = {
-  title: "Our Specialists",
-  description: "Meet the dental surgeons, implantologists, and aesthetic smile designers at GuruOm Dental.",
+export const metadata: Metadata = {
+  title: "Our Doctors & Specialists",
+  description:
+    "Meet the team behind your smile at GuruOm Dental. Experienced implantologists, aesthetic smile designers, orthodontists, and pediatric dentists in Ahilyanagar.",
+  openGraph: {
+    title: "Our Doctors & Specialists | GuruOm Dental",
+    description:
+      "Meet the team behind your smile at GuruOm Dental. Experienced implantologists, aesthetic smile designers, orthodontists, and pediatric dentists in Ahilyanagar.",
+    url: `${siteConfig.url}/doctors`,
+    siteName: siteConfig.name,
+    type: "website",
+  },
+  alternates: {
+    canonical: "/doctors",
+  },
 };
 
 export default function DoctorsPage() {
   return (
     <>
+      {/* 1. Shared Upgraded PageHeader */}
       <PageHeader
-        title="Meet Our Dental Specialists"
-        description="Our clinical team brings over 25+ combined years of maxillofacial surgery, aesthetic dentistry, and digital endodontics."
+        eyebrow="Our Doctors"
+        title="Meet the team behind your smile"
+        description="Our clinical specialists bring decades of advanced surgical training, microscopic endodontics, and digital smile engineering to ensure calm, predictable dental health."
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Doctors" },
+        ]}
       />
-      <Section variant="white">
-        <Container>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {doctors.map((doctor) => (
-              <Card key={doctor.id} variant="alt" id={doctor.id}>
-                <div className="space-y-3">
-                  <Badge variant="brand" size="sm">{doctor.experience}</Badge>
-                  <h3 className="text-display-md text-ink">{doctor.name}</h3>
-                  <p className="text-small font-semibold text-brand">{doctor.role}</p>
-                  <p className="text-small text-ink-muted">{doctor.specialization}</p>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </Container>
-      </Section>
+
+      {/* 2. Interactive Directory: Stats, GSAP Flip Filter, Grid & CTA */}
+      <DoctorsList doctors={doctorsData} />
     </>
   );
 }

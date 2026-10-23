@@ -1,50 +1,59 @@
-import { PageHeader, Container, Section, Card, Button } from "@/components/ui";
+import type { Metadata } from "next";
+import { PageHeader } from "@/components/ui";
+import {
+  PricingPlans,
+  PriceList,
+  PaymentOptions,
+  PricingFaq,
+  PricingCta,
+} from "@/components/sections/pricing";
+import { siteConfig } from "@/data/site";
 
-export const metadata = {
-  title: "Pricing & Plans",
-  description: "Transparent treatment pricing and flexible EMI plans at GuruOm Dental.",
+export const metadata: Metadata = {
+  title: "Transparent Treatment Pricing & Care Plans",
+  description:
+    "Clear, upfront treatment estimates, zero hidden fees, and flexible preventive care plans at GuruOm Dental in Ahilyanagar.",
+  openGraph: {
+    title: "Transparent Treatment Pricing & Care Plans | GuruOm Dental",
+    description:
+      "Clear, upfront treatment estimates, zero hidden fees, and flexible preventive care plans at GuruOm Dental in Ahilyanagar.",
+    url: `${siteConfig.url}/pricing`,
+    siteName: siteConfig.name,
+    type: "website",
+  },
+  alternates: {
+    canonical: "/pricing",
+  },
 };
 
 export default function PricingPage() {
   return (
     <>
+      {/* 1. Shared Upgraded PageHeader */}
       <PageHeader
-        title="Transparent Clinical Pricing"
-        description="Zero hidden fees, upfront treatment estimates, and interest-free EMI options tailored to high-value restorative procedures."
+        eyebrow="Transparent Pricing"
+        title="Clear prices, no surprises."
+        description="We believe financial clarity is an essential foundation of comfortable healthcare. Explore our monthly care memberships and itemized clinical fee estimates."
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Pricing" },
+        ]}
       />
-      <Section variant="surface">
-        <Container>
-          <div className="grid md:grid-cols-3 gap-6">
-            <Card variant="white">
-              <span className="text-xs font-semibold uppercase tracking-wider text-brand">Preventive Care</span>
-              <h3 className="text-heading text-ink mt-2 mb-4">Diagnostics & Cleaning</h3>
-              <p className="text-body-lg font-bold text-ink mb-4">Starting ₹1,500</p>
-              <p className="text-small text-ink-muted mb-6">
-                Comprehensive 3D intraoral scan, ultrasonic scaling, and laser polish.
-              </p>
-              <Button href="/appointment" variant="ghost" size="sm">Select Plan</Button>
-            </Card>
-            <Card variant="white" className="border-brand">
-              <span className="text-xs font-semibold uppercase tracking-wider text-accent font-bold">Most Popular</span>
-              <h3 className="text-heading text-ink mt-2 mb-4">Smile Makeover</h3>
-              <p className="text-body-lg font-bold text-ink mb-4">Starting ₹9,000 / tooth</p>
-              <p className="text-small text-ink-muted mb-6">
-                Digital smile design preview, ultra-thin ceramic veneer, and lifetime shade guarantee.
-              </p>
-              <Button href="/appointment" variant="primary" size="sm">Select Plan</Button>
-            </Card>
-            <Card variant="white">
-              <span className="text-xs font-semibold uppercase tracking-wider text-brand">Restorative</span>
-              <h3 className="text-heading text-ink mt-2 mb-4">Swiss Implants</h3>
-              <p className="text-body-lg font-bold text-ink mb-4">Starting ₹25,000</p>
-              <p className="text-small text-ink-muted mb-6">
-                Titanium biocompatible fixture, 3D surgical guide, and custom zirconia abutment.
-              </p>
-              <Button href="/appointment" variant="ghost" size="sm">Select Plan</Button>
-            </Card>
-          </div>
-        </Container>
-      </Section>
+
+      {/* 2. Care Plans with Billing Toggle (Surface Background) */}
+      <PricingPlans />
+
+      {/* 3. Itemized Treatment Price Table with Category Tabs (Alt Background) */}
+      <PriceList />
+
+      {/* 4. Payment & Financing Options (White Background) */}
+      <PaymentOptions />
+
+      {/* 5. FAQs with Accessible Accordion & FAQPage JSON-LD (Surface Background) */}
+      <PricingFaq />
+
+      {/* 6. Final Questions Consultation CTA Band (Brand-Dark Background) */}
+      <PricingCta />
     </>
   );
 }

@@ -22,6 +22,7 @@ const ratioStyles: Record<AspectRatio, string> = {
   "16/9": "aspect-[16/9]",
   "21/9": "aspect-[21/9]",
   "4/5": "aspect-[4/5]",
+  "16/10": "aspect-[16/10]",
 };
 
 export const SmartImage: React.FC<SmartImageProps> = ({
@@ -41,8 +42,12 @@ export const SmartImage: React.FC<SmartImageProps> = ({
   const finalAlt = alt ?? slotData?.alt ?? label ?? "GuruOm Dental image";
   const finalRatio = ratio ?? aspect ?? slotData?.ratio ?? "16/9";
   const finalLabel = label ?? slotData?.label ?? (slot ? `Slot: ${slot}` : finalAlt);
+  const isFullHeight =
+    aspect === ("full" as AspectRatio) ||
+    ratio === ("full" as AspectRatio) ||
+    className.includes("h-full");
 
-  const ratioClass = ratioStyles[finalRatio] || "aspect-[16/9]";
+  const ratioClass = isFullHeight ? "" : ratioStyles[finalRatio] || "aspect-[16/9]";
 
   // Placeholder mode when src is absent or empty
   if (!finalSrc || finalSrc.trim() === "") {

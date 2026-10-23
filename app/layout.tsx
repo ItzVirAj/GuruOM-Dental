@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
-import { fontDisplay, fontBody } from "@/lib/fonts";
+import Script from "next/script";
+import { fontDisplay, fontBody, fontAileron, fontLeagueSpartan, fontArabicaMenu, fontRainbowMiracles } from "@/lib/fonts";
 import SmoothScroll from "@/components/animations/SmoothScroll";
 import { Navbar, Footer } from "@/components/layout";
+import { DevAgentation } from "@/components/dev/DevAgentation";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,23 +23,20 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fontDisplay.variable} ${fontBody.variable}`}
+      className={`${fontDisplay.variable} ${fontBody.variable} ${fontAileron.variable} ${fontLeagueSpartan.variable} ${fontArabicaMenu.variable} ${fontRainbowMiracles.variable}`}
       suppressHydrationWarning
     >
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `document.documentElement.classList.add('js');`,
-          }}
-        />
-      </head>
       <body className="font-body bg-surface text-ink antialiased selection:bg-accent selection:text-ink min-h-screen flex flex-col">
+        <Script id="anti-fouc" strategy="beforeInteractive">
+          {`document.documentElement.classList.add('js');`}
+        </Script>
         <SmoothScroll>
           <Navbar />
           <main id="main-content" className="flex-1">
             {children}
           </main>
           <Footer />
+          <DevAgentation />
         </SmoothScroll>
       </body>
     </html>

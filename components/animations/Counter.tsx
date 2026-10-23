@@ -9,9 +9,14 @@ export interface CounterProps {
   suffix?: string;
   duration?: number;
   stagger?: number;
+  delay?: number;
   className?: string;
   digitClassName?: string;
+  prefixClassName?: string;
+  suffixClassName?: string;
   trigger?: "scroll" | "load";
+  triggerElement?: HTMLElement | null;
+  triggerRef?: React.RefObject<HTMLElement | null>;
   start?: string;
   once?: boolean;
 }
@@ -22,9 +27,14 @@ export const Counter: React.FC<CounterProps> = ({
   suffix = "",
   duration = 1.8,
   stagger = 0.08,
+  delay = 0,
   className = "",
   digitClassName = "",
+  prefixClassName = "",
+  suffixClassName = "",
   trigger = "scroll",
+  triggerElement,
+  triggerRef,
   start = "top 85%",
   once = true,
 }) => {
@@ -51,12 +61,15 @@ export const Counter: React.FC<CounterProps> = ({
       // Initial state: 0
       gsap.set(wheels, { yPercent: 0 });
 
+      const triggerTarget = triggerRef?.current || triggerElement || containerRef.current;
+
       // Animate wheels to target numbers
       const tl = gsap.timeline({
+        delay,
         scrollTrigger:
           trigger === "scroll"
             ? {
-                trigger: containerRef.current,
+                trigger: triggerTarget,
                 start,
                 toggleActions: once ? "play none none none" : "restart none none none",
               }
@@ -76,7 +89,10 @@ export const Counter: React.FC<CounterProps> = ({
         );
       });
     },
-    { scope: containerRef, dependencies: [value, duration, stagger, trigger, start] }
+    {
+      scope: containerRef,
+      dependencies: [value, duration, stagger, delay, trigger, triggerElement, start, once],
+    }
   );
 
   return (
@@ -93,14 +109,16 @@ export const Counter: React.FC<CounterProps> = ({
 
       {/* Visual rolling digit display */}
       <span aria-hidden="true" className="inline-flex items-baseline">
-        {prefix && <span className="mr-0.5">{prefix}</span>}
+        {prefix && (
+          <span className={prefixClassName || "mr-0.5"}>{prefix}</span>
+        )}
 
         {characters.map((char, index) => {
           const isDigit = /^[0-9]$/.test(char);
 
           if (!isDigit) {
             return (
-              <span key={index} className="inline-block">
+              <span key={index} className="inline-block px-[0.02em]">
                 {char}
               </span>
             );
@@ -111,8 +129,8 @@ export const Counter: React.FC<CounterProps> = ({
           return (
             <span
               key={index}
-              className={`relative inline-block overflow-hidden h-[1em] leading-none ${digitClassName}`}
-              style={{ width: "0.62em" }}
+              className={`relative inline-block overflow-hidden h-[1em] leading-none tabular-nums ${digitClassName}`}
+              style={{ width: "0.65em" }}
             >
               <span
                 data-digit-wheel
@@ -132,7 +150,9 @@ export const Counter: React.FC<CounterProps> = ({
           );
         })}
 
-        {suffix && <span className="ml-0.5">{suffix}</span>}
+        {suffix && (
+          <span className={suffixClassName || "ml-0.5"}>{suffix}</span>
+        )}
       </span>
     </span>
   );

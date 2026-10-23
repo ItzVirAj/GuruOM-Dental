@@ -21,26 +21,77 @@ export interface FooterLinkCol {
   links: { label: string; href: string }[];
 }
 
+export interface ClinicOpeningHour {
+  day: string;
+  dayIndex: number; // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  open?: string; // "09:00"
+  close?: string; // "20:30"
+  label: string;
+  isClosed?: boolean;
+}
+
+export interface ContactReasonOption {
+  value: string;
+  label: string;
+}
+
+/**
+ * ============================================================================
+ * CLINIC MASTER CONFIGURATION
+ * ============================================================================
+ * NOTE FOR CLINIC ADMINISTRATOR:
+ * All contact details, opening hours, emergency numbers, and coordinates in this
+ * file are placeholders. Replace with real clinic information before launch.
+ * ============================================================================
+ */
 export const siteConfig = {
   name: "GuruOm Dental",
+  url: "https://guruomdental.com",
   tagline: clinicInfo.tagline || "Advanced Dental Care & Precision Smile Aesthetics",
   phone: clinicInfo.phone || "+91 98765 43210",
   phonePlaceholder: "+91 00000 00000",
+  emergencyPhone: "+91 98765 43219",
+  emergencyNote:
+    "For severe acute trauma, severe toothaches, or uncontrolled bleeding outside regular clinic hours, our on-call dental emergency team is reachable 24/7.",
   email: clinicInfo.email || "care@guruomdental.com",
   emailPlaceholder: "hello@guruomdental.com",
   whatsapp: "+91 98765 43210",
   whatsappPlaceholder: "+91 00000 00000",
+  timezone: "Asia/Kolkata",
   address: {
-    full: clinicInfo.address || "Suite 402, Lotus Tower, S.G. Highway, Ahmedabad, Gujarat 380054",
-    city: "Ahmedabad",
-    state: "Gujarat",
+    line1: "Abhiyanta Colony, Shriram Nagar",
+    line2: "Sawli Housing Society, Surya Nagar",
+    city: "Ahilyanagar",
+    state: "Maharashtra",
+    postalCode: "414003",
+    country: "India",
+    full: clinicInfo.address || "GuruOm Dental, Abhiyanta Colony, Shriram Nagar, Sawli Housing Society, Surya Nagar, Ahilyanagar, Maharashtra 414003",
+    plusCodeAddress: "4QM5+F35, Abhiyanta Colony, Shriram Nagar, Sawli Housing Society, Surya Nagar, Ahilyanagar, Maharashtra 414003",
+    street: "Abhiyanta Colony, Shriram Nagar, Sawli Housing Society, Surya Nagar",
+    pincode: "414003",
+    plusCode: "4QM5+F35",
   },
-  googleMapsUrl: "https://maps.google.com/?q=GuruOm+Dental+Clinic+Ahmedabad",
+  mapsUrl: "https://www.google.com/maps/search/?api=1&query=4QM5%2BF35%2C+Abhiyanta+Colony%2C+Shriram+Nagar%2C+Sawli+Housing+Society%2C+Surya+Nagar%2C+Ahilyanagar%2C+Maharashtra+414003",
+  googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=4QM5%2BF35%2C+Abhiyanta+Colony%2C+Shriram+Nagar%2C+Sawli+Housing+Society%2C+Surya+Nagar%2C+Ahilyanagar%2C+Maharashtra+414003",
+  mapEmbedUrl: "", // Placeholder string, empty by default. Add Google Maps iframe embed src when available.
+  coordinates: {
+    lat: 19.0948,
+    lng: 74.748,
+  },
+  openingHours: [
+    { day: "Monday", dayIndex: 1, open: "09:00", close: "20:30", label: "9:00 AM – 8:30 PM" },
+    { day: "Tuesday", dayIndex: 2, open: "09:00", close: "20:30", label: "9:00 AM – 8:30 PM" },
+    { day: "Wednesday", dayIndex: 3, open: "09:00", close: "20:30", label: "9:00 AM – 8:30 PM" },
+    { day: "Thursday", dayIndex: 4, open: "09:00", close: "20:30", label: "9:00 AM – 8:30 PM" },
+    { day: "Friday", dayIndex: 5, open: "09:00", close: "20:30", label: "9:00 AM – 8:30 PM" },
+    { day: "Saturday", dayIndex: 6, open: "09:00", close: "18:00", label: "9:00 AM – 6:00 PM" },
+    { day: "Sunday", dayIndex: 0, isClosed: true, label: "Closed (Emergency Only)" },
+  ] as ClinicOpeningHour[],
   workingHours: {
     text: clinicInfo.timing || "Mon - Sat: 9:00 AM - 8:30 PM | Sun: By Appointment",
     weekdays: "Mon - Fri: 9:00 AM - 8:30 PM",
     saturday: "Saturday: 9:00 AM - 6:00 PM",
-    sunday: "Sunday: By Appointment Only",
+    sunday: "Sunday: Closed (Emergency On-Call)",
   },
   socials: {
     instagram: "https://instagram.com/guruomdental",
@@ -49,6 +100,14 @@ export const siteConfig = {
     whatsapp: "https://wa.me/919876543210",
   },
 };
+
+export const contactReasons: ContactReasonOption[] = [
+  { value: "general", label: "General enquiry" },
+  { value: "treatment", label: "Treatment question" },
+  { value: "pricing", label: "Pricing question" },
+  { value: "feedback", label: "Feedback" },
+  { value: "partnership", label: "Partnership or careers" },
+];
 
 export const navLinks: NavLink[] = [
   { label: "Home", href: "/" },

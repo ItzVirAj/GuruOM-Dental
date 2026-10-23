@@ -32,7 +32,7 @@ export const clinicInfo: ClinicInfo = {
   tagline: "Advanced Dental Care & Precision Smile Aesthetics",
   phone: "+91 98765 43210",
   email: "care@guruomdental.com",
-  address: "Suite 402, Lotus Tower, S.G. Highway, Ahmedabad, Gujarat 380054",
+  address: "GuruOm Dental, Abhiyanta Colony, Shriram Nagar, Sawli Housing Society, Surya Nagar, Ahilyanagar, Maharashtra 414003",
   timing: "Mon - Sat: 9:00 AM - 8:30 PM | Sun: By Appointment",
   rating: 4.9,
   reviewCount: 1420,
@@ -98,14 +98,14 @@ export const dentalServices: Service[] = [
 export const doctors: Doctor[] = [
   {
     id: "dr-om-patel",
-    name: "Dr. Om Patel",
+    name: "Dr. Guruprasad Handal",
     role: "Chief Dental Surgeon & Implantologist",
     experience: "16+ Years Experience",
     specialization: "MDS - Oral & Maxillofacial Implantology (Fellow ICOI)",
   },
   {
     id: "dr-guru-sharma",
-    name: "Dr. Guru Sharma",
+    name: "Dr. Guruprasad Handal",
     role: "Aesthetic & Digital Smile Designer",
     experience: "12+ Years Experience",
     specialization: "MDS - Conservative Dentistry & Endodontics",
