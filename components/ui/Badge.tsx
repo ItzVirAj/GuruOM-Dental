@@ -21,12 +21,12 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 
 const variantStyles: Record<BadgeVariant, string> = {
   default: "bg-surface-alt text-ink border border-line",
-  brand: "bg-brand text-ink-inverse",
-  accent: "bg-accent-soft text-brand-dark border border-accent/40",
+  brand: "bg-brand text-white",
+  accent: "bg-accent-soft text-accent-deep border border-accent/40 font-semibold",
   outline: "bg-transparent text-ink border border-line",
-  success: "bg-emerald-50 text-success border border-emerald-200",
-  warning: "bg-amber-50 text-warning border border-amber-200",
-  danger: "bg-rose-50 text-danger border border-rose-200",
+  success: "bg-success/10 text-success border border-success/30",
+  warning: "bg-warning/10 text-warning border border-warning/30 font-semibold",
+  danger: "bg-danger/10 text-danger border border-danger/30 font-semibold",
 };
 
 const sizeStyles: Record<BadgeSize, string> = {

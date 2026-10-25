@@ -457,7 +457,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
         {serverError && (
           <div
             role="alert"
-            className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-xs text-red-700 flex items-start justify-between gap-3 animate-fadeIn"
+            className="mb-6 p-4 rounded-2xl bg-danger/10 border border-danger/30 text-xs text-danger flex items-start justify-between gap-3 animate-fadeIn"
           >
             <div className="flex items-start gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -466,7 +466,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
             <button
               type="button"
               onClick={() => setServerError(null)}
-              className="text-red-500 hover:text-red-800 text-xs font-semibold underline underline-offset-2 shrink-0"
+              className="text-danger hover:underline text-xs font-semibold shrink-0"
             >
               Dismiss
             </button>

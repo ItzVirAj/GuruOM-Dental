@@ -142,7 +142,7 @@ export const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
     <div ref={containerRef} className="space-y-8 text-center py-4">
       {/* Animated Success Check Icon */}
       <div className="flex justify-center">
-        <div className="relative flex items-center justify-center w-20 h-20 rounded-full bg-emerald-500/10 text-emerald-600 ring-8 ring-emerald-500/5">
+        <div className="relative flex items-center justify-center w-20 h-20 rounded-full bg-success/10 text-success ring-8 ring-success/5">
           <svg
             ref={checkIconRef}
             className="w-10 h-10 stroke-[2.5]"
@@ -159,7 +159,7 @@ export const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
 
       {/* Heading & Reassurance */}
       <div className="max-w-md mx-auto space-y-2">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 text-success text-xs font-semibold">
           <ShieldCheck className="w-3.5 h-3.5" aria-hidden="true" />
           Priority Slot Reserved
         </span>
@@ -189,7 +189,7 @@ export const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
           className="p-2 rounded-xl text-ink-muted hover:text-brand hover:bg-white border border-transparent hover:border-line transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
         >
           {copied ? (
-            <span className="flex items-center gap-1 text-xs text-emerald-600 font-semibold">
+            <span className="flex items-center gap-1 text-xs text-success font-semibold">
               <CheckCheck className="w-4 h-4" />
               <span>Copied!</span>
             </span>

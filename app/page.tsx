@@ -1,12 +1,10 @@
 import {
   Hero,
-  Philosophy,
+  AboutIntro,
   Stats,
   GalleryStrip,
-  ScopeOfCare,
+  LabsMap,
   Services,
-  Comparison,
-  CheckupStack,
 } from "@/components/sections";
 
 export default function Home() {
@@ -18,8 +16,8 @@ export default function Home() {
       {/* Target anchor for Hero scroll indicator and subsequent sections */}
       <div id="hero-next" tabIndex={-1} aria-hidden="true" />
 
-      {/* 2. Our Philosophy Pinned Slides Section */}
-      <Philosophy />
+      {/* 2. About Us Introduction Section */}
+      <AboutIntro />
 
       {/* 3. Impact in Numbers Stats Section */}
       <Stats />
@@ -27,17 +25,11 @@ export default function Home() {
       {/* 4. Inside GuruOm Dental Gallery Strip */}
       <GalleryStrip />
 
-      {/* 5. Scope of Care Interactive Accordion Section */}
-      <ScopeOfCare />
+      {/* 5. Our Lab & Service Network Across Maharashtra (3D Isometric Map) */}
+      <LabsMap />
 
       {/* 6. Featured Services Grid Section */}
       <Services />
-
-      {/* 7. GuruOm vs Common Practice Comparison Section */}
-      <Comparison />
-
-      {/* 8. What We Check Sticky Stacking Cards Section */}
-      <CheckupStack />
     </>
   );
 }

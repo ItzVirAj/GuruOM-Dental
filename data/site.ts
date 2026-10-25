@@ -113,8 +113,6 @@ export const navLinks: NavLink[] = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
   { label: "Services", href: "/services" },
-  { label: "Doctors", href: "/doctors" },
-  { label: "Pricing", href: "/pricing" },
   { label: "Blog", href: "/blog" },
   { label: "Contact", href: "/contact" },
 ];
@@ -124,11 +122,9 @@ export const megaMenuGroups: MegaMenuGroup[] = [
     title: "Main",
     items: [
       { label: "Home", href: "/", description: "Sanctuary overview & intro" },
-      { label: "About Us", href: "/about", description: "Our values, hygiene & philosophy" },
+      { label: "About Us", href: "/about", description: "Our values, team & clinical standards" },
       { label: "Services", href: "/services", description: "Full spectrum oral wellness" },
       { label: "Service Details", href: "/services#details", description: "In-depth treatment procedures" },
-      { label: "Doctors", href: "/doctors", description: "Meet our specialist clinicians" },
-      { label: "Doctor Profile", href: "/doctors#profile", description: "Accreditations & background" },
       { label: "Contact", href: "/contact", description: "Front desk & clinic directions" },
       { label: "Appointment", href: "/appointment", description: "Direct booking & priority consults" },
     ],
@@ -136,7 +132,6 @@ export const megaMenuGroups: MegaMenuGroup[] = [
   {
     title: "Resources",
     items: [
-      { label: "Pricing", href: "/pricing", description: "Transparent fees & insurance support" },
       { label: "Blog", href: "/blog", description: "Dental health articles & advice" },
       { label: "Blog Post", href: "/blog#post", description: "Deep dive patient care spotlight" },
       { label: "Careers", href: "/careers", description: "Join our clinical medical team" },
@@ -159,8 +154,8 @@ export const footerLinkColumns: FooterLinkCol[] = [
       { label: "Home", href: "/" },
       { label: "About Us", href: "/about" },
       { label: "Our Treatments", href: "/services" },
-      { label: "Specialist Doctors", href: "/doctors" },
-      { label: "Pricing & Coverage", href: "/pricing" },
+      { label: "Patient Appointment", href: "/appointment" },
+      { label: "Contact Desk", href: "/contact" },
     ],
   },
   {

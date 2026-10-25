@@ -413,7 +413,7 @@ export const Step2DateTime: React.FC<Step2DateTimeProps> = ({
         <p
           id="date-error"
           role="alert"
-          className="flex items-center gap-1.5 text-xs text-red-600"
+          className="flex items-center gap-1.5 text-xs text-danger"
         >
           <AlertCircle className="w-3.5 h-3.5 shrink-0" />
           <span>{errors.date}</span>
@@ -450,7 +450,7 @@ export const Step2DateTime: React.FC<Step2DateTimeProps> = ({
               {groupedSlots.morning.length > 0 && (
                 <div>
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-ink-muted mb-2">
-                    <Sun className="w-3.5 h-3.5 text-amber-500" aria-hidden="true" />
+                    <Sun className="w-3.5 h-3.5 text-warning" aria-hidden="true" />
                     <span>Morning (9:00 AM – 11:30 AM)</span>
                   </div>
                   <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
@@ -463,7 +463,7 @@ export const Step2DateTime: React.FC<Step2DateTimeProps> = ({
               {groupedSlots.afternoon.length > 0 && (
                 <div>
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-ink-muted mb-2">
-                    <Sunset className="w-3.5 h-3.5 text-orange-500" aria-hidden="true" />
+                    <Sunset className="w-3.5 h-3.5 text-accent-deep" aria-hidden="true" />
                     <span>Afternoon (12:00 PM – 4:30 PM)</span>
                   </div>
                   <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
@@ -476,7 +476,7 @@ export const Step2DateTime: React.FC<Step2DateTimeProps> = ({
               {groupedSlots.evening.length > 0 && (
                 <div>
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-ink-muted mb-2">
-                    <Moon className="w-3.5 h-3.5 text-indigo-400" aria-hidden="true" />
+                    <Moon className="w-3.5 h-3.5 text-brand-light" aria-hidden="true" />
                     <span>Evening (5:00 PM – 8:00 PM)</span>
                   </div>
                   <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
@@ -491,7 +491,7 @@ export const Step2DateTime: React.FC<Step2DateTimeProps> = ({
             <p
               id="time-slot-error"
               role="alert"
-              className="flex items-center gap-1.5 text-xs text-red-600 mt-2"
+              className="flex items-center gap-1.5 text-xs text-danger mt-2"
             >
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{errors.timeSlot}</span>

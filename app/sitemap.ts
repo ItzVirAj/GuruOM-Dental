@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
 import { siteConfig } from "@/data/site";
-import { doctorsData } from "@/data/doctors";
 import { servicesData } from "@/data/services";
 import { blogPosts } from "@/data/blog";
 
@@ -26,18 +25,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/doctors`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/pricing`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8,
     },
     {
       url: `${baseUrl}/appointment`,
@@ -77,15 +64,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // 2. Dynamic Doctors Profiles
-  const doctorRoutes: MetadataRoute.Sitemap = doctorsData.map((doctor) => ({
-    url: `${baseUrl}/doctors/${doctor.slug}`,
-    lastModified: new Date(),
-    changeFrequency: "monthly",
-    priority: 0.8,
-  }));
-
-  // 3. Dynamic Services Catalog
+  // 2. Dynamic Services Catalog
   const serviceRoutes: MetadataRoute.Sitemap = servicesData.map((service) => ({
     url: `${baseUrl}/services/${service.slug}`,
     lastModified: new Date(),
@@ -93,7 +72,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  // 4. Dynamic Blog Posts
+  // 3. Dynamic Blog Posts
   const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => ({
     url: `${baseUrl}/blog/${post.slug}`,
     lastModified: new Date(post.updatedAt || post.publishedAt),
@@ -101,5 +80,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticRoutes, ...doctorRoutes, ...serviceRoutes, ...blogRoutes];
+  return [...staticRoutes, ...serviceRoutes, ...blogRoutes];
 }

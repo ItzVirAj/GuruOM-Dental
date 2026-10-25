@@ -57,8 +57,8 @@ export const BlogAuthorBox: React.FC<BlogAuthorBoxProps> = ({
                 />
               </div>
               <div className="text-left pr-2">
-                <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">
-                  <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-success">
+                  <ShieldCheck className="w-3 h-3 text-success" />
                   Medically Reviewed
                 </span>
                 <span className="block text-xs font-semibold text-ink group-hover:text-brand transition-colors">

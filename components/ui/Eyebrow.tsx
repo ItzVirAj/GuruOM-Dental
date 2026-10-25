@@ -16,7 +16,7 @@ const colorStyles: Record<EyebrowColor, { text: string; marker: string }> = {
     marker: "bg-brand",
   },
   accent: {
-    text: "text-accent",
+    text: "text-accent-deep",
     marker: "bg-accent",
   },
   muted: {
@@ -24,7 +24,7 @@ const colorStyles: Record<EyebrowColor, { text: string; marker: string }> = {
     marker: "bg-ink-muted",
   },
   inverse: {
-    text: "text-ink-inverse/90",
+    text: "text-white/90",
     marker: "bg-accent",
   },
 };

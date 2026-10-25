@@ -65,7 +65,7 @@ export const MapBlock: React.FC = () => {
       <Container>
         <div className="space-y-8">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-accent block">
+            <span className="text-xs font-semibold uppercase tracking-wider text-accent-deep block">
               Clinic Location & Directions
             </span>
             <h2
@@ -98,7 +98,7 @@ export const MapBlock: React.FC = () => {
                 {/* Decorative map grid background elements */}
                 <div
                   aria-hidden="true"
-                  className="absolute inset-0 opacity-[0.06] bg-[radial-gradient(#0E5A5F_1px,transparent_1px)] [background-size:16px_16px]"
+                  className="absolute inset-0 opacity-[0.06] bg-[radial-gradient(var(--brand)_1px,transparent_1px)] [background-size:16px_16px]"
                 />
 
                 <div className="relative z-10 max-w-md mx-auto space-y-4">
@@ -200,8 +200,8 @@ export const MapBlock: React.FC = () => {
                   <span className="flex items-center gap-1.5">
                     {copied ? (
                       <>
-                        <CheckCheck className="w-3.5 h-3.5 text-emerald-600" />
-                        <span className="text-emerald-700">Copied!</span>
+                        <CheckCheck className="w-3.5 h-3.5 text-success" />
+                        <span className="text-success font-semibold">Copied!</span>
                       </>
                     ) : (
                       <>

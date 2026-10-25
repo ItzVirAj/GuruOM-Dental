@@ -6,6 +6,7 @@ import { gsap, SplitText, EASE, useGSAP } from "@/lib/gsap";
 export type SplitType = "lines" | "words" | "chars";
 
 export interface SplitHeadingProps {
+  id?: string;
   as?: "h1" | "h2" | "h3" | "h4" | "p" | "span";
   type?: SplitType;
   mask?: boolean;
@@ -19,6 +20,7 @@ export interface SplitHeadingProps {
 }
 
 export const SplitHeading: React.FC<SplitHeadingProps> = ({
+  id,
   as: Component = "h2",
   type = "lines",
   mask = true,
@@ -128,12 +130,13 @@ export const SplitHeading: React.FC<SplitHeadingProps> = ({
 
   return (
     <Component
+      id={id}
       ref={containerRef as React.Ref<never>}
       data-anim="split-heading"
       aria-label={children}
-      className={`relative inline-block ${className}`}
+      className={`relative block ${className}`}
     >
-      <span ref={textRef} aria-hidden="true" className="inline-block">
+      <span ref={textRef} aria-hidden="true" className="block">
         {children}
       </span>
     </Component>

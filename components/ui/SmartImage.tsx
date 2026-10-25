@@ -19,6 +19,7 @@ const ratioStyles: Record<AspectRatio, string> = {
   "1/1": "aspect-square",
   "4/3": "aspect-[4/3]",
   "3/4": "aspect-[3/4]",
+  "3/2": "aspect-[3/2]",
   "16/9": "aspect-[16/9]",
   "21/9": "aspect-[21/9]",
   "4/5": "aspect-[4/5]",

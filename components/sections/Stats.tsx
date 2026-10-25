@@ -20,7 +20,7 @@ export function Stats({ content = statsContent }: StatsProps) {
   // -------------------------------------------------------------
   useGSAP(
     () => {
-      // Refresh ScrollTrigger when fonts are loaded to account for preceding pinned sections accurately
+      // Refresh ScrollTrigger when fonts are loaded to accurately calculate layout positions
       if (typeof document !== "undefined" && document.fonts) {
         document.fonts.ready.then(() => {
           ScrollTrigger.refresh();

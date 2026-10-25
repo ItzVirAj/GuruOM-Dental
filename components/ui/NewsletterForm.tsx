@@ -81,7 +81,7 @@ export const NewsletterForm: React.FC<NewsletterFormProps> = ({
           disabled={status === "loading" || status === "success"}
           className={`px-5 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer shrink-0 disabled:opacity-50 select-none flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
             isDark
-              ? "bg-accent hover:brightness-105 text-brand-dark focus-visible:ring-accent"
+              ? "bg-accent hover:brightness-105 text-on-accent focus-visible:ring-accent"
               : "bg-brand hover:bg-brand-dark text-white focus-visible:ring-brand"
           }`}
         >
@@ -99,13 +99,13 @@ export const NewsletterForm: React.FC<NewsletterFormProps> = ({
       {/* Accessible Notifications Region */}
       <div aria-live="polite" className="mt-2.5 text-xs">
         {status === "success" && (
-          <p className="flex items-center gap-1.5 text-emerald-500 font-medium">
+          <p className="flex items-center gap-1.5 text-success font-medium">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>Thank you! You have been successfully subscribed to our clinical journal.</span>
           </p>
         )}
         {status === "error" && (
-          <p className="flex items-center gap-1.5 text-rose-500 font-medium">
+          <p className="flex items-center gap-1.5 text-danger font-medium">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{errorMessage}</span>
           </p>

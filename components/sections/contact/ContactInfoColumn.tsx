@@ -171,14 +171,14 @@ export const ContactInfoColumn: React.FC = () => {
               <span
                 className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
                   status.isOpen
-                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                    ? "bg-success/10 text-success border border-success/30"
                     : "bg-surface-alt text-ink-muted border border-line"
                 }`}
               >
                 <span
                   className={`w-2 h-2 rounded-full ${
                     status.isOpen
-                      ? "bg-emerald-500 animate-pulse"
+                      ? "bg-success animate-pulse"
                       : "bg-ink-muted/50"
                   }`}
                   aria-hidden="true"
@@ -276,7 +276,7 @@ export const ContactInfoColumn: React.FC = () => {
         <div className="pt-1">
           <a
             href={`tel:${siteConfig.emergencyPhone.replace(/[\s\-\(\)]/g, "")}`}
-            className="inline-flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl bg-accent text-ink font-semibold text-xs tracking-wide hover:brightness-105 transition-all shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            className="inline-flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl bg-accent text-on-accent font-semibold text-xs tracking-wide hover:brightness-105 transition-all shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
             <PhoneCall className="w-4 h-4" />
             <span>Call Emergency Desk: {siteConfig.emergencyPhone}</span>

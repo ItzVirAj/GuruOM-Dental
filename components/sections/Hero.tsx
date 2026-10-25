@@ -1,10 +1,13 @@
 "use client";
 
-import { useRef } from "react";
-import { gsap, SplitText, useGSAP } from "@/lib/gsap";
-import { Container, Button, SmartImage } from "@/components/ui";
-import { MagneticWrap, useLenis, useReducedMotion } from "@/components/animations";
+import { useRef, useState } from "react";
+import Image from "next/image";
+import { MapPin, Phone, Clock, X, ExternalLink } from "lucide-react";
+import { gsap, useGSAP } from "@/lib/gsap";
+import { Container, SmartImage } from "@/components/ui";
+import { useLenis, useReducedMotion } from "@/components/animations";
 import { heroContent } from "@/data/home";
+import { labs, type LabLocation } from "@/data/labs";
 
 export interface HeroProps {
   /**
@@ -24,15 +27,32 @@ export function Hero({ showPortrait = true }: HeroProps) {
   const bgImageInnerRef = useRef<HTMLDivElement | null>(null);
   const contentColRef = useRef<HTMLDivElement | null>(null);
   const headlineRef = useRef<HTMLHeadingElement | null>(null);
+  const logoImageRef = useRef<HTMLImageElement | null>(null);
   const subheadingRef = useRef<HTMLParagraphElement | null>(null);
-  const ctaRowRef = useRef<HTMLDivElement | null>(null);
-  const statsStripRef = useRef<HTMLDivElement | null>(null);
-  const trustChipsRef = useRef<HTMLDivElement | null>(null);
+  const locationsBlockRef = useRef<HTMLDivElement | null>(null);
   const visualColRef = useRef<HTMLDivElement | null>(null);
   const portraitFrameRef = useRef<HTMLDivElement | null>(null);
   const ratingCardRef = useRef<HTMLDivElement | null>(null);
   const scrollIndicatorRef = useRef<HTMLButtonElement | null>(null);
   const floatTweenRef = useRef<gsap.core.Tween | null>(null);
+
+  // Active location state for small details popover
+  const [activeLocation, setActiveLocation] = useState<LabLocation | null>(null);
+
+  const handleLocationClick = (name: string) => {
+    const found = labs.find(
+      (l) =>
+        l.name.toLowerCase() === name.toLowerCase() ||
+        l.districtName?.toLowerCase().includes(name.toLowerCase())
+    );
+    if (!found) return;
+
+    if (activeLocation?.id === found.id) {
+      setActiveLocation(null);
+    } else {
+      setActiveLocation(found);
+    }
+  };
 
   // -------------------------------------------------------------
   // GSAP Animations (Load Timeline, Scroll Parallax, Mouse Parallax)
@@ -53,67 +73,43 @@ export function Hero({ showPortrait = true }: HeroProps) {
 
       const mm = gsap.matchMedia();
 
-      // Wait for fonts to be loaded so SplitText calculates dimensions accurately
-      document.fonts.ready.then(() => {
-        if (!headlineRef.current) return;
+      // Master Page-Load Timeline
+      const masterTl = gsap.timeline({
+        defaults: { ease: "power3.out" },
+      });
 
-        // Headline SplitText: splits into masked lines/words
-        const split = new SplitText(headlineRef.current, {
-          type: "lines,words",
-          linesClass: "overflow-hidden leading-tight text-white",
-          wordsClass: "text-white inline-block",
-        });
+      // 1. Background image: subtle scale down from 1.15 to 1.0 with soft fade
+      if (bgImageInnerRef.current) {
+        masterTl.fromTo(
+          bgImageInnerRef.current,
+          { scale: 1.15, opacity: 0 },
+          { scale: 1.0, opacity: 1, duration: 1.8, ease: "expo.out" },
+          0
+        );
+      }
 
-        // ---------------------------------------------------------
-        // A) Master Page-Load Timeline
-        // ---------------------------------------------------------
-        const masterTl = gsap.timeline({
-          defaults: { ease: "power3.out" },
-        });
+      // 2. Headline logo mask slide-up (preserving exact animation from previous text)
+      if (logoImageRef.current) {
+        masterTl.fromTo(
+          logoImageRef.current,
+          { yPercent: 125, opacity: 0 },
+          { yPercent: 0, opacity: 1, duration: 0.9, ease: "power3.out" },
+          0.25
+        );
+      }
 
-        // 1. Background image: subtle scale down from 1.15 to 1.0 with soft fade
-        if (bgImageInnerRef.current) {
-          masterTl.fromTo(
-            bgImageInnerRef.current,
-            { scale: 1.15, opacity: 0 },
-            { scale: 1.0, opacity: 1, duration: 1.8, ease: "expo.out" },
-            0
-          );
-        }
-
-        // 2. Headline words mask slide-up
-        if (split.words && split.words.length > 0) {
-          masterTl.fromTo(
-            split.words,
-            { yPercent: 125, opacity: 0 },
-            { yPercent: 0, opacity: 1, stagger: 0.04, duration: 0.9, ease: "power3.out" },
-            0.25
-          );
-        }
-
-        // 4. Subheading, CTAs, and Stats Strip
+        // 4. Subheading and Working Centres / Services Block
         const textElements = [
           subheadingRef.current,
-          ctaRowRef.current,
-          statsStripRef.current,
+          locationsBlockRef.current,
         ].filter(Boolean);
 
         if (textElements.length > 0) {
           masterTl.fromTo(
             textElements,
             { y: 24, opacity: 0 },
-            { y: 0, opacity: 1, stagger: 0.1, duration: 0.7 },
+            { y: 0, opacity: 1, stagger: 0.12, duration: 0.7 },
             "-=0.5"
-          );
-        }
-
-        // 5. Trust chips stagger in from below with subtle scale
-        if (trustChipsRef.current && trustChipsRef.current.children.length > 0) {
-          masterTl.fromTo(
-            trustChipsRef.current.children,
-            { y: 18, scale: 0.94, opacity: 0 },
-            { y: 0, scale: 1, opacity: 1, stagger: 0.07, duration: 0.5 },
-            "-=0.3"
           );
         }
 
@@ -164,7 +160,6 @@ export function Hero({ showPortrait = true }: HeroProps) {
             "-=0.2"
           );
         }
-      });
 
       // ---------------------------------------------------------
       // B) Desktop-Only Scroll Parallax (Lenis synced)
@@ -296,7 +291,7 @@ export function Hero({ showPortrait = true }: HeroProps) {
         {/* Bottom edge fade for seamless visual connection to following sections */}
         <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-transparent to-transparent opacity-90 z-10" />
 
-        {/* Subtle mint/teal atmospheric radial glow */}
+        {/* Subtle orange atmospheric radial glow */}
         <div className="absolute top-1/4 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-accent/10 blur-[120px] z-10" />
       </div>
 
@@ -308,101 +303,246 @@ export function Hero({ showPortrait = true }: HeroProps) {
             ref={contentColRef}
             className="lg:col-span-7 flex flex-col gap-6 sm:gap-7 max-w-[640px] will-change-transform"
           >
-            {/* Accessible Single <h1> Headline */}
+            {/* Accessible Single <h1> Headline with Brand Logo */}
             <h1
               ref={headlineRef}
-              className="font-rainbow-miracles text-display-xl !font-rainbow-miracles !text-white text-white font-normal tracking-tight text-balance"
-              style={{ fontFamily: "var(--font-rainbow-miracles)" }}
+              className="relative max-w-xl"
             >
-              {heroContent.headline}
+              <span className="sr-only">GuruOm Dental — Healthy smiles, gently cared for.</span>
+              <div className="overflow-hidden py-1">
+                <Image
+                  ref={logoImageRef}
+                  src="/images/NewLogo-Viraj-Guru-OM-PNG.png"
+                  alt="GuruOm Dental - Healthy smiles, gently cared for."
+                  width={843}
+                  height={193}
+                  priority
+                  className="w-full max-w-[460px] sm:max-w-[540px] h-auto object-contain will-change-transform drop-shadow-md"
+                />
+              </div>
             </h1>
 
             {/* Subheading */}
             <p
               ref={subheadingRef}
-              className="text-white/80 text-base sm:text-lg lg:text-xl font-normal leading-relaxed text-balance"
+              className="text-white/80 text-sm sm:text-base font-normal leading-relaxed max-w-xl"
             >
               {heroContent.subheading}
             </p>
 
-            {/* CTA Action Buttons */}
-            <div ref={ctaRowRef} className="flex flex-wrap items-center gap-4 pt-1">
-              <MagneticWrap strength={0.25}>
-                <Button
-                  href={heroContent.primaryCta.href}
-                  variant="secondary"
-                  size="lg"
-                  className="font-bold text-dark shadow-soft hover:shadow-float"
-                >
-                  {heroContent.primaryCta.label}
-                </Button>
-              </MagneticWrap>
-
-              <Button
-                href={heroContent.secondaryCta.href}
-                variant="light"
-                size="lg"
-                className="bg-white text-brand font-semibold hover:bg-surface-alt hover:text-brand-dark shadow-soft"
-              >
-                {heroContent.secondaryCta.label}
-              </Button>
-            </div>
-
-            {/* Mini Stats Strip */}
-            {heroContent.statsStrip && heroContent.statsStrip.length > 0 && (
-              <div
-                ref={statsStripRef}
-                className="grid grid-cols-3 gap-4 pt-4 border-t border-white/15 max-w-lg"
-              >
-                {heroContent.statsStrip.map((stat, i) => (
-                  <div key={i} className="flex flex-col">
-                    <span className="font-aileron text-xl sm:text-2xl font-bold text-white tracking-tight">
-                      {stat.value}
-                    </span>
-                    <span className="text-[11px] sm:text-xs text-white/80 font-medium">
-                      {stat.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Glass Trust Chips */}
-            <div
-              ref={trustChipsRef}
-              className="flex flex-wrap items-center gap-2.5 pt-1"
-              aria-label="Clinical Trust Highlights"
-            >
-              {heroContent.trustChips.map((chip) => (
-                <div
-                  key={chip.id}
-                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-medium text-white shadow-xs"
-                >
-                  {chip.icon === "doctor" && (
-                    <svg className="h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2a5 5 0 100 10 5 5 0 000-10zm-7 18c0-3.87 3.13-7 7-7s7 3.13 7 7H5z" />
-                    </svg>
-                  )}
-                  {chip.icon === "hygiene" && (
-                    <svg className="h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z" />
-                    </svg>
-                  )}
-                  {chip.icon === "emergency" && (
-                    <svg className="h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-                    </svg>
-                  )}
-                  <span className="text-white">{chip.label}</span>
+            {/* Network Highlights: Our Working Centres & Services Across */}
+            {/* Network Highlights: Our Lab Centers & Services Across */}
+            <div ref={locationsBlockRef} className="flex flex-col gap-6 pt-2">
+              {/* 1. Our Lab Centers */}
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-2.5">
+                  <span className="relative flex h-3 w-3 items-center justify-center">
+                    <span
+                      className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                      style={{ backgroundColor: "var(--accent)" }}
+                    />
+                    <span
+                      className="relative inline-flex rounded-full h-2.5 w-2.5"
+                      style={{ backgroundColor: "var(--accent)" }}
+                    />
+                  </span>
+                  <span className="text-base sm:text-lg font-bold uppercase tracking-wider text-accent font-body">
+                    Our Lab Centers
+                  </span>
                 </div>
-              ))}
+
+                <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                  {[
+                    "Chh. Sambhajinagar",
+                    "Ahilyanagar",
+                    "Pune",
+                  ].map((centre) => {
+                    const locData = labs.find((l) => l.name === centre);
+                    const isSelected = activeLocation?.id === locData?.id;
+                    return (
+                      <button
+                        key={centre}
+                        type="button"
+                        onClick={() => handleLocationClick(centre)}
+                        className={`group inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl border text-white font-body text-sm font-bold shadow-sm transition-all duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                          isSelected
+                            ? "bg-accent text-brand-dark border-accent ring-2 ring-accent/60 shadow-lg scale-105"
+                            : "bg-accent/15 hover:bg-accent/25 border border-accent/40 hover:border-accent text-white"
+                        }`}
+                        title={`Click to view address and contact for ${centre}`}
+                        aria-expanded={isSelected}
+                      >
+                        <span
+                          className={`w-2 h-2 rounded-full transition-transform ${
+                            isSelected ? "bg-brand-dark" : "bg-accent group-hover:scale-125"
+                          }`}
+                        />
+                        <span className={`font-bold tracking-normal ${isSelected ? "text-brand-dark" : "text-white"}`}>
+                          {centre}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 2. Services Across */}
+              <div className="flex flex-col gap-3 pt-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full border border-amber-400 bg-amber-400/50 shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
+                  <span className="text-sm sm:text-base font-semibold uppercase tracking-wider text-white/80 font-body">
+                    Services Across
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                  {[
+                    "Nashik",
+                    "Nagpur",
+                    "Jalgaon",
+                    "Jalna",
+                    "Nanded",
+                    "Solapur",
+                    "Kolhapur",
+                  ].map((city) => {
+                    const locData = labs.find((l) => l.name === city);
+                    const isSelected = activeLocation?.id === locData?.id;
+                    return (
+                      <button
+                        key={city}
+                        type="button"
+                        onClick={() => handleLocationClick(city)}
+                        className={`group inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs sm:text-sm font-body font-normal transition-all duration-150 cursor-pointer outline-none focus-visible:ring-1 focus-visible:ring-amber-400 ${
+                          isSelected
+                            ? "bg-amber-400 text-brand-dark border-amber-400 ring-2 ring-amber-400/60 font-semibold shadow-md scale-105"
+                            : "bg-white/8 hover:bg-white/15 border border-white/15 hover:border-white/30 text-white/85 hover:text-white"
+                        }`}
+                        title={`Click to view address and contact for ${city}`}
+                        aria-expanded={isSelected}
+                      >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                            isSelected ? "bg-brand-dark" : "bg-amber-400/70 group-hover:bg-amber-400"
+                          }`}
+                        />
+                        <span className={isSelected ? "text-brand-dark font-medium" : "text-white/90"}>
+                          {city}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Interactive Location & Contact Details Box */}
+              {activeLocation && (
+                <div
+                  role="region"
+                  aria-label={`${activeLocation.name} location details`}
+                  className="relative mt-1 rounded-2xl bg-white/95 text-ink p-5 sm:p-6 shadow-2xl backdrop-blur-xl border border-white/90 animate-in fade-in zoom-in-95 duration-200 z-20 max-w-xl"
+                >
+                  {/* Top Bar with Name & Close Button */}
+                  <div className="flex items-start justify-between gap-3 mb-2.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={`w-2.5 h-2.5 rounded-full ${
+                          activeLocation.type === "lab" ? "bg-accent" : "bg-amber-500"
+                        }`}
+                      />
+                      <h3 className="font-display text-lg sm:text-xl font-bold text-ink">
+                        {activeLocation.name}
+                      </h3>
+                      <span
+                        className={`text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full ${
+                          activeLocation.type === "lab"
+                            ? "bg-accent-soft text-accent-deep border border-accent/20"
+                            : "bg-amber-50 text-amber-800 border border-amber-200"
+                        }`}
+                      >
+                        {activeLocation.type === "lab"
+                          ? "In-House Digital Lab"
+                          : "Regional Service Hub"}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveLocation(null)}
+                      className="p-1 rounded-lg text-ink-muted hover:text-ink hover:bg-surface-alt transition-colors"
+                      aria-label="Close location box"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* Tagline */}
+                  <p className="text-xs text-brand font-medium italic mb-4">
+                    {activeLocation.tagline}
+                  </p>
+
+                  {/* Details: Location, Contact Number, Hours */}
+                  <div className="space-y-2.5 text-xs sm:text-sm">
+                    {/* Location / Address */}
+                    <div className="flex items-start gap-2.5 text-ink/90">
+                      <MapPin className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                      <span className="leading-snug">
+                        <strong className="text-ink">Location: </strong>
+                        {activeLocation.address}
+                      </span>
+                    </div>
+
+                    {/* Contact Number */}
+                    <div className="flex items-center gap-2.5 text-ink/90">
+                      <Phone className="w-4 h-4 text-accent shrink-0" />
+                      <div className="flex items-center gap-2">
+                        <strong className="text-ink">Contact: </strong>
+                        <a
+                          href={`tel:${activeLocation.phone}`}
+                          className="font-bold text-brand hover:text-accent hover:underline transition-colors"
+                        >
+                          {activeLocation.phone}
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Hours */}
+                    <div className="flex items-center gap-2.5 text-ink-muted text-xs">
+                      <Clock className="w-3.5 h-3.5 text-accent shrink-0" />
+                      <span>{activeLocation.hours}</span>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="mt-4 pt-3.5 border-t border-line/60 flex flex-wrap items-center gap-3">
+                    <a
+                      href={`tel:${activeLocation.phone}`}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand text-white text-xs font-semibold hover:bg-brand-light transition-colors shadow-sm"
+                    >
+                      <Phone className="w-3.5 h-3.5" />
+                      Call {activeLocation.phone}
+                    </a>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const el = document.getElementById("our-labs");
+                        if (el) el.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface hover:bg-surface-alt text-brand text-xs font-semibold border border-line/70 transition-colors"
+                    >
+                      <MapPin className="w-3.5 h-3.5 text-accent" />
+                      View on Maharashtra Map
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Mobile Viewport Rating Card (Displayed in normal flow below CTAs) */}
             <div className="block lg:hidden pt-4">
               <div className="rounded-2xl bg-white/95 text-ink p-5 shadow-2xl backdrop-blur-md border border-white/40 max-w-sm">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-amber-400" aria-label="Rated 4.9 out of 5 stars">
+                  <div className="flex items-center gap-1 text-warning" aria-label="Rated 4.9 out of 5 stars">
                     {[...Array(5)].map((_, i) => (
                       <svg key={i} className="h-4 w-4 fill-current" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -457,7 +597,7 @@ export function Hero({ showPortrait = true }: HeroProps) {
                 }`}
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1 text-amber-400" aria-label="Rated 4.9 out of 5 stars">
+                <div className="flex items-center gap-1 text-warning" aria-label="Rated 4.9 out of 5 stars">
                   {[...Array(5)].map((_, i) => (
                     <svg key={i} className="h-4 w-4 fill-current" viewBox="0 0 20 20">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -477,7 +617,7 @@ export function Hero({ showPortrait = true }: HeroProps) {
               </p>
 
               <div className="mt-3.5 flex items-center gap-2.5 border-t border-line/70 pt-2.5">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-brand-dark font-bold text-xs">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-on-accent font-bold text-xs">
                   {heroContent.ratingCard.author
                     .split(" ")
                     .map((n) => n[0])

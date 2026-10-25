@@ -286,7 +286,7 @@ export const LegalLayout: React.FC<LegalLayoutProps> = ({
                       className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity p-1.5 rounded-lg text-ink-muted hover:text-brand hover:bg-black/5 shrink-0 print:hidden cursor-pointer"
                     >
                       {copiedId === section.id ? (
-                        <CheckCheck className="w-4 h-4 text-emerald-600" aria-hidden="true" />
+                        <CheckCheck className="w-4 h-4 text-success" aria-hidden="true" />
                       ) : (
                         <LinkIcon className="w-4 h-4" aria-hidden="true" />
                       )}
@@ -431,11 +431,11 @@ const LegalNoteBlock: React.FC<LegalNoteBlockProps> = ({ note }) => {
   let icon = <Info className="w-4 h-4 text-brand shrink-0 mt-0.5" aria-hidden="true" />;
 
   if (tone === "warning") {
-    containerStyles = "bg-amber-50/80 border-amber-300 text-amber-950";
-    icon = <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" aria-hidden="true" />;
+    containerStyles = "bg-warning/10 border-warning/30 text-ink";
+    icon = <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" aria-hidden="true" />;
   } else if (tone === "alert") {
-    containerStyles = "bg-rose-50/80 border-rose-300 text-rose-950";
-    icon = <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" aria-hidden="true" />;
+    containerStyles = "bg-danger/10 border-danger/30 text-ink";
+    icon = <ShieldAlert className="w-4 h-4 text-danger shrink-0 mt-0.5" aria-hidden="true" />;
   }
 
   return (

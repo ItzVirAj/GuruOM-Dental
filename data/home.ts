@@ -36,26 +36,35 @@ export interface HeroContent {
   statsStrip: MiniStat[];
 }
 
-export interface PhilosophySlide {
-  id: string;
-  number: string;
-  title: string;
-  text: string;
-  imageSlot: string;
+export interface AboutIntroHelpLine {
+  label: string;
+  value: string;
+  href: string;
 }
 
-export interface PhilosophyContent {
+export interface AboutIntroContent {
   eyebrow: string;
   title: string;
-  intro: string;
-  slides: PhilosophySlide[];
+  paragraph: string;
+  quote: {
+    text: string;
+    icon: string;
+  };
+  cta: {
+    label: string;
+    href: string;
+  };
+  helpCard: {
+    title: string;
+    lines: AboutIntroHelpLine[];
+  };
 }
 
 export const heroContent: HeroContent = {
   eyebrow: `Trusted dental care in ${siteConfig.address.city || "your city"}`,
   headline: "Healthy smiles, gently cared for.",
   subheading:
-    "Experience calm, hospital-grade dentistry with our team of specialists. Precision 3D diagnostics, painless treatments, and comprehensive care for your whole family.",
+    "Founded in 2019 in Ahilyanagar (Ahmednagar), Guru-Om Dental began with a vision to transform dental care. Our founder, Dr. Guruprasad Handal, a passionate Prosthodontist, envisioned the future of digital dentistry. Embracing innovation, we transitioned from conventional practices to digital dentistry, pioneering a new era of precision and excellence.",
   primaryCta: {
     label: "Book Appointment",
     href: "/appointment",
@@ -95,41 +104,39 @@ export const heroContent: HeroContent = {
   ],
 };
 
-export const philosophyContent: PhilosophyContent = {
-  eyebrow: "OUR PHILOSOPHY",
-  title: "Trusted Dental Care for a Brighter Smile.",
-  intro:
-    "At the heart of our practice is a commitment to precision and patient comfort. We don't just treat symptoms; we focus on the long-term health and vitality of your smile.",
-  slides: [
-    {
-      id: "diagnostic-accuracy",
-      number: "01",
-      title: "Diagnostic Accuracy",
-      text: "This is skeleton filler text, written only to keep the shape alive. It does not carry meaning, it does not aim to convince, it simply marks the rhythm of where real words will eventually go. Like bones under the skin, this placeholder creates a frame that can stand without flesh.",
-      imageSlot: "philosophy1",
-    },
-    {
-      id: "gentle-care",
-      number: "02",
-      title: "Gentle, Anxiety-Free Care",
-      text: "A dental visit should never be an ordeal. Through sound-dampening operatory suites, compassionate communication, and computer-controlled gentle anesthetic delivery, we create a tranquil treatment experience that removes anxiety entirely.",
-      imageSlot: "philosophy2",
-    },
-    {
-      id: "minimally-invasive",
-      number: "03",
-      title: "Modern, Minimally Invasive Treatment",
-      text: "Our conservative philosophy preserves your natural tooth enamel whenever possible. By using micro-dentistry optics and premium biocompatible ceramics, we ensure restorations are exceptionally durable, aesthetically seamless, and gentle on surrounding gum tissue.",
-      imageSlot: "philosophy3",
-    },
-    {
-      id: "hospital-grade-hygiene",
-      number: "04",
-      title: "Hospital-Grade Hygiene",
-      text: "Uncompromising patient safety is our highest ethical obligation. Our clinic adheres to multi-barrier autoclave sterilization, medical-grade ultrasonic cleansing, and continuous HEPA air exchange so every instrument and surface is completely sterile.",
-      imageSlot: "philosophy4",
-    },
-  ],
+// ============================================================================
+// About Intro Section Content (Homepage)
+// ============================================================================
+
+// Replace with the clinic's real story. Do not publish founding years, awards or numbers that are not true.
+export const aboutIntroContent: AboutIntroContent = {
+  eyebrow: "About GuruOm Dental",
+  title: "Pioneering Gentle Care with Advanced Digital Dental Precision",
+  paragraph:
+    "At GuruOm Dental, we unite clinical warmth with leading-edge restorative technology to make every visit calm and predictable. From computer-guided implantology to microscope-assisted restorations, our dedicated team focuses on preserving your natural teeth with minimal intervention. We believe exceptional oral health begins with patient comfort, transparent guidance, and uncompromising standards of care.",
+  quote: {
+    text: "To restore healthy, confident smiles through patient-centered compassion, clinical mastery, and digital innovation.",
+    icon: "Sparkles",
+  },
+  cta: {
+    label: "More About Us",
+    href: "/about",
+  },
+  helpCard: {
+    title: "Need help?",
+    lines: [
+      {
+        label: "Clinic Desk",
+        value: siteConfig.phone,
+        href: `tel:${siteConfig.phone.replace(/[^+\d]/g, "")}`,
+      },
+      {
+        label: "Emergency & WhatsApp",
+        value: siteConfig.emergencyPhone,
+        href: `tel:${siteConfig.emergencyPhone.replace(/[^+\d]/g, "")}`,
+      },
+    ],
+  },
 };
 
 // ============================================================================
@@ -156,21 +163,21 @@ export const statsContent: StatsContent = {
   eyebrow: "Our Impact in Numbers",
   title: "Precision care, measurable results.",
   intro:
-    "Over fifteen years of patient-centered dentistry, advanced hospital-grade technology, and specialized clinical care reflected in real restorative outcomes.",
+    "Over eight years of clinical mastery, advanced digital dental infrastructure, and collaborative partnerships delivering predictable restorative outcomes.",
   stats: [
     {
       id: "years-of-trust",
-      value: "15",
+      value: "8",
       suffix: "+",
       label: "Years of Trust",
       description: "Dedicated speciality care delivered with compassion and integrity.",
     },
     {
-      id: "treatment-success",
-      value: "99.9",
-      suffix: "%",
-      label: "Treatment Success",
-      description: "Documented success rate in restorative, implant, and laser therapies.",
+      id: "doctors-network",
+      value: "800",
+      suffix: "+",
+      label: "Doctors Working With Us",
+      description: "Trusted dental surgeons and clinical practitioners partnering with our digital labs across Maharashtra.",
     },
     {
       id: "happy-smiles",
@@ -223,81 +230,6 @@ export const galleryContent: GalleryContent = {
 };
 
 // ============================================================================
-// Scope of Care Accordion Content
-// ============================================================================
-
-export interface ScopeItem {
-  id: string;
-  number?: string;
-  icon: "tooth" | "heart-pulse" | "dna" | "droplet";
-  title: string;
-  text: string;
-  highlights?: string[];
-  imageSlot: string;
-  imageSrc?: string;
-}
-
-export interface ScopeContent {
-  eyebrow?: string;
-  title: string;
-  intro?: string;
-  cta?: {
-    label: string;
-    href: string;
-  };
-  items: ScopeItem[];
-}
-
-export const scopeContent: ScopeContent = {
-  eyebrow: "Our Scope of Care",
-  title: "The Scope of Our Care",
-  intro:
-    "From routine preventive cleanings to complex 3D guided surgical reconstructions, our multidisciplinary clinic delivers integrated dental expertise with a gentle touch.",
-  cta: {
-    label: "View All Services",
-    href: "/services",
-  },
-  items: [
-    {
-      id: "diagnostic-accuracy",
-      number: "01",
-      icon: "tooth",
-      title: "Diagnostic Accuracy",
-      text: "It completely eliminates the need for traditional, messy, and gag-inducing putty impressions. Patients love the comfort, speed, and seeing a live 3D model of their teeth on screen instantly.",
-      imageSlot: "scope1",
-      imageSrc: "/images/scope/scope-diagnostic.jpg",
-    },
-    {
-      id: "systemic-recovery",
-      number: "02",
-      icon: "heart-pulse",
-      title: "Systemic Recovery",
-      text: "Supports total body wellness through calm, biologically aligned restorative care, gentle sedation options, and zero-anxiety clinical protocols designed for comprehensive recovery.",
-      imageSlot: "scope2",
-      imageSrc: "/images/scope/scope-recovery.jpg",
-    },
-    {
-      id: "biological-integrity",
-      number: "03",
-      icon: "dna",
-      title: "Biological Integrity",
-      text: "We preserve your natural tooth structure using micro-dentistry optics, biocompatible metal-free ceramics, and adhesive bonding engineered for maximum longevity and biological harmony.",
-      imageSlot: "scope3",
-      imageSrc: "/images/scope/scope-integrity.jpg",
-    },
-    {
-      id: "preventive-hygiene",
-      number: "04",
-      icon: "droplet",
-      title: "Preventive Hygiene",
-      text: "It completely eliminates the need for traditional, messy, and gag-inducing putty impressions. Patients love the comfort, speed, and seeing a live 3D model of their teeth on screen instantly.",
-      imageSlot: "scope4",
-      imageSrc: "/images/scope/scope-hygiene.jpg",
-    },
-  ],
-};
-
-// ============================================================================
 // Services Grid Section Content
 // ============================================================================
 
@@ -326,89 +258,6 @@ export const servicesSectionContent: ServicesSectionContent = {
     "cleaning-whitening",
     "orthodontics-aligners",
     "dental-implants",
-  ],
-};
-
-// ============================================================================
-// GuruOm vs Common Practice Comparison Section Content
-// ============================================================================
-
-export interface ComparisonRow {
-  id: string;
-  feature: string;
-  usValue: string | boolean;
-  themValue: string | boolean;
-}
-
-export interface ComparisonContent {
-  eyebrow: string;
-  title: string;
-  intro: string;
-  columns: {
-    us: string;
-    them: string;
-  };
-  rows: ComparisonRow[];
-}
-
-export const comparisonContent: ComparisonContent = {
-  eyebrow: "Why GuruOm Dental",
-  title: "The difference you can feel.",
-  intro:
-    "We believe dentistry should be transparent, unhurried, and comfortable. Here is how our commitment to patient-first care sets us apart.",
-  columns: {
-    us: "GuruOm Dental",
-    them: "Common Practice",
-  },
-  rows: [
-    {
-      id: "imaging",
-      feature: "Digital X-rays & 3D CBCT Imaging",
-      usValue: "Ultra-low radiation 3D scans with instant chairside review",
-      themValue: "Traditional 2D film with delays & higher radiation",
-    },
-    {
-      id: "sterilization",
-      feature: "Hospital-Grade Sterilization Protocol",
-      usValue: "Multi-barrier Class-B autoclaving & vacuum sealed pouches",
-      themValue: "Standard basic chemical disinfection",
-    },
-    {
-      id: "painless-injections",
-      feature: "Painless Computer-Guided Injections",
-      usValue: true,
-      themValue: false,
-    },
-    {
-      id: "transparent-pricing",
-      feature: "Transparent Upfront Itemized Pricing",
-      usValue: "Fixed quote provided in writing before treatment begins",
-      themValue: "Hidden charges & surprise mid-treatment additions",
-    },
-    {
-      id: "emergency-slots",
-      feature: "Dedicated Same-Day Emergency Slots",
-      usValue: true,
-      themValue: false,
-    },
-    {
-      id: "treatment-plan",
-      feature: "Treatment Plan Explained Before Starting",
-      usValue: "Visualized on high-res monitors with all alternative options",
-      themValue: "Rushed explanations without showing clear options",
-    },
-    {
-      id: "follow-up-care",
-      feature: "Proactive Follow-Up Care & Healing Checks",
-      usValue: true,
-      themValue: false,
-    },
-    {
-      id: "child-friendly",
-      feature: "Gentle Child-Friendly Environment",
-      usValue: "Specially trained pedodontic staff & anxiety-free approach",
-      themValue: "Adult clinical setups that intimidate young children",
-    },
   ],
 };
 
@@ -533,4 +382,4 @@ export const checkupContent: CheckupContent = {
   ],
 };
 
-export default philosophyContent;
+export default aboutIntroContent;

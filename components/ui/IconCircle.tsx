@@ -12,7 +12,7 @@ export interface IconCircleProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const variantStyles: Record<IconCircleVariant, string> = {
-  brand: "bg-brand text-ink-inverse",
+  brand: "bg-brand text-white",
   accent: "bg-accent-soft text-brand border border-accent/40",
   surface: "bg-surface text-brand border border-line",
   alt: "bg-surface-alt text-brand border border-line",

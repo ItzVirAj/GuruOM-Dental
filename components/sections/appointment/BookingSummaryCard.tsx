@@ -183,7 +183,7 @@ export const BookingSummaryCard: React.FC<BookingSummaryCardProps> = ({
             href={siteConfig.socials.whatsapp}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-line bg-surface hover:border-emerald-500 hover:text-emerald-600 font-medium transition-colors"
+            className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-line bg-surface hover:border-success hover:text-success font-medium transition-colors"
           >
             <MessageCircle className="w-3.5 h-3.5" />
             <span>WhatsApp</span>
@@ -201,15 +201,15 @@ export const BookingSummaryCard: React.FC<BookingSummaryCardProps> = ({
         {/* Clinical Reassurance Badges */}
         <ul className="space-y-1.5 pt-1 text-[11px] text-ink-muted">
           <li className="flex items-center gap-2">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0" />
             <span>No advance payment needed to book</span>
           </li>
           <li className="flex items-center gap-2">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0" />
             <span>We confirm every slot by direct phone call</span>
           </li>
           <li className="flex items-center gap-2">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0" />
             <span>Reschedule or cancel anytime at no fee</span>
           </li>
         </ul>

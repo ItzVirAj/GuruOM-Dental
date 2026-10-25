@@ -68,9 +68,9 @@ export default function AnimationLabPage() {
   return (
     <main className="min-h-screen bg-surface pb-32">
       {/* Temporary Notice Banner */}
-      <div className="sticky top-0 z-50 bg-amber-50/95 backdrop-blur-md border-b border-amber-200 px-6 py-3 flex flex-wrap items-center justify-between gap-4 text-xs font-medium text-amber-900 shadow-sm">
+      <div className="sticky top-0 z-50 bg-warning/15 backdrop-blur-md border-b border-warning/30 px-6 py-3 flex flex-wrap items-center justify-between gap-4 text-xs font-medium text-ink shadow-sm">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+          <span className="w-2 h-2 rounded-full bg-warning animate-pulse" />
           <span>
             <strong>Animation Lab & Motion Engine Workbench:</strong> Temporary page, delete before launch.
           </span>
@@ -86,14 +86,14 @@ export default function AnimationLabPage() {
 
           <button
             onClick={handleLogReducedMotion}
-            className="px-3 py-1 rounded-pill bg-white border border-amber-300 hover:bg-amber-100 text-[11px] font-semibold text-amber-900 transition-colors"
+            className="px-3 py-1 rounded-pill bg-white border border-warning/40 hover:bg-warning/20 text-[11px] font-semibold text-ink transition-colors"
           >
             Check Accessibility State
           </button>
 
           <Link
             href="/design-system"
-            className="text-amber-900 hover:text-amber-950 underline font-semibold text-[11px]"
+            className="text-ink hover:text-brand underline font-semibold text-[11px]"
           >
             Design System →
           </Link>

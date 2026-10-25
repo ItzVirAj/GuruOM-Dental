@@ -213,7 +213,7 @@ The GuruOm Dental web application is constructed on a modern stack:
 - **Framework:** Next.js (App Router, Turbopack, React Server Components).
 - **Language:** TypeScript with strict type checking.
 - **Styling:** Vanilla CSS design tokens with Tailwind CSS v4 integration.
-  - Colors: Brand deep forest teal (`#0E5A5F`), brand dark (`#08383B`), accent mint/lime (`#48D597`), surface neutrals (`#FAFAF8`, `#F3F4F1`), ink dark (`#111827`).
+  - Colors: Brand Charcoal (`#383435`), Brand Dark (`#1E1B1C`), Brand Light (`#606060`), Accent Orange (`#F7922F`), Accent Deep (`#B8560B`), Accent Soft (`#FEF1E2`), Surface Neutrals (`#F6F5F3`, `#ECEBE9`), Ink (`#231F20`).
   - Typography: `font-display` (League Spartan / custom editorial display) and `font-body` (Inter / system fallback).
 - **Animation Suite:** GSAP (GreenSock), ScrollTrigger, SplitText, and GSAP Flip for filter animations.
 - **Smooth Scroll:** Lenis smooth scrolling with accessible reduced-motion bypass.

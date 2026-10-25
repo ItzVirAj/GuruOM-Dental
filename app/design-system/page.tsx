@@ -20,6 +20,7 @@ import {
   IconCircle,
   SmartImage,
 } from "@/components/ui";
+import { tokens } from "@/lib/tokens";
 
 export const metadata = {
   title: "Design System Showcase",
@@ -27,27 +28,29 @@ export const metadata = {
 };
 
 const colorTokens = [
-  { name: "Brand (Primary)", class: "bg-brand text-white", hex: "#0E5A5F", var: "--brand" },
-  { name: "Brand Dark", class: "bg-brand-dark text-white", hex: "#072F33", var: "--brand-dark" },
-  { name: "Brand Light", class: "bg-brand-light text-white", hex: "#1F7C82", var: "--brand-light" },
-  { name: "Accent (Mint)", class: "bg-accent text-ink", hex: "#5FD3BC", var: "--accent" },
-  { name: "Accent Soft", class: "bg-accent-soft text-brand-dark border border-line", hex: "#E6F6F2", var: "--accent-soft" },
-  { name: "Surface (Page Bg)", class: "bg-surface text-ink border border-line", hex: "#F7F5F0", var: "--surface" },
-  { name: "Surface Alt", class: "bg-surface-alt text-ink border border-line", hex: "#EEF3F1", var: "--surface-alt" },
-  { name: "White", class: "bg-white text-ink border border-line", hex: "#FFFFFF", var: "--white" },
-  { name: "Ink (Main Text)", class: "bg-ink text-white", hex: "#10262A", var: "--ink" },
-  { name: "Ink Muted", class: "bg-ink-muted text-white", hex: "#5B7075", var: "--ink-muted" },
-  { name: "Line (Borders)", class: "bg-line text-ink border border-slate-300", hex: "#DCE6E4", var: "--line" },
-  { name: "Success", class: "bg-success text-white", hex: "#2E9E6B", var: "--success" },
-  { name: "Warning", class: "bg-warning text-white", hex: "#D9962B", var: "--warning" },
-  { name: "Danger", class: "bg-danger text-white", hex: "#D64545", var: "--danger" },
+  { name: "Brand Primary (Charcoal)", class: "bg-brand text-white", hex: tokens.brand, var: "--brand" },
+  { name: "Brand Dark", class: "bg-brand-dark text-white", hex: tokens.brandDark, var: "--brand-dark" },
+  { name: "Brand Light (Slate)", class: "bg-brand-light text-white", hex: tokens.brandLight, var: "--brand-light" },
+  { name: "Accent (Orange)", class: "bg-accent text-on-accent", hex: tokens.accent, var: "--accent" },
+  { name: "Accent Soft", class: "bg-accent-soft text-brand-dark border border-line", hex: tokens.accentSoft, var: "--accent-soft" },
+  { name: "Accent Deep", class: "bg-accent-deep text-white", hex: tokens.accentDeep, var: "--accent-deep" },
+  { name: "On Accent", class: "bg-on-accent text-white", hex: tokens.onAccent, var: "--on-accent" },
+  { name: "Surface (Page Bg)", class: "bg-surface text-ink border border-line", hex: tokens.surface, var: "--surface" },
+  { name: "Surface Alt", class: "bg-surface-alt text-ink border border-line", hex: tokens.surfaceAlt, var: "--surface-alt" },
+  { name: "White", class: "bg-white text-ink border border-line", hex: tokens.white, var: "--white" },
+  { name: "Ink (Main Text)", class: "bg-ink text-white", hex: tokens.ink, var: "--ink" },
+  { name: "Ink Muted", class: "bg-ink-muted text-white", hex: tokens.inkMuted, var: "--ink-muted" },
+  { name: "Line (Borders)", class: "bg-line text-ink border border-line", hex: tokens.line, var: "--line" },
+  { name: "Success", class: "bg-success text-white", hex: tokens.success, var: "--success" },
+  { name: "Warning", class: "bg-warning text-white", hex: tokens.warning, var: "--warning" },
+  { name: "Danger", class: "bg-danger text-white", hex: tokens.danger, var: "--danger" },
 ];
 
 export default function DesignSystemPage() {
   return (
     <main className="min-h-screen bg-surface pb-32">
       {/* Temporary Page Notice Banner */}
-      <div className="bg-amber-50 border-b border-amber-200 px-6 py-3 text-center text-xs font-medium text-amber-900">
+      <div className="bg-warning/10 border-b border-warning/30 px-6 py-3 text-center text-xs font-medium text-ink">
         <span className="font-semibold">Internal Design System Workbench:</span> This is a living test page for tokens, components, and responsive typography. This route can be removed or protected before launch.
       </div>
 
@@ -206,7 +209,7 @@ export default function DesignSystemPage() {
               <h3 className="text-xs font-semibold uppercase tracking-wider text-accent">Variants on Dark Background</h3>
               <div className="flex flex-wrap items-center gap-4">
                 <Button variant="light">Light Action</Button>
-                <Button variant="secondary">Secondary Mint</Button>
+                <Button variant="secondary">Secondary (Orange)</Button>
                 <Button variant="ghost" className="text-white border-white/20 hover:border-white hover:bg-white/10">Ghost White</Button>
               </div>
             </div>
@@ -304,7 +307,7 @@ export default function DesignSystemPage() {
               <div className="flex flex-wrap gap-2.5">
                 <Badge variant="default">Default Pill</Badge>
                 <Badge variant="brand">Brand Badge</Badge>
-                <Badge variant="accent">Accent Mint</Badge>
+                <Badge variant="accent">Accent (Orange)</Badge>
                 <Badge variant="outline">Outline</Badge>
                 <Badge variant="success" icon={<CheckCircle2 className="w-3 h-3 text-success" />}>
                   100% Painless
@@ -342,7 +345,7 @@ export default function DesignSystemPage() {
           <div className="mb-10">
             <Eyebrow variant="dot" color="brand">Surfaces & Shadows</Eyebrow>
             <h2 className="text-display-md text-ink mt-2">6. Card Variants & Hover Lift</h2>
-            <p className="text-body text-ink-muted">Three variants with soft teal-tinted shadows (shadow-soft, shadow-card) and smooth hover transitions.</p>
+            <p className="text-body text-ink-muted">Three variants with soft charcoal-tinted shadows (shadow-soft, shadow-card) and smooth hover transitions.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
@@ -469,22 +472,22 @@ export default function DesignSystemPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="rounded-xl p-6 bg-surface border border-line text-ink">
               <span className="text-xs font-semibold uppercase tracking-wider text-brand">variant=&quot;surface&quot;</span>
-              <p className="text-small text-ink-muted mt-2">Warm off-white base layer (#F7F5F0)</p>
+              <p className="text-small text-ink-muted mt-2">Warm off-white base layer ({tokens.surface})</p>
             </div>
 
             <div className="rounded-xl p-6 bg-surface-alt border border-line text-ink">
               <span className="text-xs font-semibold uppercase tracking-wider text-brand">variant=&quot;alt&quot;</span>
-              <p className="text-small text-ink-muted mt-2">Cool minty off-white (#EEF3F1)</p>
+              <p className="text-small text-ink-muted mt-2">Neutral light gray surface ({tokens.surfaceAlt})</p>
             </div>
 
             <div className="rounded-xl p-6 bg-white border border-line text-ink">
               <span className="text-xs font-semibold uppercase tracking-wider text-brand">variant=&quot;white&quot;</span>
-              <p className="text-small text-ink-muted mt-2">Pure crisp white contrast (#FFFFFF)</p>
+              <p className="text-small text-ink-muted mt-2">Pure crisp white contrast ({tokens.white})</p>
             </div>
 
             <div className="rounded-xl p-6 bg-brand text-white">
               <span className="text-xs font-semibold uppercase tracking-wider text-accent">variant=&quot;brand&quot;</span>
-              <p className="text-small text-white/80 mt-2">Primary deep rich teal (#0E5A5F)</p>
+              <p className="text-small text-white/80 mt-2">Primary rich charcoal ({tokens.brand})</p>
             </div>
           </div>
         </Container>

@@ -67,25 +67,25 @@ export const LegalPlaceholderWarning: React.FC<LegalPlaceholderWarningProps> = (
   return (
     <aside
       aria-label="Development Mode Warning: Unresolved Legal Placeholders"
-      className="my-8 rounded-2xl border-2 border-amber-400/80 bg-amber-50/90 p-5 sm:p-6 text-amber-950 shadow-soft print:hidden"
+      className="my-8 rounded-2xl border-2 border-warning/40 bg-warning/10 p-5 sm:p-6 text-ink shadow-soft print:hidden"
     >
       <div className="flex items-start gap-3.5">
-        <div className="mt-0.5 rounded-lg bg-amber-500/20 p-2 text-amber-700 shrink-0">
+        <div className="mt-0.5 rounded-lg bg-warning/20 p-2 text-warning shrink-0">
           <AlertTriangle className="h-5 w-5" aria-hidden="true" />
         </div>
         <div className="space-y-2 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-800 bg-amber-200/80 px-2 py-0.5 rounded-md">
+            <span className="text-xs font-bold uppercase tracking-wider text-warning bg-warning/20 px-2 py-0.5 rounded-md">
               DEV ONLY NOTICE
             </span>
-            <h3 className="font-display font-semibold text-sm sm:text-base text-amber-950">
+            <h3 className="font-display font-semibold text-sm sm:text-base text-ink">
               Unresolved Legal Placeholders ({placeholders.length} found)
             </h3>
           </div>
-          <p className="text-xs sm:text-sm text-amber-900/90 leading-relaxed font-body">
+          <p className="text-xs sm:text-sm text-ink/90 leading-relaxed font-body">
             This document is a draft template. Before launching the clinic website, a qualified
             lawyer must review, approve, and replace all{" "}
-            <code className="px-1.5 py-0.5 rounded bg-amber-200/70 font-mono text-xs font-bold">
+            <code className="px-1.5 py-0.5 rounded bg-warning/20 text-ink font-mono text-xs font-bold">
               [PLACEHOLDER: ...]
             </code>{" "}
             tokens in <code className="font-mono text-xs font-semibold">/data/legal.ts</code> with
@@ -95,14 +95,14 @@ export const LegalPlaceholderWarning: React.FC<LegalPlaceholderWarningProps> = (
 
           <div className="pt-2">
             <details className="text-xs group">
-              <summary className="font-semibold text-amber-900 cursor-pointer hover:underline select-none">
+              <summary className="font-semibold text-warning cursor-pointer hover:underline select-none">
                 View all {placeholders.length} placeholder tokens in this document
               </summary>
-              <ul className="mt-3 space-y-1.5 pl-3 border-l-2 border-amber-300">
+              <ul className="mt-3 space-y-1.5 pl-3 border-l-2 border-warning/30">
                 {placeholders.map((item, idx) => (
-                  <li key={`${item.token}-${idx}`} className="font-mono text-[11px] text-amber-950 break-words">
-                    <span className="font-semibold text-amber-800">{item.location}:</span>{" "}
-                    <span className="bg-amber-200/80 px-1 py-0.2 rounded font-bold">
+                  <li key={`${item.token}-${idx}`} className="font-mono text-[11px] text-ink break-words">
+                    <span className="font-semibold text-warning">{item.location}:</span>{" "}
+                    <span className="bg-warning/20 px-1 py-0.2 rounded font-bold">
                       {item.token}
                     </span>
                   </li>

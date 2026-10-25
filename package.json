@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "map:build": "node scripts/map/run-build.mjs",
+    "map:check": "node --no-warnings --experimental-strip-types scripts/map/check-map.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -21,6 +23,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -28,6 +31,7 @@
     "agentation": "^3.1.2",
     "eslint": "^9",
     "eslint-config-next": "16.4.2",
+    "svgo": "^4.1.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

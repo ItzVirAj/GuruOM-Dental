@@ -115,8 +115,7 @@ export const Services: React.FC<ServicesProps> = ({
 
     gsap.to(card, {
       y: -8,
-      boxShadow:
-        "0 24px 48px -8px rgba(14, 90, 95, 0.12), 0 8px 24px -4px rgba(14, 90, 95, 0.06)",
+      boxShadow: "var(--shadow-float)",
       duration: 0.35,
       ease: "power2.out",
       overwrite: "auto",
@@ -143,7 +142,7 @@ export const Services: React.FC<ServicesProps> = ({
 
     if (arrowIcon) {
       gsap.to(arrowIcon, {
-        color: "#ffffff",
+        color: "var(--white)",
         x: 2,
         y: -2,
         duration: 0.3,
@@ -168,8 +167,7 @@ export const Services: React.FC<ServicesProps> = ({
 
     gsap.to(card, {
       y: 0,
-      boxShadow:
-        "0 2px 10px -2px rgba(14, 90, 95, 0.05), 0 1px 3px -1px rgba(14, 90, 95, 0.03)",
+      boxShadow: "var(--shadow-soft)",
       duration: 0.35,
       ease: "power2.out",
       overwrite: "auto",

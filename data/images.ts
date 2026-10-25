@@ -1,4 +1,4 @@
-export type AspectRatio = "1/1" | "4/3" | "3/4" | "16/9" | "21/9" | "4/5" | "16/10";
+export type AspectRatio = "1/1" | "4/3" | "3/4" | "3/2" | "16/9" | "21/9" | "4/5" | "16/10";
 
 export interface ImageSlot {
   id: string;
@@ -70,38 +70,86 @@ export const plannedImages: Record<string, ImageSlot> = {
     recommendedSize: "900x1200",
   },
 
-  // Philosophy & Values (1-4)
-  philosophy1: {
-    id: "philosophy1",
+  // About Section & Page Slots
+  aboutMain: {
+    id: "aboutMain",
     src: "",
-    alt: "Microscopic dental precision tool in sterile environment",
+    alt: "GuruOm Dental modern clinical sanctuary and team",
+    ratio: "3/2",
+    label: "About main image 900x600",
+    recommendedSize: "900x600",
+  },
+  aboutSecondary: {
+    id: "aboutSecondary",
+    src: "",
+    alt: "Precision digital dental milling and diagnostics",
+    ratio: "4/5",
+    label: "About second image 700x875",
+    recommendedSize: "700x875",
+  },
+  aboutQuote: {
+    id: "aboutQuote",
+    src: "",
+    alt: "Clinical specialist inspecting digital smile preview",
+    ratio: "1/1",
+    label: "About quote thumbnail 300x300",
+    recommendedSize: "300x300",
+  },
+  aboutStory: {
+    id: "aboutStory",
+    src: "",
+    alt: "Founder Dr. Guruprasad Handal consulting with patient",
+    ratio: "4/5",
+    label: "About story tall portrait (800x1000)",
+    recommendedSize: "800x1000",
+  },
+  drAkshata: {
+    id: "drAkshata",
+    src: "/images/DRAkshata.jpeg",
+    alt: "Dr. Akshata Handal, B.D.S.",
+    ratio: "3/4",
+    label: "Dr. Akshata Handal portrait",
+    recommendedSize: "800x1066",
+  },
+  drGuruprasad: {
+    id: "drGuruprasad",
+    src: "/images/DRGuruprasad.jpeg",
+    alt: "Dr. Guruprasad Handal, M.D.S. (Prosthodontics)",
+    ratio: "3/4",
+    label: "Dr. Guruprasad Handal portrait",
+    recommendedSize: "800x1066",
+  },
+  aboutClinic1: {
+    id: "aboutClinic1",
+    src: "",
+    alt: "State of the art 3D CBCT diagnostic imaging suite",
     ratio: "4/3",
-    label: "Philosophy: Precision Tech (1200x900)",
+    label: "Clinic Suite: 3D CBCT (1200x900)",
     recommendedSize: "1200x900",
   },
-  philosophy2: {
-    id: "philosophy2",
+  aboutClinic2: {
+    id: "aboutClinic2",
     src: "",
-    alt: "Calm consultation lounge with natural sunlight",
-    ratio: "4/3",
-    label: "Philosophy: Calm Environment (1200x900)",
-    recommendedSize: "1200x900",
+    alt: "Calm, ergonomic patient operatory chair",
+    ratio: "1/1",
+    label: "Clinic Suite: Operatory Chair (800x800)",
+    recommendedSize: "800x800",
   },
-  philosophy3: {
-    id: "philosophy3",
+  aboutClinic3: {
+    id: "aboutClinic3",
     src: "",
-    alt: "Doctor discussing digital smile mockup with patient",
-    ratio: "4/3",
-    label: "Philosophy: Transparent Care (1200x900)",
-    recommendedSize: "1200x900",
+    alt: "Hospital-grade Class-B vacuum sterilization center",
+    ratio: "3/4",
+    label: "Clinic Suite: Sterilization Autoclave (900x1200)",
+    recommendedSize: "900x1200",
   },
-  philosophy4: {
-    id: "philosophy4",
+  aboutClinic4: {
+    id: "aboutClinic4",
     src: "",
-    alt: "Zero-pain anesthetic delivery system",
-    ratio: "4/3",
-    label: "Philosophy: Pain-Free Protocol (1200x900)",
-    recommendedSize: "1200x900",
+    alt: "In-house digital CAD/CAM ceramic milling workstation",
+    ratio: "16/9",
+    label: "Clinic Suite: CAD/CAM Dental Lab (1600x900)",
+    recommendedSize: "1600x900",
   },
 
   // Gallery (1-8)
@@ -490,15 +538,6 @@ export const plannedImages: Record<string, ImageSlot> = {
     recommendedSize: "1200x675",
   },
 
-  // Pricing CTA Section
-  pricingCta: {
-    id: "pricingCta",
-    src: "",
-    alt: "GuruOm Dental friendly consultation desk and transparent pricing advisor",
-    ratio: "16/9",
-    label: "Pricing CTA Atmosphere (1280x720)",
-    recommendedSize: "1280x720",
-  },
 };
 
 export default plannedImages;

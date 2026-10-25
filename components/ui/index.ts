@@ -10,3 +10,4 @@ export * from "./SmartImage";
 export * from "./PageHeader";
 export * from "./Accordion";
 export * from "./NewsletterForm";
+export * from "./DoctorCard";

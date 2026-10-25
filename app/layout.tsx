@@ -1,10 +1,13 @@
-import type { Metadata } from "next";
-import Script from "next/script";
+import type { Metadata, Viewport } from "next";
 import { fontDisplay, fontBody, fontAileron, fontLeagueSpartan, fontArabicaMenu, fontRainbowMiracles } from "@/lib/fonts";
 import SmoothScroll from "@/components/animations/SmoothScroll";
 import { Navbar, Footer } from "@/components/layout";
 import { DevAgentation } from "@/components/dev/DevAgentation";
 import "./globals.css";
+
+export const viewport: Viewport = {
+  themeColor: "#1E1B1C",
+};
 
 export const metadata: Metadata = {
   title: {
@@ -23,13 +26,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fontDisplay.variable} ${fontBody.variable} ${fontAileron.variable} ${fontLeagueSpartan.variable} ${fontArabicaMenu.variable} ${fontRainbowMiracles.variable}`}
+      className={`js ${fontDisplay.variable} ${fontBody.variable} ${fontAileron.variable} ${fontLeagueSpartan.variable} ${fontArabicaMenu.variable} ${fontRainbowMiracles.variable}`}
       suppressHydrationWarning
     >
-      <body className="font-body bg-surface text-ink antialiased selection:bg-accent selection:text-ink min-h-screen flex flex-col">
-        <Script id="anti-fouc" strategy="beforeInteractive">
-          {`document.documentElement.classList.add('js');`}
-        </Script>
+      <body className="font-body bg-surface text-ink antialiased selection:bg-accent selection:text-on-accent min-h-screen flex flex-col">
         <SmoothScroll>
           <Navbar />
           <main id="main-content" className="flex-1">

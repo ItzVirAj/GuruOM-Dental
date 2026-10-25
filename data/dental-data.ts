@@ -97,17 +97,17 @@ export const dentalServices: Service[] = [
 
 export const doctors: Doctor[] = [
   {
-    id: "dr-om-patel",
+    id: "dr-guruprasad-handal",
     name: "Dr. Guruprasad Handal",
-    role: "Chief Dental Surgeon & Implantologist",
-    experience: "16+ Years Experience",
-    specialization: "MDS - Oral & Maxillofacial Implantology (Fellow ICOI)",
+    role: "Founder & Chief Prosthodontist",
+    experience: "Founder since 2019",
+    specialization: "M.D.S. (Prosthodontics) - Advanced Implants & Full Mouth Rehabilitation",
   },
   {
-    id: "dr-guru-sharma",
-    name: "Dr. Guruprasad Handal",
-    role: "Aesthetic & Digital Smile Designer",
-    experience: "12+ Years Experience",
-    specialization: "MDS - Conservative Dentistry & Endodontics",
+    id: "dr-akshata-handal",
+    name: "Dr. Akshata Handal",
+    role: "Co-Founder & Dental Surgeon",
+    experience: "Experienced Dental Surgeon",
+    specialization: "B.D.S. - General Dentistry & Aesthetic Care",
   },
 ];

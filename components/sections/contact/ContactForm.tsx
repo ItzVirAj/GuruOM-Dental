@@ -224,7 +224,7 @@ export const ContactForm: React.FC = () => {
         <div ref={contentRef} className="space-y-6 text-center py-4 animate-fadeIn">
           {/* Animated Success Check */}
           <div className="flex justify-center">
-            <div className="flex items-center justify-center w-20 h-20 rounded-full bg-emerald-500/10 text-emerald-600 ring-8 ring-emerald-500/5">
+            <div className="flex items-center justify-center w-20 h-20 rounded-full bg-success/10 text-success ring-8 ring-success/5">
               <svg
                 ref={checkSvgRef}
                 className="w-10 h-10 stroke-[2.5]"
@@ -240,7 +240,7 @@ export const ContactForm: React.FC = () => {
           </div>
 
           <div className="max-w-md mx-auto space-y-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 text-success text-xs font-semibold">
               Enquiry Received
             </span>
             <h3 className="text-display-md sm:text-display-lg font-display text-ink tracking-tight">
@@ -269,7 +269,7 @@ export const ContactForm: React.FC = () => {
               className="p-2 rounded-xl text-ink-muted hover:text-brand hover:bg-white border border-transparent hover:border-line transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             >
               {copied ? (
-                <span className="flex items-center gap-1 text-xs text-emerald-600 font-semibold">
+                <span className="flex items-center gap-1 text-xs text-success font-semibold">
                   <CheckCheck className="w-4 h-4" />
                   <span>Copied!</span>
                 </span>
@@ -315,7 +315,7 @@ export const ContactForm: React.FC = () => {
           {serverError && (
             <div
               role="alert"
-              className="p-4 rounded-2xl bg-red-50 border border-red-200 text-xs text-red-700 flex items-start justify-between gap-3 animate-fadeIn"
+              className="p-4 rounded-2xl bg-danger/10 border border-danger/30 text-xs text-danger flex items-start justify-between gap-3 animate-fadeIn"
             >
               <div className="flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -324,7 +324,7 @@ export const ContactForm: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setServerError(null)}
-                className="text-red-500 hover:text-red-800 text-xs font-semibold underline underline-offset-2 shrink-0"
+                className="text-danger hover:underline text-xs font-semibold shrink-0"
               >
                 Dismiss
               </button>
@@ -335,7 +335,7 @@ export const ContactForm: React.FC = () => {
             {/* Full Name */}
             <div>
               <label htmlFor="field-fullName" className="block text-xs font-semibold text-ink mb-1.5">
-                Full Name <span className="text-accent">*</span>
+                Full Name <span className="text-accent-deep">*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted">
@@ -358,7 +358,7 @@ export const ContactForm: React.FC = () => {
                   aria-invalid={Boolean(errors.fullName)}
                   className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm text-ink placeholder:text-ink-muted/50 transition-all focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent ${
                     errors.fullName
-                      ? "border-red-500 bg-red-50/30"
+                      ? "border-danger bg-danger/5"
                       : "border-line bg-white hover:border-brand/40"
                   }`}
                 />
@@ -367,7 +367,7 @@ export const ContactForm: React.FC = () => {
                 <p
                   id="fullName-error"
                   role="alert"
-                  className="flex items-center gap-1.5 text-xs text-red-600 mt-1.5"
+                  className="flex items-center gap-1.5 text-xs text-danger mt-1.5"
                 >
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{errors.fullName}</span>
@@ -380,7 +380,7 @@ export const ContactForm: React.FC = () => {
               {/* Email */}
               <div>
                 <label htmlFor="field-email" className="block text-xs font-semibold text-ink mb-1.5">
-                  Email Address <span className="text-accent">*</span>
+                  Email Address <span className="text-accent-deep">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted">
@@ -403,7 +403,7 @@ export const ContactForm: React.FC = () => {
                     aria-invalid={Boolean(errors.email)}
                     className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm text-ink placeholder:text-ink-muted/50 transition-all focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent ${
                       errors.email
-                        ? "border-red-500 bg-red-50/30"
+                        ? "border-danger bg-danger/5"
                         : "border-line bg-white hover:border-brand/40"
                     }`}
                   />
@@ -412,7 +412,7 @@ export const ContactForm: React.FC = () => {
                   <p
                     id="email-error"
                     role="alert"
-                    className="flex items-center gap-1.5 text-xs text-red-600 mt-1.5"
+                    className="flex items-center gap-1.5 text-xs text-danger mt-1.5"
                   >
                     <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                     <span>{errors.email}</span>
@@ -449,7 +449,7 @@ export const ContactForm: React.FC = () => {
                     aria-invalid={Boolean(errors.phone)}
                     className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm text-ink placeholder:text-ink-muted/50 transition-all focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent ${
                       errors.phone
-                        ? "border-red-500 bg-red-50/30"
+                        ? "border-danger bg-danger/5"
                         : "border-line bg-white hover:border-brand/40"
                     }`}
                   />
@@ -458,7 +458,7 @@ export const ContactForm: React.FC = () => {
                   <p
                     id="phone-error"
                     role="alert"
-                    className="flex items-center gap-1.5 text-xs text-red-600 mt-1.5"
+                    className="flex items-center gap-1.5 text-xs text-danger mt-1.5"
                   >
                     <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                     <span>{errors.phone}</span>
@@ -470,7 +470,7 @@ export const ContactForm: React.FC = () => {
             {/* Reason for Contact (Accessible Native Select) */}
             <div>
               <label htmlFor="field-reason" className="block text-xs font-semibold text-ink mb-1.5">
-                Reason for Contact <span className="text-accent">*</span>
+                Reason for Contact <span className="text-accent-deep">*</span>
               </label>
               <select
                 id="field-reason"
@@ -494,7 +494,7 @@ export const ContactForm: React.FC = () => {
                 <p
                   id="reason-error"
                   role="alert"
-                  className="flex items-center gap-1.5 text-xs text-red-600 mt-1.5"
+                  className="flex items-center gap-1.5 text-xs text-danger mt-1.5"
                 >
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{errors.reason}</span>
@@ -506,11 +506,11 @@ export const ContactForm: React.FC = () => {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label htmlFor="field-message" className="block text-xs font-semibold text-ink">
-                  Your Message <span className="text-accent">*</span>
+                  Your Message <span className="text-accent-deep">*</span>
                 </label>
                 <span
                   className={`text-[11px] ${
-                    messageLength > maxMessageLength ? "text-red-500 font-semibold" : "text-ink-muted"
+                    messageLength > maxMessageLength ? "text-danger font-semibold" : "text-ink-muted"
                   }`}
                 >
                   {messageLength}/{maxMessageLength}
@@ -535,7 +535,7 @@ export const ContactForm: React.FC = () => {
                 aria-invalid={Boolean(errors.message)}
                 className={`w-full p-3 rounded-xl border text-sm text-ink placeholder:text-ink-muted/50 transition-all focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent resize-none ${
                   errors.message
-                    ? "border-red-500 bg-red-50/30"
+                    ? "border-danger bg-danger/5"
                     : "border-line bg-white hover:border-brand/40"
                 }`}
               />
@@ -543,9 +543,9 @@ export const ContactForm: React.FC = () => {
               {/* Urgent Dental Problems Visible Notice */}
               <p
                 id="message-urgent-notice"
-                className="flex items-center gap-1.5 text-[11px] text-amber-700 font-medium mt-1.5"
+                className="flex items-center gap-1.5 text-[11px] text-warning font-medium mt-1.5"
               >
-                <ShieldAlert className="w-3.5 h-3.5 shrink-0 text-amber-600" aria-hidden="true" />
+                <ShieldAlert className="w-3.5 h-3.5 shrink-0 text-warning" aria-hidden="true" />
                 <span>{URGENT_CARE_NOTICE}</span>
               </p>
 
@@ -553,7 +553,7 @@ export const ContactForm: React.FC = () => {
                 <p
                   id="message-error"
                   role="alert"
-                  className="flex items-center gap-1.5 text-xs text-red-600 mt-1.5"
+                  className="flex items-center gap-1.5 text-xs text-danger mt-1.5"
                 >
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{errors.message}</span>
@@ -618,7 +618,7 @@ export const ContactForm: React.FC = () => {
                 <p
                   id="consent-error"
                   role="alert"
-                  className="flex items-center gap-1.5 text-xs text-red-600 mt-1.5 pl-7"
+                  className="flex items-center gap-1.5 text-xs text-danger mt-1.5 pl-7"
                 >
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{errors.consent}</span>

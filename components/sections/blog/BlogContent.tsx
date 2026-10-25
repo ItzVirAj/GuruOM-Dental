@@ -95,9 +95,9 @@ export const BlogContent: React.FC<BlogContentProps> = ({ content }) => {
             const isWarning = block.tone === "warning";
 
             const toneStyles = isTip
-              ? "bg-emerald-50/80 border-emerald-300 text-emerald-950"
+              ? "bg-success/10 border-success/30 text-ink"
               : isWarning
-              ? "bg-amber-50/80 border-amber-300 text-amber-950"
+              ? "bg-warning/10 border-warning/30 text-ink"
               : "bg-surface border-brand/30 text-brand-dark";
 
             const IconComponent = isTip
@@ -107,9 +107,9 @@ export const BlogContent: React.FC<BlogContentProps> = ({ content }) => {
               : Info;
 
             const iconColor = isTip
-              ? "text-emerald-600"
+              ? "text-success"
               : isWarning
-              ? "text-amber-600"
+              ? "text-warning"
               : "text-brand";
 
             return (

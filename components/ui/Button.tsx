@@ -28,20 +28,20 @@ export type ButtonProps = ButtonAsButton | ButtonAsLink;
 
 const variantStyles: Record<ButtonVariant, { base: string; iconCircle: string }> = {
   primary: {
-    base: "bg-brand text-ink-inverse hover:bg-brand-light active:bg-brand-dark shadow-soft hover:shadow-card",
-    iconCircle: "bg-white/20 text-ink-inverse group-hover:bg-white/30",
+    base: "bg-brand text-white hover:bg-brand-light active:bg-brand-dark shadow-soft hover:shadow-card",
+    iconCircle: "bg-white/20 text-white group-hover:bg-accent group-hover:text-on-accent transition-colors duration-200",
   },
   secondary: {
-    base: "bg-accent text-ink hover:brightness-105 active:brightness-95 shadow-soft hover:shadow-card",
-    iconCircle: "bg-ink/10 text-ink group-hover:bg-ink/15",
+    base: "bg-accent text-on-accent hover:brightness-105 active:brightness-95 shadow-soft hover:shadow-card",
+    iconCircle: "bg-on-accent/15 text-on-accent group-hover:bg-on-accent/25 transition-colors duration-200",
   },
   ghost: {
     base: "bg-transparent text-brand border border-line hover:border-brand hover:bg-surface-alt active:bg-line",
-    iconCircle: "bg-line/60 text-brand group-hover:bg-brand group-hover:text-ink-inverse",
+    iconCircle: "bg-line/60 text-brand group-hover:bg-brand group-hover:text-white transition-colors duration-200",
   },
   light: {
     base: "bg-white text-brand hover:bg-surface-alt active:bg-line shadow-soft hover:shadow-card",
-    iconCircle: "bg-brand/10 text-brand group-hover:bg-brand/20",
+    iconCircle: "bg-brand/10 text-brand group-hover:bg-brand/20 transition-colors duration-200",
   },
 };
 

@@ -162,7 +162,7 @@ export const Accordion: React.FC<AccordionProps> = ({
 
                 <div className="flex items-center gap-2 shrink-0">
                   {item.badge && (
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-accent/20 text-accent-dark">
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-accent/20 text-accent-deep">
                       {item.badge}
                     </span>
                   )}

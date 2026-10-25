@@ -96,7 +96,7 @@ export const Step1Treatment: React.FC<Step1TreatmentProps> = ({
       {/* 1. Visit Type Selector */}
       <fieldset className="space-y-2">
         <legend className="text-sm font-semibold text-ink">
-          Nature of Visit <span className="text-accent">*</span>
+          Nature of Visit <span className="text-accent-deep">*</span>
         </legend>
         <div
           role="radiogroup"
@@ -154,7 +154,7 @@ export const Step1Treatment: React.FC<Step1TreatmentProps> = ({
           <p
             id="visit-type-error"
             role="alert"
-            className="flex items-center gap-1.5 text-xs text-red-600 mt-1"
+            className="flex items-center gap-1.5 text-xs text-danger mt-1"
           >
             <AlertCircle className="w-3.5 h-3.5 shrink-0" />
             <span>{errors.visitType}</span>
@@ -166,7 +166,7 @@ export const Step1Treatment: React.FC<Step1TreatmentProps> = ({
       <fieldset className="space-y-2.5">
         <div className="flex items-center justify-between">
           <legend className="text-sm font-semibold text-ink">
-            Dental Service <span className="text-accent">*</span>
+            Dental Service <span className="text-accent-deep">*</span>
           </legend>
           <span className="text-xs text-ink-muted">Select 1 service</span>
         </div>
@@ -245,7 +245,7 @@ export const Step1Treatment: React.FC<Step1TreatmentProps> = ({
           <p
             id="service-slug-error"
             role="alert"
-            className="flex items-center gap-1.5 text-xs text-red-600 mt-1"
+            className="flex items-center gap-1.5 text-xs text-danger mt-1"
           >
             <AlertCircle className="w-3.5 h-3.5 shrink-0" />
             <span>{errors.serviceSlug}</span>
@@ -257,7 +257,7 @@ export const Step1Treatment: React.FC<Step1TreatmentProps> = ({
       <fieldset className="space-y-2.5">
         <div className="flex items-center justify-between">
           <legend className="text-sm font-semibold text-ink">
-            Preferred Specialist <span className="text-accent">*</span>
+            Preferred Specialist <span className="text-accent-deep">*</span>
           </legend>
           <span className="text-xs text-ink-muted">Any available doctor or select specific</span>
         </div>
@@ -375,7 +375,7 @@ export const Step1Treatment: React.FC<Step1TreatmentProps> = ({
           <p
             id="doctor-slug-error"
             role="alert"
-            className="flex items-center gap-1.5 text-xs text-red-600 mt-1"
+            className="flex items-center gap-1.5 text-xs text-danger mt-1"
           >
             <AlertCircle className="w-3.5 h-3.5 shrink-0" />
             <span>{errors.doctorSlug}</span>

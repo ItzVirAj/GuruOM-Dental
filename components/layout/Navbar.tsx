@@ -2,32 +2,21 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
+import { gsap, useGSAP } from "@/lib/gsap";
 import { Container, Button, Badge, SmartImage } from "@/components/ui";
-import { MagneticWrap, useLenis, useIsDesktop, useReducedMotion } from "@/components/animations";
+import { useIsDesktop, useReducedMotion } from "@/components/animations";
 import { siteConfig, navLinks, megaMenuGroups } from "@/data/site";
 
 export interface NavbarProps {
-  /**
-   * Header appearance at the very top of the page.
-   * 'transparent-light': transparent background with white/light text (for dark hero sections).
-   * 'solid': surface background with dark ink text.
-   * Scrolling down past 40px always transitions smoothly to solid surface blur.
-   */
   variant?: "transparent-light" | "solid";
 }
 
-export function Navbar({ variant }: NavbarProps) {
+export function Navbar({}: NavbarProps) {
   const pathname = usePathname();
-  const lenis = useLenis();
   const isDesktop = useIsDesktop();
   const prefersReducedMotion = useReducedMotion();
-
-  // Clean route-to-variant resolution: routes with PageHeader or Hero start transparent-light at the top,
-  // transitioning smoothly to solid surface on scroll past 40px.
-  const isLightTopRoute = pathname.startsWith("/design-system") || pathname.startsWith("/animation-lab");
-  const resolvedVariant = variant ?? (isLightTopRoute ? "solid" : "transparent-light");
 
   // State
   const [isScrolled, setIsScrolled] = useState(false);
@@ -46,8 +35,6 @@ export function Navbar({ variant }: NavbarProps) {
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
   const hamburgerButtonRef = useRef<HTMLButtonElement | null>(null);
   const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const lastScrollYRef = useRef(0);
-  const isHiddenRef = useRef(false);
 
   // Active route matching
   const isRouteActive = useCallback(
@@ -59,74 +46,30 @@ export function Navbar({ variant }: NavbarProps) {
   );
 
   // -------------------------------------------------------------
-  // A) Scroll Hide/Show & Style State (GSAP ScrollTrigger)
+  // A) Scroll Style State (Always visible, permanently fixed)
   // -------------------------------------------------------------
+  // Sync scroll state reliably via passive scroll listener
+  useEffect(() => {
+    const handleScroll = () => {
+      const y = window.scrollY || document.documentElement.scrollTop;
+      setIsScrolled(y > 20);
+    };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   useGSAP(
     () => {
       const el = navContainerRef.current;
-      const inner = navInnerRef.current;
-      if (!el || !inner) return;
-
-      // Initial state
+      if (!el) return;
+      // Ensure navbar is always positioned at 0 and never translated away
       gsap.set(el, { yPercent: 0 });
-
-      const st = ScrollTrigger.create({
-        start: "top top",
-        end: 999999,
-        onUpdate: (self) => {
-          const currentY = self.scroll();
-          const delta = currentY - lastScrollYRef.current;
-          const isAtTop = currentY <= 40;
-
-          // Toggle scrolled style threshold
-          setIsScrolled(currentY > 40);
-
-          // Hide / Show logic with debounce threshold
-          if (isAtTop) {
-            // Always visible at the top
-            if (isHiddenRef.current) {
-              gsap.to(el, {
-                yPercent: 0,
-                duration: prefersReducedMotion ? 0 : 0.35,
-                ease: "power2.out",
-                overwrite: "auto",
-              });
-              isHiddenRef.current = false;
-            }
-          } else if (Math.abs(delta) > 8) {
-            if (delta > 0 && !isHiddenRef.current && !isMegaOpen) {
-              // Scrolling DOWN: Hide
-              gsap.to(el, {
-                yPercent: -100,
-                duration: prefersReducedMotion ? 0 : 0.35,
-                ease: "power2.inOut",
-                overwrite: "auto",
-              });
-              isHiddenRef.current = true;
-            } else if (delta < 0 && isHiddenRef.current) {
-              // Scrolling UP: Show
-              gsap.to(el, {
-                yPercent: 0,
-                duration: prefersReducedMotion ? 0 : 0.35,
-                ease: "power2.out",
-                overwrite: "auto",
-              });
-              isHiddenRef.current = false;
-            }
-          }
-
-          lastScrollYRef.current = currentY;
-        },
-      });
-
-      return () => {
-        st.kill();
-      };
     },
-    { dependencies: [prefersReducedMotion, isMegaOpen] }
+    []
   );
 
-  // Animate inner navbar padding/height on scroll state change
+  // Animate inner navbar height slightly on scroll state change (80px -> 68px)
   useEffect(() => {
     const inner = navInnerRef.current;
     if (!inner) return;
@@ -137,15 +80,15 @@ export function Navbar({ variant }: NavbarProps) {
 
     if (isScrolled) {
       gsap.to(inner, {
-        height: 64,
-        duration: 0.3,
+        height: 68,
+        duration: 0.25,
         ease: "power2.out",
         overwrite: "auto",
       });
     } else {
       gsap.to(inner, {
         height: 80,
-        duration: 0.3,
+        duration: 0.25,
         ease: "power2.out",
         overwrite: "auto",
       });
@@ -264,48 +207,34 @@ export function Navbar({ variant }: NavbarProps) {
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     closeTimerRef.current = setTimeout(() => {
       setIsMegaOpen(false);
-    }, 120);
+    }, 220);
   };
 
-  // Close mega menu and mobile menu on route change
-  const [prevPathname, setPrevPathname] = useState(pathname);
-  if (prevPathname !== pathname) {
-    setPrevPathname(pathname);
-    setIsMegaOpen(false);
-    setIsMobileOpen(false);
-  }
-
+  // Close menus on Escape key
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        if (isMegaOpen) setIsMegaOpen(false);
-        if (isMobileOpen) {
-          setIsMobileOpen(false);
-          hamburgerButtonRef.current?.focus();
-        }
+        setIsMegaOpen(false);
+        setIsMobileOpen(false);
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isMegaOpen, isMobileOpen]);
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
-  // -------------------------------------------------------------
-  // D) Mobile Menu Lock & Animation
-  // -------------------------------------------------------------
+  // Lock body scroll when mobile menu is open
   useEffect(() => {
     if (isMobileOpen) {
-      lenis?.stop();
       document.body.style.overflow = "hidden";
     } else {
-      lenis?.start();
       document.body.style.overflow = "";
     }
     return () => {
-      lenis?.start();
       document.body.style.overflow = "";
     };
-  }, [isMobileOpen, lenis]);
+  }, [isMobileOpen]);
 
+  // Mobile menu GSAP animation
   useGSAP(
     () => {
       const overlay = mobileMenuRef.current;
@@ -313,7 +242,7 @@ export function Navbar({ variant }: NavbarProps) {
 
       if (isMobileOpen) {
         if (prefersReducedMotion) {
-          gsap.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.2 });
+          gsap.set(overlay, { opacity: 1 });
         } else {
           gsap.fromTo(
             overlay,
@@ -349,64 +278,49 @@ export function Navbar({ variant }: NavbarProps) {
     { dependencies: [isMobileOpen, prefersReducedMotion] }
   );
 
-  // Determine text and theme colors based on state & variant
-  const isDarkTop = resolvedVariant === "transparent-light" && !isScrolled;
-
-  const textColorClass = isDarkTop
-    ? "text-white/90 hover:text-white"
-    : "text-ink/80 hover:text-brand";
-
-  const activeColorClass = isDarkTop ? "text-white font-semibold" : "text-brand font-semibold";
-
   return (
     <>
       {/* Skip to Content accessible link */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 z-50 rounded-md bg-brand px-4 py-2 font-medium text-white shadow-lg outline-none ring-2 ring-brand-light transition"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 z-50 rounded-md bg-accent px-4 py-2 font-medium text-brand-dark shadow-lg outline-none ring-2 ring-accent transition"
       >
         Skip to main content
       </a>
 
+      {/* Permanently fixed, always visible, dark glassmorphism navbar */}
       <header
         ref={navContainerRef}
-        className={`fixed top-0 left-0 right-0 z-40 transition-colors duration-300 ${isDarkTop
-          ? "bg-transparent border-b border-white/10"
-          : "bg-surface/90 backdrop-blur-md shadow-xs border-b border-surface-alt/80"
-          }`}
-        style={{ height: "var(--nav-h, 5rem)" }}
+        className="fixed top-0 left-0 right-0 z-50 border-b transition-[background-color,border-color,box-shadow] duration-300"
+        style={{
+          height: "var(--nav-h, 5rem)",
+          backgroundColor: isScrolled ? "rgba(10, 10, 10, 0.88)" : "rgba(10, 10, 10, 0.72)",
+          backdropFilter: "blur(16px) saturate(160%)",
+          WebkitBackdropFilter: "blur(16px) saturate(160%)",
+          borderColor: isScrolled ? "rgba(255, 255, 255, 0.15)" : "rgba(255, 255, 255, 0.09)",
+          boxShadow: isScrolled ? "0 10px 30px -5px rgba(0, 0, 0, 0.4)" : "none",
+        }}
       >
         <Container>
           <div
             ref={navInnerRef}
-            className="flex h-20 items-center justify-between transition-[height] duration-300"
+            className="flex h-20 items-center justify-between transition-[height] duration-250"
           >
             {/* 1. Brand Logo */}
             <Link
               href="/"
-              className="group flex items-center gap-3 outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-lg"
+              className="group flex items-center shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg py-1"
               aria-label="GuruOm Dental - Home"
             >
-              <div
-                className={`flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105 ${isDarkTop ? "bg-white text-brand" : "bg-brand text-white shadow-xs"
-                  }`}
-              >
-                {/* Stylized Tooth/Botanical Leaf SVG Icon */}
-                <svg
-                  className="h-6 w-6 transition-transform duration-300 group-hover:rotate-6"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path d="M12 2C8.5 2 6 4.5 6 8c0 3.2 1.3 5.4 2.1 7.2.7 1.6 1.4 3.3 1.9 5.8.2.8.9 1 1.5.8.7-.3.9-1.1.9-1.8 0-1.8-.4-3.5-.8-5.2-.2-.8.5-1.5 1.4-1.5s1.6.7 1.4 1.5c-.4 1.7-.8 3.4-.8 5.2 0 .7.2 1.5.9 1.8.6.2 1.3 0 1.5-.8.5-2.5 1.2-4.2 1.9-5.8.8-1.8 2.1-4 2.1-7.2 0-3.5-2.5-6-6-6z" />
-                </svg>
-              </div>
-              <span
-                className={`font-league-spartan text-xl sm:text-[22px] tracking-tight font-bold leading-none translate-y-[5px] transition-colors ${isDarkTop ? "text-white" : "text-brand"
-                  }`}
-              >
-                {siteConfig.name}
-              </span>
+              <Image
+                src="/images/NewLogo2nd-Viraj-Guru-OM-PNG.png"
+                alt="GuruOm Dental"
+                width={160}
+                height={37}
+                priority
+                style={{ width: "auto", height: "36px" }}
+                className="w-auto h-9 max-h-9 object-contain object-left transition-transform duration-300 group-hover:scale-[1.02] drop-shadow-sm"
+              />
             </Link>
 
             {/* 2. Desktop Centered Navigation Links */}
@@ -418,8 +332,7 @@ export function Navbar({ variant }: NavbarProps) {
               {/* Sliding Active Pill Indicator */}
               <span
                 ref={indicatorRef}
-                className={`pointer-events-none absolute bottom-0 h-0.5 rounded-full transition-opacity duration-200 ${isDarkTop ? "bg-accent" : "bg-brand"
-                  }`}
+                className="pointer-events-none absolute bottom-0 h-0.5 rounded-full transition-opacity duration-200 bg-accent"
                 style={{ opacity: 0 }}
                 aria-hidden="true"
               />
@@ -437,8 +350,9 @@ export function Navbar({ variant }: NavbarProps) {
                     onMouseEnter={() => setActiveHoverIndex(idx)}
                     onMouseLeave={() => setActiveHoverIndex(null)}
                     aria-current={active ? "page" : undefined}
-                    className={`group relative px-3 py-2 text-sm font-medium transition-colors rounded-md outline-none focus-visible:ring-2 focus-visible:ring-brand ${active ? activeColorClass : textColorClass
-                      }`}
+                    className={`group relative px-3 py-2 text-sm font-medium transition-colors rounded-md outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                      active ? "text-accent font-semibold" : "text-white/85 hover:text-white"
+                    }`}
                   >
                     {/* Text-roll hover animation */}
                     <span className="relative inline-flex flex-col h-5 overflow-hidden">
@@ -446,8 +360,7 @@ export function Navbar({ variant }: NavbarProps) {
                         {link.label}
                       </span>
                       <span
-                        className={`absolute top-full left-0 transition-transform duration-300 ease-out group-hover:-translate-y-full ${isDarkTop ? "text-accent" : "text-brand"
-                          }`}
+                        className="absolute top-full left-0 transition-transform duration-300 ease-out group-hover:-translate-y-full text-accent font-medium"
                         aria-hidden="true"
                       >
                         {link.label}
@@ -484,17 +397,15 @@ export function Navbar({ variant }: NavbarProps) {
                   aria-expanded={isMegaOpen}
                   aria-haspopup="true"
                   aria-controls="desktop-mega-menu"
-                  className={`group flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md outline-none focus-visible:ring-2 focus-visible:ring-brand transition-colors ${isMegaOpen
-                    ? isDarkTop
-                      ? "text-white"
-                      : "text-brand"
-                    : textColorClass
-                    }`}
+                  className={`group flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md outline-none focus-visible:ring-2 focus-visible:ring-accent transition-colors ${
+                    isMegaOpen ? "text-accent" : "text-white/85 hover:text-white"
+                  }`}
                 >
                   <span>Pages</span>
                   <svg
-                    className={`h-4 w-4 transition-transform duration-300 ${isMegaOpen ? "rotate-180" : ""
-                      }`}
+                    className={`h-4 w-4 transition-transform duration-300 ${
+                      isMegaOpen ? "rotate-180 text-accent" : "text-white/60 group-hover:text-white"
+                    }`}
                     viewBox="0 0 20 20"
                     fill="currentColor"
                     aria-hidden="true"
@@ -507,12 +418,12 @@ export function Navbar({ variant }: NavbarProps) {
                   </svg>
                 </button>
 
-                {/* Mega Menu Dropdown Panel */}
+                {/* Mega Menu Dropdown Panel (Dark Theme) */}
                 {isMegaOpen && (
                   <div
                     id="desktop-mega-menu"
                     ref={megaPanelRef}
-                    className="absolute top-full -left-48 mt-3 w-[720px] rounded-2xl bg-surface p-6 shadow-xl ring-1 ring-black/5 border border-surface-alt z-50 text-ink"
+                    className="absolute top-full -left-48 mt-3 w-[720px] rounded-2xl bg-black/90 backdrop-blur-xl p-6 shadow-2xl ring-1 ring-white/10 border border-white/10 z-50 text-white"
                     onMouseEnter={openMegaMenu}
                     onMouseLeave={scheduleCloseMegaMenu}
                   >
@@ -520,7 +431,7 @@ export function Navbar({ variant }: NavbarProps) {
                       {/* 3 Link Groups */}
                       {megaMenuGroups.map((group) => (
                         <div key={group.title} className="mega-group flex flex-col gap-3">
-                          <span className="text-xs font-bold uppercase tracking-wider text-ink-muted">
+                          <span className="text-xs font-bold uppercase tracking-wider text-accent">
                             {group.title}
                           </span>
                           <ul className="flex flex-col gap-2">
@@ -529,12 +440,12 @@ export function Navbar({ variant }: NavbarProps) {
                                 <Link
                                   href={item.href}
                                   onClick={() => setIsMegaOpen(false)}
-                                  className="group/item block rounded-lg p-1.5 transition-colors hover:bg-surface-alt outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                                  className="group/item block rounded-lg p-1.5 transition-colors hover:bg-white/5 outline-none focus-visible:ring-2 focus-visible:ring-accent"
                                 >
-                                  <div className="text-sm font-semibold text-ink group-hover/item:text-brand transition-colors">
+                                  <div className="text-sm font-semibold text-white group-hover/item:text-accent transition-colors">
                                     {item.label}
                                   </div>
-                                  <div className="text-[11px] text-ink-muted line-clamp-1 leading-snug">
+                                  <div className="text-[11px] text-white/60 line-clamp-1 leading-snug">
                                     {item.description}
                                   </div>
                                 </Link>
@@ -545,7 +456,7 @@ export function Navbar({ variant }: NavbarProps) {
                       ))}
 
                       {/* Mega Menu Promo Card */}
-                      <div className="mega-promo flex flex-col justify-between rounded-xl bg-surface-alt p-4 border border-surface-alt/70">
+                      <div className="mega-promo flex flex-col justify-between rounded-xl bg-white/5 p-4 border border-white/10">
                         <div className="flex flex-col gap-2">
                           <div className="overflow-hidden rounded-lg">
                             <SmartImage
@@ -555,13 +466,13 @@ export function Navbar({ variant }: NavbarProps) {
                               className="rounded-lg object-cover"
                             />
                           </div>
-                          <Badge variant="outline" size="sm" className="w-fit mt-1">
+                          <Badge variant="outline" size="sm" className="w-fit mt-1 border-accent/40 text-accent">
                             New Patients
                           </Badge>
-                          <h4 className="font-display text-sm font-bold text-ink">
+                          <h4 className="font-display text-sm font-bold text-white">
                             Book your first visit
                           </h4>
-                          <p className="text-xs text-ink-muted leading-relaxed">
+                          <p className="text-xs text-white/70 leading-relaxed font-body">
                             Experience comprehensive oral scanning with zero radiation discomfort.
                           </p>
                         </div>
@@ -587,11 +498,10 @@ export function Navbar({ variant }: NavbarProps) {
             <div className="hidden lg:flex items-center gap-5">
               <a
                 href={`tel:${siteConfig.phone.replace(/[^+\d]/g, "")}`}
-                className={`flex items-center gap-2 text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-md ${isDarkTop ? "text-white/80 hover:text-white" : "text-ink/80 hover:text-brand"
-                  }`}
+                className="flex items-center gap-2 text-sm font-medium text-white/85 hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-md"
               >
                 <svg
-                  className="h-4 w-4 text-brand"
+                  className="h-4 w-4 text-accent"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -604,12 +514,6 @@ export function Navbar({ variant }: NavbarProps) {
                 </svg>
                 <span>{siteConfig.phone}</span>
               </a>
-
-              <MagneticWrap strength={0.25}>
-                <Button href="/appointment" variant="primary" size="sm">
-                  Book Appointment
-                </Button>
-              </MagneticWrap>
             </div>
 
             {/* 4. Mobile Hamburger Button */}
@@ -621,23 +525,23 @@ export function Navbar({ variant }: NavbarProps) {
                 aria-expanded={isMobileOpen}
                 aria-controls="mobile-navigation-menu"
                 aria-label={isMobileOpen ? "Close navigation menu" : "Open navigation menu"}
-                className={`relative flex h-11 w-11 items-center justify-center rounded-xl p-2.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${isDarkTop && !isMobileOpen
-                  ? "bg-white/10 text-white"
-                  : "bg-surface-alt text-ink"
-                  }`}
+                className="relative flex h-11 w-11 items-center justify-center rounded-xl p-2.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent bg-white/10 text-white hover:bg-white/15"
               >
                 <div className="relative flex flex-col justify-between w-5 h-4">
                   <span
-                    className={`h-0.5 w-full rounded-full bg-current transition-all duration-300 ${isMobileOpen ? "translate-y-[7px] rotate-45" : ""
-                      }`}
+                    className={`h-0.5 w-full rounded-full bg-current transition-all duration-300 ${
+                      isMobileOpen ? "translate-y-[7px] rotate-45" : ""
+                    }`}
                   />
                   <span
-                    className={`h-0.5 w-full rounded-full bg-current transition-opacity duration-200 ${isMobileOpen ? "opacity-0" : "opacity-100"
-                      }`}
+                    className={`h-0.5 w-full rounded-full bg-current transition-opacity duration-200 ${
+                      isMobileOpen ? "opacity-0" : "opacity-100"
+                    }`}
                   />
                   <span
-                    className={`h-0.5 w-full rounded-full bg-current transition-all duration-300 ${isMobileOpen ? "-translate-y-[7px] -rotate-45" : ""
-                      }`}
+                    className={`h-0.5 w-full rounded-full bg-current transition-all duration-300 ${
+                      isMobileOpen ? "-translate-y-[7px] -rotate-45" : ""
+                    }`}
                   />
                 </div>
               </button>
@@ -654,7 +558,7 @@ export function Navbar({ variant }: NavbarProps) {
           role="dialog"
           aria-modal="true"
           aria-label="Mobile Navigation"
-          className="fixed inset-0 z-30 flex flex-col justify-between bg-brand-dark px-6 pt-24 pb-8 text-white lg:hidden overflow-y-auto"
+          className="fixed inset-0 z-40 flex flex-col justify-between bg-brand-dark px-6 pt-24 pb-8 text-white lg:hidden overflow-y-auto"
         >
           {/* Main Links List */}
           <div className="flex flex-col gap-5 pt-4">
@@ -670,8 +574,9 @@ export function Navbar({ variant }: NavbarProps) {
                       href={link.href}
                       onClick={() => setIsMobileOpen(false)}
                       aria-current={active ? "page" : undefined}
-                      className={`font-display text-3xl font-bold tracking-tight transition-colors hover:text-accent outline-none focus-visible:underline ${active ? "text-accent" : "text-white"
-                        }`}
+                      className={`font-display text-3xl font-bold tracking-tight transition-colors hover:text-accent outline-none focus-visible:underline ${
+                        active ? "text-accent" : "text-white"
+                      }`}
                     >
                       {link.label}
                     </Link>
@@ -685,21 +590,14 @@ export function Navbar({ variant }: NavbarProps) {
               <Link
                 href="/services"
                 onClick={() => setIsMobileOpen(false)}
-                className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/10 text-surface hover:bg-white/20 transition-colors"
+                className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
               >
                 All Services
               </Link>
               <Link
-                href="/pricing"
-                onClick={() => setIsMobileOpen(false)}
-                className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/10 text-surface hover:bg-white/20 transition-colors"
-              >
-                Pricing & Plans
-              </Link>
-              <Link
                 href="/contact"
                 onClick={() => setIsMobileOpen(false)}
-                className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/10 text-surface hover:bg-white/20 transition-colors"
+                className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
               >
                 Clinic Location
               </Link>
@@ -716,7 +614,7 @@ export function Navbar({ variant }: NavbarProps) {
               >
                 {siteConfig.phone}
               </a>
-              <span className="text-xs text-surface-alt/70 mt-1">{siteConfig.address.full}</span>
+              <span className="text-xs text-white/70 mt-1">{siteConfig.address.full}</span>
             </div>
 
             <Button
@@ -734,3 +632,5 @@ export function Navbar({ variant }: NavbarProps) {
     </>
   );
 }
+
+export default Navbar;

@@ -88,7 +88,7 @@ export const Step3Details: React.FC<Step3DetailsProps> = ({
         {/* Full Name */}
         <div>
           <label htmlFor="field-fullName" className="block text-xs font-semibold text-ink mb-1.5">
-            Full Name <span className="text-accent">*</span>
+            Full Name <span className="text-accent-deep">*</span>
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted">
@@ -108,7 +108,7 @@ export const Step3Details: React.FC<Step3DetailsProps> = ({
               aria-invalid={Boolean(errors?.fullName)}
               className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm text-ink placeholder:text-ink-muted/50 transition-all focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent ${
                 errors?.fullName
-                  ? "border-red-500 bg-red-50/30"
+                  ? "border-danger bg-danger/5"
                   : "border-line bg-white hover:border-brand/40"
               }`}
             />
@@ -117,7 +117,7 @@ export const Step3Details: React.FC<Step3DetailsProps> = ({
             <p
               id="fullName-error"
               role="alert"
-              className="flex items-center gap-1.5 text-xs text-red-600 mt-1.5"
+              className="flex items-center gap-1.5 text-xs text-danger mt-1.5"
             >
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{errors.fullName}</span>
@@ -128,7 +128,7 @@ export const Step3Details: React.FC<Step3DetailsProps> = ({
         {/* Mobile Phone Number */}
         <div>
           <label htmlFor="field-phone" className="block text-xs font-semibold text-ink mb-1.5">
-            Mobile Number <span className="text-accent">*</span>
+            Mobile Number <span className="text-accent-deep">*</span>
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted">
@@ -149,7 +149,7 @@ export const Step3Details: React.FC<Step3DetailsProps> = ({
               aria-invalid={Boolean(errors?.phone)}
               className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm text-ink placeholder:text-ink-muted/50 transition-all focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent ${
                 errors?.phone
-                  ? "border-red-500 bg-red-50/30"
+                  ? "border-danger bg-danger/5"
                   : "border-line bg-white hover:border-brand/40"
               }`}
             />
@@ -161,7 +161,7 @@ export const Step3Details: React.FC<Step3DetailsProps> = ({
             <p
               id="phone-error"
               role="alert"
-              className="flex items-center gap-1.5 text-xs text-red-600 mt-1"
+              className="flex items-center gap-1.5 text-xs text-danger mt-1"
             >
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{errors.phone}</span>
@@ -194,7 +194,7 @@ export const Step3Details: React.FC<Step3DetailsProps> = ({
               aria-invalid={Boolean(errors?.email)}
               className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm text-ink placeholder:text-ink-muted/50 transition-all focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent ${
                 errors?.email
-                  ? "border-red-500 bg-red-50/30"
+                  ? "border-danger bg-danger/5"
                   : "border-line bg-white hover:border-brand/40"
               }`}
             />
@@ -203,7 +203,7 @@ export const Step3Details: React.FC<Step3DetailsProps> = ({
             <p
               id="email-error"
               role="alert"
-              className="flex items-center gap-1.5 text-xs text-red-600 mt-1.5"
+              className="flex items-center gap-1.5 text-xs text-danger mt-1.5"
             >
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{errors.email}</span>
@@ -219,7 +219,7 @@ export const Step3Details: React.FC<Step3DetailsProps> = ({
             </label>
             <span
               className={`text-[11px] ${
-                notesCharCount > maxNotesLength ? "text-red-500 font-semibold" : "text-ink-muted"
+                notesCharCount > maxNotesLength ? "text-danger font-semibold" : "text-ink-muted"
               }`}
             >
               {notesCharCount}/{maxNotesLength}
@@ -239,7 +239,7 @@ export const Step3Details: React.FC<Step3DetailsProps> = ({
               aria-invalid={Boolean(errors?.notes)}
               className={`w-full p-3 rounded-xl border text-sm text-ink placeholder:text-ink-muted/50 transition-all focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent resize-none ${
                 errors?.notes
-                  ? "border-red-500 bg-red-50/30"
+                  ? "border-danger bg-danger/5"
                   : "border-line bg-white hover:border-brand/40"
               }`}
             />
@@ -248,7 +248,7 @@ export const Step3Details: React.FC<Step3DetailsProps> = ({
             <p
               id="notes-error"
               role="alert"
-              className="flex items-center gap-1.5 text-xs text-red-600 mt-1"
+              className="flex items-center gap-1.5 text-xs text-danger mt-1"
             >
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{errors.notes}</span>
@@ -320,7 +320,7 @@ export const Step3Details: React.FC<Step3DetailsProps> = ({
             <p
               id="consent-error"
               role="alert"
-              className="flex items-center gap-1.5 text-xs text-red-600 mt-1.5 pl-7"
+              className="flex items-center gap-1.5 text-xs text-danger mt-1.5 pl-7"
             >
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{errors.consent}</span>

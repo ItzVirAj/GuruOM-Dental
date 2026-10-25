@@ -21,7 +21,7 @@ export const BlogRelatedPosts: React.FC<BlogRelatedPostsProps> = ({ posts }) => 
         <div className="space-y-8">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-accent block">
+              <span className="text-xs font-semibold uppercase tracking-wider text-accent-deep block">
                 Recommended Reading
               </span>
               <h3

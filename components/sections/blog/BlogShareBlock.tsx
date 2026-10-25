@@ -59,7 +59,7 @@ export const BlogShareBlock: React.FC<BlogShareBlockProps> = ({
           className="flex flex-col items-center justify-center p-2.5 rounded-2xl border border-line bg-surface hover:bg-surface-alt hover:border-brand/40 text-ink transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
         >
           {copied ? (
-            <CheckCheck className="w-4 h-4 text-emerald-600 mb-1" />
+            <CheckCheck className="w-4 h-4 text-success mb-1" />
           ) : (
             <Copy className="w-4 h-4 text-brand mb-1" />
           )}
@@ -74,9 +74,9 @@ export const BlogShareBlock: React.FC<BlogShareBlockProps> = ({
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Share this guide via WhatsApp"
-          className="flex flex-col items-center justify-center p-2.5 rounded-2xl border border-line bg-surface hover:bg-emerald-50 hover:border-emerald-300 text-ink hover:text-emerald-700 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+          className="flex flex-col items-center justify-center p-2.5 rounded-2xl border border-line bg-surface hover:bg-success/10 hover:border-success/30 text-ink hover:text-success transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
         >
-          <MessageCircle className="w-4 h-4 text-emerald-600 mb-1" />
+          <MessageCircle className="w-4 h-4 text-success mb-1" />
           <span className="text-[11px] font-medium">WhatsApp</span>
         </a>
 
