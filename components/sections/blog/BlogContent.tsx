@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
 import { Link as LinkIcon, Lightbulb, Info, AlertTriangle } from "lucide-react";
-import { ContentBlock } from "@/data/blog";
+import { ContentBlock } from "@/src/lib/blog-content";
 import { SmartImage } from "@/components/ui/SmartImage";
 
 export interface BlogContentProps {

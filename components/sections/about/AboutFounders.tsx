@@ -4,8 +4,7 @@ import React, { useRef } from "react";
 import Image from "next/image";
 import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
-import { Badge } from "@/components/ui/Badge";
-import { Quote, Award, Sparkles, CheckCircle2 } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { gsap, useGSAP } from "@/lib/gsap";
 
 const founders = [
@@ -101,73 +100,45 @@ export const AboutFounders: React.FC = () => {
           {founders.map((founder, idx) => (
             <div
               key={idx}
-              className="founder-card-anim group rounded-3xl bg-white border border-line/70 p-6 sm:p-8 lg:p-10 shadow-card hover:shadow-float hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
+              className="founder-card-anim group rounded-3xl bg-white border border-line/70 p-6 sm:p-8 lg:p-10 shadow-card hover:shadow-float hover:-translate-y-1 transition-all duration-300 flex flex-col justify-center"
             >
-              <div>
-                {/* Doctor Portrait + Header Info */}
-                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8 mb-8">
-                  {/* Portrait Container */}
-                  <div className="relative w-44 h-56 sm:w-48 sm:h-64 shrink-0 rounded-2xl overflow-hidden shadow-card border border-line/80 bg-surface-alt">
-                    <Image
-                      src={founder.imageSrc}
-                      alt={`${founder.name}, ${founder.degree}`}
-                      fill
-                      sizes="(max-width: 640px) 176px, 192px"
-                      className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
-                      priority={idx === 0}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60" />
-                    <span className="absolute bottom-2.5 left-2.5 right-2.5 text-center text-[10px] font-medium tracking-wider uppercase text-white/90 bg-brand-dark/70 backdrop-blur-md py-1 px-2 rounded-full border border-white/10">
-                      {founder.experience}
-                    </span>
-                  </div>
-
-                  {/* Name, Degrees, and Role */}
-                  <div className="flex-1 text-center sm:text-left">
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-soft text-accent-deep text-xs font-semibold mb-3">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      {founder.degree}
-                    </div>
-
-                    <h3 className="font-display text-2xl sm:text-3xl font-bold text-ink mb-1 tracking-tight">
-                      {founder.name}
-                    </h3>
-
-                    <p className="font-display font-semibold text-brand text-sm sm:text-base mb-4">
-                      {founder.role}
-                    </p>
-
-                    {/* Bio */}
-                    <p className="font-body text-sm sm:text-base text-ink-muted leading-relaxed">
-                      {founder.bio}
-                    </p>
-                  </div>
+              {/* Doctor Portrait + Header Info */}
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8">
+                {/* Portrait Container */}
+                <div className="relative w-44 h-56 sm:w-48 sm:h-64 shrink-0 rounded-2xl overflow-hidden shadow-card border border-line/80 bg-surface-alt">
+                  <Image
+                    src={founder.imageSrc}
+                    alt={`${founder.name}, ${founder.degree}`}
+                    fill
+                    sizes="(max-width: 640px) 176px, 192px"
+                    className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
+                    priority={idx === 0}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60" />
+                  <span className="absolute bottom-2.5 left-2.5 right-2.5 text-center text-[10px] font-medium tracking-wider uppercase text-white/90 bg-brand-dark/70 backdrop-blur-md py-1 px-2 rounded-full border border-white/10">
+                    {founder.experience}
+                  </span>
                 </div>
 
-                {/* Doctor's Quote Box */}
-                <div className="rounded-2xl bg-surface p-5 border border-line/60 mb-8 relative">
-                  <Quote className="w-5 h-5 text-accent/50 mb-2" />
-                  <p className="font-display italic text-ink/90 text-sm sm:text-base leading-relaxed">
-                    &ldquo;{founder.quote}&rdquo;
+                {/* Name, Degrees, and Role */}
+                <div className="flex-1 text-center sm:text-left">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-soft text-accent-deep text-xs font-semibold mb-3">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    {founder.degree}
+                  </div>
+
+                  <h3 className="font-display text-2xl sm:text-3xl font-bold text-ink mb-1 tracking-tight">
+                    {founder.name}
+                  </h3>
+
+                  <p className="font-display font-semibold text-brand text-sm sm:text-base mb-4">
+                    {founder.role}
                   </p>
-                </div>
-              </div>
 
-              {/* Specializations Tags */}
-              <div className="pt-6 border-t border-line/60">
-                <p className="font-display text-xs font-semibold uppercase tracking-wider text-ink-muted mb-3">
-                  Focus Disciplines
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {founder.specialties.map((spec, specIdx) => (
-                    <span
-                      key={specIdx}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-surface-alt/70 text-ink text-xs font-medium border border-line/60"
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5 text-accent" />
-                      {spec}
-                    </span>
-                  ))}
+                  {/* Bio */}
+                  <p className="font-body text-sm sm:text-base text-ink-muted leading-relaxed">
+                    {founder.bio}
+                  </p>
                 </div>
               </div>
             </div>

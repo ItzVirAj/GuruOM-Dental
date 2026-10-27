@@ -3,7 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import { Calendar, Clock, User, ArrowRight } from "lucide-react";
-import { BlogPost, blogCategories, formatDate, readingTimeMinutes } from "@/data/blog";
+import type { BlogPost } from "@/src/server/blog/types";
+import { formatDate } from "@/src/lib/blog-format";
 import { SmartImage } from "@/components/ui/SmartImage";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -15,9 +16,9 @@ export interface BlogHeroProps {
 }
 
 export const BlogHero: React.FC<BlogHeroProps> = ({ post }) => {
-  const category = blogCategories.find((c) => c.slug === post.category);
+  const categoryLabel = post.categoryLabel || post.category;
   const formattedDate = formatDate(post.publishedAt);
-  const readTime = readingTimeMinutes(post);
+  const readTime = post.readingTimeMinutes || 5;
 
   return (
     <section aria-label="Featured article" className="py-10 sm:py-12 bg-surface/50 border-b border-line">
@@ -32,7 +33,7 @@ export const BlogHero: React.FC<BlogHeroProps> = ({ post }) => {
               <div className="lg:col-span-5 relative overflow-hidden rounded-2xl bg-surface-alt">
                 <div className="relative w-full aspect-[16/10] overflow-hidden">
                   <SmartImage
-                    slot={post.coverSlot}
+                    slot={post.coverSlot || undefined}
                     alt={post.title}
                     ratio="16/10"
                     priority={true}
@@ -50,9 +51,9 @@ export const BlogHero: React.FC<BlogHeroProps> = ({ post }) => {
                     <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-accent/20 text-brand-dark">
                       Featured Guide
                     </span>
-                    {category && (
+                    {categoryLabel && (
                       <Badge variant="outline" size="sm">
-                        {category.label}
+                        {categoryLabel}
                       </Badge>
                     )}
                   </div>

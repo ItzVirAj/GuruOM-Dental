@@ -1,7 +1,10 @@
 /**
- * ALL POSTS ARE PLACEHOLDER SAMPLES. Replace with real, clinically reviewed articles.
- * Never publish medical claims that a qualified dentist has not verified.
- * 'Reviewed by' must only name a real doctor who actually reviewed the post.
+ * SEED INPUT ONLY.
+ * This file contains the initial static blog data used exclusively by scripts/db/seed.ts
+ * to populate the Neon Postgres database.
+ *
+ * DO NOT IMPORT THIS FILE IN RUNTIME WEBSITE CODE.
+ * All public queries and components read from the database via src/server/blog/queries.ts.
  */
 
 export interface BlogCategory {

@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
-import { MapPin, Phone, Clock, X, ExternalLink } from "lucide-react";
+import { MapPin, Phone, Clock, X } from "lucide-react";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { Container, SmartImage } from "@/components/ui";
 import { useLenis, useReducedMotion } from "@/components/animations";
@@ -32,7 +32,6 @@ export function Hero({ showPortrait = true }: HeroProps) {
   const locationsBlockRef = useRef<HTMLDivElement | null>(null);
   const visualColRef = useRef<HTMLDivElement | null>(null);
   const portraitFrameRef = useRef<HTMLDivElement | null>(null);
-  const ratingCardRef = useRef<HTMLDivElement | null>(null);
   const scrollIndicatorRef = useRef<HTMLButtonElement | null>(null);
   const floatTweenRef = useRef<gsap.core.Tween | null>(null);
 
@@ -123,35 +122,7 @@ export function Hero({ showPortrait = true }: HeroProps) {
           );
         }
 
-        // 7. Floating Rating Card slide in with overshoot + start yoyo float
-        if (ratingCardRef.current) {
-          masterTl.fromTo(
-            ratingCardRef.current,
-            { x: 40, opacity: 0, scale: 0.95 },
-            {
-              x: 0,
-              opacity: 1,
-              scale: 1,
-              duration: 0.8,
-              ease: "back.out(1.2)",
-              onComplete: () => {
-                // Desktop yoyo float loop
-                if (window.innerWidth >= 1024 && ratingCardRef.current) {
-                  floatTweenRef.current = gsap.to(ratingCardRef.current, {
-                    y: -10,
-                    duration: 2.6,
-                    ease: "sine.inOut",
-                    repeat: -1,
-                    yoyo: true,
-                  });
-                }
-              },
-            },
-            "-=0.4"
-          );
-        }
-
-        // 8. Scroll Indicator fade in
+        // 7. Scroll Indicator fade in
         if (scrollIndicatorRef.current) {
           masterTl.fromTo(
             scrollIndicatorRef.current,
@@ -198,23 +169,16 @@ export function Hero({ showPortrait = true }: HeroProps) {
       // C) Subtle Mouse Parallax (Desktop Fine Pointer Only)
       // ---------------------------------------------------------
       mm.add("(min-width: 1024px) and (pointer: fine)", () => {
-        if (!ratingCardRef.current) return;
+        if (!portraitFrameRef.current) return;
 
-        const setCardX = gsap.quickTo(ratingCardRef.current, "x", {
-          duration: 0.7,
+        const setPortraitX = gsap.quickTo(portraitFrameRef.current, "x", {
+          duration: 0.9,
           ease: "power2.out",
         });
-        const setCardY = gsap.quickTo(ratingCardRef.current, "y", {
-          duration: 0.7,
+        const setPortraitY = gsap.quickTo(portraitFrameRef.current, "y", {
+          duration: 0.9,
           ease: "power2.out",
         });
-
-        const setPortraitX = portraitFrameRef.current
-          ? gsap.quickTo(portraitFrameRef.current, "x", { duration: 0.9, ease: "power2.out" })
-          : null;
-        const setPortraitY = portraitFrameRef.current
-          ? gsap.quickTo(portraitFrameRef.current, "y", { duration: 0.9, ease: "power2.out" })
-          : null;
 
         const handleMouseMove = (e: MouseEvent) => {
           const { clientX, clientY } = e;
@@ -222,14 +186,8 @@ export function Hero({ showPortrait = true }: HeroProps) {
           const xRatio = (clientX / innerWidth - 0.5) * 2; // -1 to 1
           const yRatio = (clientY / innerHeight - 0.5) * 2; // -1 to 1
 
-          // Subtle offset opposite to cursor movement
-          setCardX(-xRatio * 14);
-          setCardY(-yRatio * 14);
-
-          if (setPortraitX && setPortraitY) {
-            setPortraitX(xRatio * 10);
-            setPortraitY(yRatio * 10);
-          }
+          setPortraitX(xRatio * 10);
+          setPortraitY(yRatio * 10);
         };
 
         window.addEventListener("mousemove", handleMouseMove, { passive: true });
@@ -331,9 +289,9 @@ export function Hero({ showPortrait = true }: HeroProps) {
             </p>
 
             {/* Network Highlights: Our Working Centres & Services Across */}
-            {/* Network Highlights: Our Lab Centers & Services Across */}
+            {/* Network Highlights: Our Lab Centres & Services Across */}
             <div ref={locationsBlockRef} className="flex flex-col gap-6 pt-2">
-              {/* 1. Our Lab Centers */}
+              {/* 1. Our Lab Centres */}
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-2.5">
                   <span className="relative flex h-3 w-3 items-center justify-center">
@@ -347,15 +305,15 @@ export function Hero({ showPortrait = true }: HeroProps) {
                     />
                   </span>
                   <span className="text-base sm:text-lg font-bold uppercase tracking-wider text-accent font-body">
-                    Our Lab Centers
+                    Our Lab Centres
                   </span>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
                   {[
-                    "Chh. Sambhajinagar",
                     "Ahilyanagar",
                     "Pune",
+                    "Chh. Sambhajinagar",
                   ].map((centre) => {
                     const locData = labs.find((l) => l.name === centre);
                     const isSelected = activeLocation?.id === locData?.id;
@@ -388,22 +346,31 @@ export function Hero({ showPortrait = true }: HeroProps) {
 
               {/* 2. Services Across */}
               <div className="flex flex-col gap-3 pt-1">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full border border-amber-400 bg-amber-400/50 shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
-                  <span className="text-sm sm:text-base font-semibold uppercase tracking-wider text-white/80 font-body">
+                <div className="flex items-center gap-2.5">
+                  <span className="relative flex h-3 w-3 items-center justify-center">
+                    <span
+                      className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                      style={{ backgroundColor: "var(--accent)" }}
+                    />
+                    <span
+                      className="relative inline-flex rounded-full h-2.5 w-2.5"
+                      style={{ backgroundColor: "var(--accent)" }}
+                    />
+                  </span>
+                  <span className="text-base sm:text-lg font-bold uppercase tracking-wider text-accent font-body">
                     Services Across
                   </span>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
                   {[
                     "Nashik",
-                    "Nagpur",
                     "Jalgaon",
-                    "Jalna",
-                    "Nanded",
+                    "Beed",
+                    "Latur",
+                    "Dharashiv",
                     "Solapur",
-                    "Kolhapur",
+                    "Satara",
                   ].map((city) => {
                     const locData = labs.find((l) => l.name === city);
                     const isSelected = activeLocation?.id === locData?.id;
@@ -412,20 +379,20 @@ export function Hero({ showPortrait = true }: HeroProps) {
                         key={city}
                         type="button"
                         onClick={() => handleLocationClick(city)}
-                        className={`group inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs sm:text-sm font-body font-normal transition-all duration-150 cursor-pointer outline-none focus-visible:ring-1 focus-visible:ring-amber-400 ${
+                        className={`group inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl border text-white font-body text-sm font-bold shadow-sm transition-all duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-accent ${
                           isSelected
-                            ? "bg-amber-400 text-brand-dark border-amber-400 ring-2 ring-amber-400/60 font-semibold shadow-md scale-105"
-                            : "bg-white/8 hover:bg-white/15 border border-white/15 hover:border-white/30 text-white/85 hover:text-white"
+                            ? "bg-accent text-brand-dark border-accent ring-2 ring-accent/60 shadow-lg scale-105"
+                            : "bg-accent/15 hover:bg-accent/25 border border-accent/40 hover:border-accent text-white"
                         }`}
                         title={`Click to view address and contact for ${city}`}
                         aria-expanded={isSelected}
                       >
                         <span
-                          className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                            isSelected ? "bg-brand-dark" : "bg-amber-400/70 group-hover:bg-amber-400"
+                          className={`w-2 h-2 rounded-full transition-transform ${
+                            isSelected ? "bg-brand-dark" : "bg-accent group-hover:scale-125"
                           }`}
                         />
-                        <span className={isSelected ? "text-brand-dark font-medium" : "text-white/90"}>
+                        <span className={`font-bold tracking-normal ${isSelected ? "text-brand-dark" : "text-white"}`}>
                           {city}
                         </span>
                       </button>
@@ -537,34 +504,9 @@ export function Hero({ showPortrait = true }: HeroProps) {
                 </div>
               )}
             </div>
-
-            {/* Mobile Viewport Rating Card (Displayed in normal flow below CTAs) */}
-            <div className="block lg:hidden pt-4">
-              <div className="rounded-2xl bg-white/95 text-ink p-5 shadow-2xl backdrop-blur-md border border-white/40 max-w-sm">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-warning" aria-label="Rated 4.9 out of 5 stars">
-                    {[...Array(5)].map((_, i) => (
-                      <svg key={i} className="h-4 w-4 fill-current" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
-                  </div>
-                  <span className="font-display font-bold text-base text-ink">
-                    {heroContent.ratingCard.score} <span className="text-xs text-ink-muted font-normal">/ 5.0</span>
-                  </span>
-                </div>
-                <p className="text-xs italic text-ink-muted mt-2">
-                  &ldquo;{heroContent.ratingCard.quote}&rdquo;
-                </p>
-                <div className="mt-3 flex items-center justify-between text-xs text-ink-muted border-t border-line/60 pt-2">
-                  <span className="font-medium text-ink">{heroContent.ratingCard.author}</span>
-                  <span>{heroContent.ratingCard.count}</span>
-                </div>
-              </div>
-            </div>
           </div>
 
-          {/* Right Column: Decorative Frame & Desktop Floating Card (Span 5) */}
+          {/* Right Column: Decorative Frame (Span 5) */}
           <div
             ref={visualColRef}
             className="hidden lg:flex lg:col-span-5 relative justify-end items-center will-change-transform min-h-[460px]"
@@ -587,52 +529,6 @@ export function Hero({ showPortrait = true }: HeroProps) {
                 </div>
               </div>
             )}
-
-            {/* Desktop Floating Rating Card */}
-            <div
-              ref={ratingCardRef}
-              className={`rounded-2xl bg-white/95 text-ink p-5 shadow-2xl backdrop-blur-md border border-white/40 max-w-xs will-change-transform ${showPortrait
-                  ? "absolute -bottom-6 -left-6 z-20"
-                  : "relative z-20 ml-auto"
-                }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1 text-warning" aria-label="Rated 4.9 out of 5 stars">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="h-4 w-4 fill-current" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="font-display font-bold text-base text-ink">
-                    {heroContent.ratingCard.score}
-                  </span>
-                  <span className="text-[10px] text-ink-muted">/ 5.0</span>
-                </div>
-              </div>
-
-              <p className="text-xs italic text-ink-muted mt-2.5 leading-snug">
-                &ldquo;{heroContent.ratingCard.quote}&rdquo;
-              </p>
-
-              <div className="mt-3.5 flex items-center gap-2.5 border-t border-line/70 pt-2.5">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-on-accent font-bold text-xs">
-                  {heroContent.ratingCard.author
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-semibold text-ink leading-none">
-                    {heroContent.ratingCard.author}
-                  </span>
-                  <span className="text-[10px] text-ink-muted leading-tight mt-0.5">
-                    {heroContent.ratingCard.count}
-                  </span>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </Container>

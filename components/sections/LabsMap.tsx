@@ -303,7 +303,7 @@ export function LabsMap() {
                 onClick={() => setFilterType((prev) => (prev === "service" ? "all" : "service"))}
                 className={`inline-flex items-center gap-2 py-1 px-3 rounded-full transition-colors cursor-pointer outline-none focus-visible:ring-1 focus-visible:ring-accent ${filterType === "service" ? "bg-amber-400/25 text-white font-bold" : "text-white/90 hover:text-white"
                   }`}
-                title="Filter: 7 Services Hubs (Nashik, Nagpur, Jalgaon, Jalna, Nanded, Solapur, Kolhapur)"
+                title="Filter: 7 Services Hubs (Nashik, Jalgaon, Beed, Latur, Dharashiv, Solapur, Satara)"
               >
                 <span className="w-2 h-2 rounded-full border border-amber-400 bg-amber-400/50 shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
                 <span className="font-medium text-white/90">7 Services Hubs</span>

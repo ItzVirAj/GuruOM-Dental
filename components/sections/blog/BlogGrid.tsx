@@ -3,7 +3,8 @@
 import React, { useState, useMemo, useRef, useEffect, useTransition } from "react";
 import Link from "next/link";
 import { Search, X, Calendar, Clock, ArrowRight, RotateCcw } from "lucide-react";
-import { BlogPost, BlogCategory, formatDate, readingTimeMinutes } from "@/data/blog";
+import type { BlogPost, BlogCategory } from "@/src/server/blog/types";
+import { formatDate } from "@/src/lib/blog-format";
 import { SmartImage } from "@/components/ui/SmartImage";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -196,7 +197,7 @@ export const BlogGrid: React.FC<BlogGridProps> = ({
 
             {categories.map((cat) => {
               const isSelected = selectedCategory === cat.slug;
-              const count = posts.filter((p) => p.category === cat.slug).length;
+              const count = cat.count !== undefined ? cat.count : posts.filter((p) => p.category === cat.slug).length;
 
               return (
                 <button
@@ -233,8 +234,9 @@ export const BlogGrid: React.FC<BlogGridProps> = ({
           >
             {visiblePosts.map((post, idx) => {
               const category = categories.find((c) => c.slug === post.category);
+              const categoryLabel = category?.label || post.categoryLabel || post.category;
               const formattedDate = formatDate(post.publishedAt);
-              const readTime = readingTimeMinutes(post);
+              const readTime = post.readingTimeMinutes || 5;
               const isNewlyAddedAnchor = idx === visibleCount - PAGE_SIZE && visibleCount > PAGE_SIZE;
 
               return (
@@ -251,7 +253,7 @@ export const BlogGrid: React.FC<BlogGridProps> = ({
                     {/* Cover Thumbnail 16/10 */}
                     <div className="relative w-full aspect-[16/10] overflow-hidden bg-surface-alt">
                       <SmartImage
-                        slot={post.coverSlot}
+                        slot={post.coverSlot || undefined}
                         alt={post.title}
                         ratio="16/10"
                         className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
@@ -265,9 +267,9 @@ export const BlogGrid: React.FC<BlogGridProps> = ({
                       <div>
                         {/* Category & Date */}
                         <div className="flex items-center justify-between gap-2 mb-2.5">
-                          {category && (
+                          {categoryLabel && (
                             <Badge variant="outline" size="sm">
-                              {category.label}
+                              {categoryLabel}
                             </Badge>
                           )}
                           <span className="text-[11px] text-ink-muted flex items-center gap-1">

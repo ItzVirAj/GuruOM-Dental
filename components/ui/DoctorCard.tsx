@@ -1,8 +1,6 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { SmartImage } from "./SmartImage";
 import { Badge } from "./Badge";
 import { Doctor } from "@/data/doctors";

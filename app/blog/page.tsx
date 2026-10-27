@@ -2,7 +2,11 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { BlogHero, BlogGrid, BlogNewsletterBand } from "@/components/sections/blog";
-import { blogPosts, blogCategories } from "@/data/blog";
+import {
+  getLivePosts,
+  getFeaturedPost,
+  getCategoriesWithCounts,
+} from "@/src/server/blog/queries";
 import { siteConfig } from "@/data/site";
 
 interface BlogPageProps {
@@ -35,14 +39,21 @@ async function BlogContentContainer({
 }) {
   const params = await searchParams;
 
+  const [categories, featuredPost, { posts: allLivePosts }] = await Promise.all([
+    getCategoriesWithCounts(),
+    getFeaturedPost(),
+    getLivePosts({ limit: 24 }),
+  ]);
+
   // Validate initial category from URL
-  const validCategory = blogCategories.some((c) => c.slug === params.category)
+  const validCategory = categories.some((c) => c.slug === params.category)
     ? params.category
     : "all";
 
-  // Find featured post and remaining posts
-  const featuredPost = blogPosts.find((p) => p.featured) || blogPosts[0];
-  const regularPosts = blogPosts.filter((p) => p.slug !== featuredPost.slug);
+  // Filter out featured post from regular grid
+  const regularPosts = featuredPost
+    ? allLivePosts.filter((p) => p.slug !== featuredPost.slug)
+    : allLivePosts;
 
   return (
     <>
@@ -52,7 +63,7 @@ async function BlogContentContainer({
       {/* 3. Filterable & Searchable Post Grid */}
       <BlogGrid
         posts={regularPosts}
-        categories={blogCategories}
+        categories={categories}
         initialCategory={validCategory}
       />
     </>

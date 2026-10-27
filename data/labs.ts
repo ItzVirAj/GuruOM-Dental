@@ -110,24 +110,6 @@ export const labs: LabLocation[] = [
     offset: { x: -110, y: -20 }
   },
   {
-    id: "service-nagpur",
-    name: "Nagpur",
-    districtId: "d02",
-    districtName: "Nagpur",
-    type: "service",
-    tagline: "Vidarbha Clinical Logistics & Support",
-    address: "East Maharashtra Service & Logistics Center, Nagpur",
-    phone: "+91 98765 43210",
-    hours: "Mon - Sat: 9:00 AM - 7:00 PM",
-    capabilities: [
-      "Overnight Express Courier",
-      "Digital File Verification",
-      "Warranty Restorations Support"
-    ],
-    labelSide: "right",
-    offset: { x: 145, y: -10 }
-  },
-  {
     id: "service-jalgaon",
     name: "Jalgaon",
     districtId: "d06",
@@ -146,13 +128,13 @@ export const labs: LabLocation[] = [
     offset: { x: 0, y: -80 }
   },
   {
-    id: "service-jalna",
-    name: "Jalna",
+    id: "service-beed",
+    name: "Beed",
     districtId: "d25",
-    districtName: "Jalna & Beed",
+    districtName: "Beed",
     type: "service",
     tagline: "Central Maharashtra Partner Clinics Network",
-    address: "Central Support & Distribution Point, Jalna",
+    address: "Central Support & Distribution Point, Beed",
     phone: "+91 98765 43210",
     hours: "Mon - Sat: 9:00 AM - 7:00 PM",
     capabilities: [
@@ -164,13 +146,13 @@ export const labs: LabLocation[] = [
     offset: { x: 270, y: 0 }
   },
   {
-    id: "service-nanded",
-    name: "Nanded",
+    id: "service-latur",
+    name: "Latur",
     districtId: "d29",
-    districtName: "Nanded",
+    districtName: "Latur",
     type: "service",
     tagline: "Marathwada Service & Delivery Center",
-    address: "Marathwada Regional Service Hub, Nanded",
+    address: "Marathwada Regional Service Hub, Latur",
     phone: "+91 98765 43210",
     hours: "Mon - Sat: 9:00 AM - 7:00 PM",
     capabilities: [
@@ -182,13 +164,13 @@ export const labs: LabLocation[] = [
     offset: { x: 200, y: 70 }
   },
   {
-    id: "service-solapur",
-    name: "Solapur",
+    id: "service-dharashiv",
+    name: "Dharashiv",
     districtId: "d28",
-    districtName: "Solapur & Latur",
+    districtName: "Dharashiv (Osmanabad)",
     type: "service",
     tagline: "South-Central Clinical Service Hub",
-    address: "South-Central Support Center, Solapur",
+    address: "South-Central Support Center, Dharashiv",
     phone: "+91 98765 43210",
     hours: "Mon - Sat: 9:00 AM - 7:00 PM",
     capabilities: [
@@ -200,13 +182,13 @@ export const labs: LabLocation[] = [
     offset: { x: 70, y: 110 }
   },
   {
-    id: "service-kolhapur",
-    name: "Kolhapur",
+    id: "service-solapur",
+    name: "Solapur",
     districtId: "d30",
-    districtName: "Kolhapur & Sangli",
+    districtName: "Solapur",
     type: "service",
-    tagline: "Southwest Maharashtra Clinical Network",
-    address: "Southwest Regional Service Desk, Kolhapur",
+    tagline: "South-Central Regional Service Network",
+    address: "South-Central Regional Service Desk, Solapur",
     phone: "+91 98765 43210",
     hours: "Mon - Sat: 9:00 AM - 7:00 PM",
     capabilities: [
@@ -216,6 +198,24 @@ export const labs: LabLocation[] = [
     ],
     labelSide: "bottom",
     offset: { x: -35, y: 95 }
+  },
+  {
+    id: "service-satara",
+    name: "Satara",
+    districtId: "d31",
+    districtName: "Satara",
+    type: "service",
+    tagline: "Western Maharashtra Clinical Logistics & Care",
+    address: "Western Maharashtra Regional Service Hub, Satara",
+    phone: "+91 98765 43210",
+    hours: "Mon - Sat: 9:00 AM - 7:00 PM",
+    capabilities: [
+      "Express Restorative Pickup",
+      "Digital Scan Coordination",
+      "Prosthetic Delivery Desk"
+    ],
+    labelSide: "left",
+    offset: { x: -125, y: 15 }
   }
 ];
 

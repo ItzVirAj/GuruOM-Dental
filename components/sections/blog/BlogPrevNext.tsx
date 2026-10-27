@@ -1,9 +1,8 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { BlogPost } from "@/data/blog";
+import type { BlogPost } from "@/src/server/blog/types";
 
 export interface BlogPrevNextProps {
   prev: BlogPost | null;

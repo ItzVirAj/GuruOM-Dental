@@ -1,9 +1,9 @@
 import type { MetadataRoute } from "next";
 import { siteConfig } from "@/data/site";
 import { servicesData } from "@/data/services";
-import { blogPosts } from "@/data/blog";
+import { getAllLiveSlugs } from "@/src/server/blog/queries";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = siteConfig.url.replace(/\/+$/, "");
 
   // 1. Static Core Routes
@@ -73,9 +73,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   // 3. Dynamic Blog Posts
-  const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => ({
+  const liveSlugs = await getAllLiveSlugs();
+  const blogRoutes: MetadataRoute.Sitemap = liveSlugs.map((post) => ({
     url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: new Date(post.updatedAt || post.publishedAt),
+    lastModified: post.updatedAt ? new Date(post.updatedAt) : new Date(),
     changeFrequency: "monthly",
     priority: 0.7,
   }));

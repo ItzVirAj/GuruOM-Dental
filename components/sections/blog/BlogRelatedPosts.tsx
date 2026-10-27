@@ -3,7 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowRight, Clock, Calendar } from "lucide-react";
-import { BlogPost, blogCategories, formatDate, readingTimeMinutes } from "@/data/blog";
+import type { BlogPost } from "@/src/server/blog/types";
+import { formatDate } from "@/src/lib/blog-format";
 import { SmartImage } from "@/components/ui/SmartImage";
 import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
@@ -42,9 +43,9 @@ export const BlogRelatedPosts: React.FC<BlogRelatedPostsProps> = ({ posts }) => 
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             {posts.map((post) => {
-              const category = blogCategories.find((c) => c.slug === post.category);
+              const categoryLabel = post.categoryLabel || post.category;
               const formattedDate = formatDate(post.publishedAt);
-              const readTime = readingTimeMinutes(post);
+              const readTime = post.readingTimeMinutes || 5;
 
               return (
                 <article
@@ -57,7 +58,7 @@ export const BlogRelatedPosts: React.FC<BlogRelatedPostsProps> = ({ posts }) => 
                   >
                     <div className="relative w-full aspect-[16/10] overflow-hidden bg-surface-alt">
                       <SmartImage
-                        slot={post.coverSlot}
+                        slot={post.coverSlot || undefined}
                         alt={post.title}
                         ratio="16/10"
                         className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
@@ -67,9 +68,9 @@ export const BlogRelatedPosts: React.FC<BlogRelatedPostsProps> = ({ posts }) => 
                     <div className="p-5 flex flex-col flex-1 justify-between">
                       <div>
                         <div className="flex items-center justify-between gap-2 mb-2">
-                          {category && (
+                          {categoryLabel && (
                             <Badge variant="outline" size="sm">
-                              {category.label}
+                              {categoryLabel}
                             </Badge>
                           )}
                           <span className="text-[11px] text-ink-muted flex items-center gap-1">

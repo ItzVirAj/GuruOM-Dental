@@ -1,42 +1,8 @@
 "use client";
 
 import React, { useRef } from "react";
-import { Sparkles, Award, MapPin, Users, Cpu } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { gsap, useGSAP } from "@/lib/gsap";
-
-const keyStats = [
-  {
-    icon: Award,
-    value: "2019",
-    label: "Founded in Ahilyanagar",
-    detail: "Region's early digital scanner pioneers",
-  },
-  {
-    icon: Users,
-    value: "40+",
-    label: "Specialist Team",
-    detail: "Prosthodontists, surgeons & technicians",
-  },
-  {
-    icon: MapPin,
-    value: "30+",
-    label: "Maharashtra Cities",
-    detail: "Ahilyanagar, Pune, Nashik & beyond",
-  },
-  {
-    icon: Users,
-    value: "800+",
-    label: "Partner Dentists",
-    detail: "Entrusted by clinicians statewide",
-  },
-  {
-    icon: Cpu,
-    value: "DMLS",
-    label: "3D Metal Printing",
-    detail: "Direct metal laser sintering lab",
-  },
-];
 
 export const AboutHero: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -95,44 +61,12 @@ export const AboutHero: React.FC = () => {
         </h1>
 
         {/* Narrative Subtitle */}
-        <p className="apple-hero-anim font-body text-lg sm:text-xl text-ink-muted max-w-3xl mx-auto leading-relaxed mb-12 sm:mb-16">
-          From acquiring Central Maharashtra's earliest intraoral scanners in 2019
+        <p className="apple-hero-anim font-body text-lg sm:text-xl text-ink-muted max-w-3xl mx-auto leading-relaxed">
+          From acquiring Central Maharashtra&apos;s earliest intraoral scanners in 2019
           to establishing the largest emerging digital dental lab in the region —
           we unite biological preservation, computer-guided prosthetics, and
           compassionate, anxiety-free patient care.
         </p>
-
-        {/* Floating Apple Key Metrics Ribbon */}
-        <div className="apple-hero-anim max-w-5xl mx-auto">
-          <div className="rounded-3xl bg-white/90 backdrop-blur-xl border border-line/70 p-6 sm:p-8 shadow-card">
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-6 sm:gap-8 divide-y md:divide-y-0 md:divide-x divide-line/60">
-              {keyStats.map((stat, idx) => {
-                const Icon = stat.icon;
-                return (
-                  <div
-                    key={idx}
-                    className={`flex flex-col items-center text-center ${
-                      idx !== 0 ? "pt-6 md:pt-0 md:pl-6" : ""
-                    }`}
-                  >
-                    <div className="w-9 h-9 rounded-xl bg-accent-soft text-accent-deep flex items-center justify-center mb-3 shadow-xs">
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <div className="font-display text-3xl sm:text-4xl font-bold text-ink mb-1 tracking-tight">
-                      {stat.value}
-                    </div>
-                    <div className="font-display font-semibold text-ink text-xs sm:text-sm mb-0.5">
-                      {stat.label}
-                    </div>
-                    <div className="font-body text-[11px] text-ink-muted leading-tight">
-                      {stat.detail}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
       </Container>
     </section>
   );

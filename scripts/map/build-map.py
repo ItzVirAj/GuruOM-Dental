@@ -131,14 +131,21 @@ def build_map():
     # Check for lab districts
     lab_labels = []
     for dl in candidate_labels:
+        # Exclude Nagpur (dl 3 / district d02) per user feedback
+        if dl == 3:
+            continue
         mask = (labels == dl)
         o_count = np.sum(orange_mask & mask)
         if o_count > 100:
             lab_labels.append(dl)
 
+    # Add Satara (dl 37 / district d31, requested in user feedback)
+    if 37 not in lab_labels:
+        lab_labels.append(37)
+
     print(f"Detected {len(lab_labels)} lab districts: {lab_labels}")
 
-    # VERIFY exactly 10 lab districts
+    # VERIFY exactly 10 lab districts (3 Working Centres + 7 Regional Service Hubs)
     if len(lab_labels) != 10:
         os.makedirs(os.path.dirname(DEBUG_IMG), exist_ok=True)
         debug_img = arr.copy()
@@ -610,6 +617,7 @@ def generate_static_svg(view_box, base_bottom, base_walls, base_top, districts, 
         8: (85, 10),
         9: (65, 45),
         10: (-25, 65),
+        11: (-110, 20),
     }
 
     for idx, d in enumerate(districts):

@@ -3,14 +3,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Calendar, Clock, User, ArrowRight, Stethoscope, Sparkles } from "lucide-react";
 import {
-  blogPosts,
-  blogCategories,
-  getPostBySlug,
+  getLivePostBySlug,
   getRelatedPosts,
   getAdjacentPosts,
-  formatDate,
-  readingTimeMinutes,
-} from "@/data/blog";
+  getAllLiveSlugs,
+} from "@/src/server/blog/queries";
+import { formatDate } from "@/src/lib/blog-format";
 import { servicesData } from "@/data/services";
 import { siteConfig } from "@/data/site";
 import { Container } from "@/components/ui/Container";
@@ -35,8 +33,13 @@ interface PostPageProps {
 }
 
 export async function generateStaticParams() {
-  return blogPosts.map((post) => ({
-    slug: post.slug,
+  const slugs = await getAllLiveSlugs();
+  if (slugs.length === 0) {
+    // Next.js 16 cacheComponents requires generateStaticParams to return >= 1 item for build validation
+    return [{ slug: "_placeholder" }];
+  }
+  return slugs.map((item) => ({
+    slug: item.slug,
   }));
 }
 
@@ -44,7 +47,7 @@ export async function generateMetadata({
   params,
 }: PostPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await getLivePostBySlug(slug);
 
   if (!post) {
     return {
@@ -74,18 +77,21 @@ export async function generateMetadata({
 
 export default async function BlogPostPage({ params }: PostPageProps) {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await getLivePostBySlug(slug);
 
   if (!post) {
     notFound();
   }
 
-  const category = blogCategories.find((c) => c.slug === post.category);
+  const categoryLabel = post.categoryLabel || post.category;
   const formattedPublished = formatDate(post.publishedAt);
   const formattedUpdated = post.updatedAt ? formatDate(post.updatedAt) : undefined;
-  const readTime = readingTimeMinutes(post);
-  const relatedPosts = getRelatedPosts(post.slug, 3);
-  const { prev, next } = getAdjacentPosts(post.slug);
+  const readTime = post.readingTimeMinutes || 5;
+
+  const [relatedPosts, { prev, next }] = await Promise.all([
+    getRelatedPosts(post.slug, 3),
+    getAdjacentPosts(post.slug),
+  ]);
 
   const relatedService = post.relatedServiceSlug
     ? servicesData.find((s) => s.slug === post.relatedServiceSlug)
@@ -147,14 +153,14 @@ export default async function BlogPostPage({ params }: PostPageProps) {
 
       {/* 3. Post Header with Breadcrumbs & Meta Row */}
       <PageHeader
-        eyebrow={category?.label || "Clinical Journal"}
+        eyebrow={categoryLabel || "Clinical Journal"}
         title={post.title}
         breadcrumbs={[
           { label: "Home", href: "/" },
           { label: "Blog", href: "/blog" },
           {
-            label: category?.label || "Category",
-            href: category ? `/blog?category=${category.slug}` : "/blog",
+            label: categoryLabel || "Category",
+            href: `/blog?category=${post.category}`,
           },
           { label: post.title },
         ]}
@@ -192,7 +198,7 @@ export default async function BlogPostPage({ params }: PostPageProps) {
               {/* Article Cover Image (16/9) */}
               <div className="rounded-3xl overflow-hidden border border-line bg-surface-alt shadow-card">
                 <SmartImage
-                  slot={post.coverSlot}
+                  slot={post.coverSlot || undefined}
                   alt={post.title}
                   ratio="16/9"
                   priority={true}
@@ -212,7 +218,7 @@ export default async function BlogPostPage({ params }: PostPageProps) {
               <BlogAuthorBox
                 authorName={post.authorName}
                 authorRole={post.authorRole}
-                reviewedBySlug={post.reviewedBySlug}
+                reviewedBySlug={post.reviewedBySlug || undefined}
               />
 
               {/* Mobile Share Block (Shown at the bottom on mobile) */}

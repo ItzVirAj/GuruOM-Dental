@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useRef } from "react";
-import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
-import { ArrowRight, Phone, MapPin, Calendar, Clock, MessageSquare } from "lucide-react";
+import { Phone, MapPin, Calendar, Clock } from "lucide-react";
 import { gsap, useGSAP } from "@/lib/gsap";
 
 export const AboutCta: React.FC = () => {

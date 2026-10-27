@@ -7,7 +7,6 @@ import {
   Cpu,
   Layers,
   Sparkles,
-  ShieldCheck,
   CheckCircle2,
   Zap,
 } from "lucide-react";
