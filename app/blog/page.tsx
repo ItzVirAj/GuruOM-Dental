@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Rss } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { BlogHero, BlogGrid, BlogNewsletterBand } from "@/components/sections/blog";
 import {
@@ -95,7 +97,19 @@ export default function BlogPage({ searchParams }: BlogPageProps) {
           { label: "Home", href: "/" },
           { label: "Blog" },
         ]}
-      />
+      >
+        <div className="pt-2">
+          <Link
+            href="/feed.xml"
+            prefetch={false}
+            className="inline-flex items-center gap-1.5 text-xs text-brand hover:text-brand-dark transition-colors font-medium"
+            title="Subscribe to RSS Feed"
+          >
+            <Rss className="w-3.5 h-3.5" />
+            <span>RSS Feed</span>
+          </Link>
+        </div>
+      </PageHeader>
 
       {/* Suspense boundary for Next.js 16 Partial Prerendering */}
       <Suspense fallback={<BlogLoadingFallback />}>

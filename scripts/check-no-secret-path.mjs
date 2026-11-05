@@ -6,10 +6,19 @@ dotenv.config({ path: ".env.local" });
 dotenv.config();
 
 const adminPath = process.env.ADMIN_PATH?.trim();
+const authSecret = process.env.BETTER_AUTH_SECRET?.trim();
 
-if (!adminPath || adminPath.startsWith("sample-") || adminPath.includes("REPLACE_WITH_")) {
+const secretsToScan = [];
+if (adminPath && !adminPath.startsWith("sample-") && !adminPath.includes("REPLACE_WITH_")) {
+  secretsToScan.push({ name: "ADMIN_PATH", value: adminPath });
+}
+if (authSecret && !authSecret.includes("REPLACE_WITH_") && authSecret.length >= 16) {
+  secretsToScan.push({ name: "BETTER_AUTH_SECRET", value: authSecret });
+}
+
+if (secretsToScan.length === 0) {
   console.log(
-    "check-no-secret-path: ADMIN_PATH is not set to a custom value in .env.local. Skipping secret scan."
+    "check-no-secret-path: No custom secrets configured in .env.local to scan. Skipping."
   );
   process.exit(0);
 }
@@ -36,11 +45,13 @@ function scanDirectory(dir, allowedFiles = []) {
 
       try {
         const content = fs.readFileSync(fullPath, "utf8");
-        if (content.includes(adminPath)) {
-          console.error(
-            `[LEAK DETECTED] Secret ADMIN_PATH was found in: ${fullPath}`
-          );
-          leakFound = true;
+        for (const secret of secretsToScan) {
+          if (content.includes(secret.value)) {
+            console.error(
+              `[LEAK DETECTED] Secret ${secret.name} was found in: ${fullPath}`
+            );
+            leakFound = true;
+          }
         }
       } catch {
         // Skip unreadable binary files
@@ -49,9 +60,9 @@ function scanDirectory(dir, allowedFiles = []) {
   }
 }
 
-console.log("Scanning source files and client bundles for secret ADMIN_PATH leaks...");
+console.log("Scanning source files and client bundles for secret leaks...");
 
-// Files where ADMIN_PATH is legitimately referenced on server
+// Files where secrets are legitimately referenced on server
 const allowedFiles = [
   ".env",
   ".env.local",
@@ -59,7 +70,9 @@ const allowedFiles = [
   "src/lib/env.ts",
   "proxy.ts",
   "scripts/generate-owner-slug.mjs",
+  "scripts/generate-auth-secret.mjs",
   "scripts/check-no-secret-path.mjs",
+  "scripts/check-env-leaks.mjs",
 ];
 
 // Scan source directories
@@ -76,11 +89,11 @@ if (fs.existsSync(nextStaticDir)) {
 
 if (leakFound) {
   console.error(
-    "\n[SECURITY FAILURE] The secret ADMIN_PATH has leaked into source files or client bundles!"
+    "\n[SECURITY FAILURE] Sensitive credentials or secret paths leaked into source files or client bundles!"
   );
   process.exit(1);
 } else {
   console.log(
-    "[PASS] No secret ADMIN_PATH leaks found in source code or client bundles."
+    "[PASS] No secret ADMIN_PATH or BETTER_AUTH_SECRET leaks found in source code or client bundles."
   );
 }

@@ -20,6 +20,7 @@ export interface LabLocation {
   tagline: string;
   address: string;
   phone: string;
+  email?: string;
   hours: string;
   capabilities: string[];
   labelSide?: "left" | "right" | "top" | "bottom" | "auto";

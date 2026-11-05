@@ -19,7 +19,6 @@ import {
   Section,
   Badge,
   IconCircle,
-  Eyebrow,
   SmartImage,
   Button,
 } from "@/components/ui";
@@ -212,18 +211,22 @@ export const Services: React.FC<ServicesProps> = ({
       className="relative overflow-hidden"
     >
       <Container>
-        {/* Header Row: Eyebrow + SplitHeading (left), intro + CTA (right) */}
+        {/* Header Row: Heading + Subheading (left), intro + CTA (right) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-end pb-12 md:pb-16 border-b border-line/60">
-          <div className="lg:col-span-7 space-y-4">
-            <Eyebrow variant="dot" color="brand">
-              {content.eyebrow}
-            </Eyebrow>
+          <div className="lg:col-span-7">
             <SplitHeading
+              id="services-heading"
               as="h2"
-              className="text-display-lg font-display text-ink leading-tight"
+              type="lines"
+              mask
+              start="top 80%"
+              className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-ink leading-[1.15]"
             >
-              {content.title}
+              {content.eyebrow}
             </SplitHeading>
+            <p className="font-aileron text-lg sm:text-xl lg:text-2xl font-semibold text-brand leading-snug mt-3">
+              {content.title}
+            </p>
           </div>
 
           <div className="lg:col-span-5 flex flex-col sm:flex-row lg:flex-col items-start lg:items-end justify-between gap-5">

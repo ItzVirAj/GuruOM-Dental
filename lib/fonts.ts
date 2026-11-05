@@ -1,10 +1,24 @@
-import { Instrument_Serif, DM_Sans } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 import localFont from "next/font/local";
 
-export const fontDisplay = Instrument_Serif({
-  subsets: ["latin"],
-  weight: ["400"],
-  style: ["normal", "italic"],
+export const fontDisplay = localFont({
+  src: [
+    {
+      path: "../public/fonts/JUSTSerif-Regular.otf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/JUSTSerif-ExtraBold.otf",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/JUSTSerif-ExtraBold.otf",
+      weight: "800",
+      style: "normal",
+    },
+  ],
   variable: "--font-display",
   display: "swap",
 });
@@ -55,6 +69,23 @@ export const fontRainbowMiracles = localFont({
   weight: "400",
   style: "normal",
   variable: "--font-rainbow-miracles",
+  display: "swap",
+});
+
+export const fontJustSerif = localFont({
+  src: [
+    {
+      path: "../public/fonts/JUSTSerif-Regular.otf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/JUSTSerif-ExtraBold.otf",
+      weight: "800",
+      style: "normal",
+    },
+  ],
+  variable: "--font-just-serif",
   display: "swap",
 });
 

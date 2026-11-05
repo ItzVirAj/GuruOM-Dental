@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 
+import { subscribeNewsletter } from "@/app/newsletter/actions";
+
 export interface NewsletterFormProps {
   variant?: "light" | "dark";
   buttonText?: string;
@@ -34,10 +36,14 @@ export const NewsletterForm: React.FC<NewsletterFormProps> = ({
     setStatus("loading");
 
     try {
-      // Simulate remote newsletter subscription dispatch
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      setStatus("success");
-      setEmail("");
+      const res = await subscribeNewsletter({ email: email.trim() });
+      if (res.ok) {
+        setStatus("success");
+        setEmail("");
+      } else {
+        setStatus("error");
+        setErrorMessage(res.message);
+      }
     } catch {
       setStatus("error");
       setErrorMessage("Something went wrong. Please try again later.");

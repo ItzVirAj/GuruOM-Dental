@@ -66,8 +66,8 @@ export const heroContent: HeroContent = {
   subheading:
     "Founded in 2019 in Ahilyanagar (Ahmednagar), Guru-Om Dental began with a vision to transform dental care. Our founder, Dr. Guruprasad Handal, a passionate Prosthodontist, envisioned the future of digital dentistry. Embracing innovation, we transitioned from conventional practices to digital dentistry, pioneering a new era of precision and excellence.",
   primaryCta: {
-    label: "Book Appointment",
-    href: "/appointment",
+    label: "Contact Clinic",
+    href: "/contact",
   },
   secondaryCta: {
     label: "Our Services",
@@ -245,7 +245,7 @@ export interface ServicesSectionContent {
 }
 
 export const servicesSectionContent: ServicesSectionContent = {
-  eyebrow: "What We Treat",
+  eyebrow: "Our Services",
   title: "Complete dental care for every age.",
   intro:
     "Explore our full spectrum of specialized dental treatments, combining advanced hospital-grade technology with personalized, compassionate patient care.",
@@ -295,8 +295,8 @@ export const checkupContent: CheckupContent = {
   intro:
     "Every comprehensive examination at GuruOm Dental combines advanced optical diagnostics, low-radiation imaging, and holistic soft tissue reviews to detect issues long before they cause discomfort.",
   cta: {
-    label: "Book a Checkup",
-    href: "/appointment",
+    label: "Contact For Checkup",
+    href: "/contact",
   },
   cards: [
     {
@@ -381,5 +381,48 @@ export const checkupContent: CheckupContent = {
     },
   ],
 };
+
+export interface HomeFaqItem {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+/**
+ * 5 General FAQs for the Home Page
+ * Original placeholder copy marked for clinic review.
+ */
+export const homeFaqs: HomeFaqItem[] = [
+  {
+    id: "faq-first-visit",
+    question: "What should I expect during my first dental visit?",
+    answer:
+      "Your first appointment begins with an unhurried clinical conversation about your dental goals and medical history. We conduct a thorough examination including low-radiation digital scans if needed, discuss our findings transparently on chairside screens, and co-create an individual treatment plan before any procedure begins.",
+  },
+  {
+    id: "faq-emergencies",
+    question: "How do you handle urgent dental emergencies?",
+    answer:
+      "We provide priority on-call emergency dental support for severe toothaches, chipped or knocked-out teeth, and facial trauma. Please call our clinic emergency line immediately so our surgical team can prepare an operatory and guide you on immediate first-aid steps.",
+  },
+  {
+    id: "faq-payment-plans",
+    question: "What payment methods and financing options do you accept?",
+    answer:
+      "We accept all major UPI applications, debit and credit cards, and bank transfers. For comprehensive treatments like dental implants, clear aligners, and smile makeovers, we offer flexible phased payment schedules and interest-free EMI options to keep your care accessible.",
+  },
+  {
+    id: "faq-children",
+    question: "At what age should children have their first dental checkup?",
+    answer:
+      "We recommend scheduling a child's first dental visit when their first milk tooth erupts or by their first birthday. Early visits allow us to monitor jaw development, apply gentle preventive fluoride sealants, and help your child build positive, fear-free memories in the dental clinic.",
+  },
+  {
+    id: "faq-hygiene-sterilization",
+    question: "What sterilization and infection control protocols do you follow?",
+    answer:
+      "Patient safety is paramount. We follow rigorous 4-step medical-grade autoclaving protocols with Class-B vacuum sterilization for all instruments. Contact surfaces are disinfected with hospital-grade barriers between every single patient appointment.",
+  },
+];
 
 export default aboutIntroContent;

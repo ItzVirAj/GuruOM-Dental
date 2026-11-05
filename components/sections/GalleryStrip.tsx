@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Container, Eyebrow, SmartImage } from "@/components/ui";
+import { Container, SmartImage } from "@/components/ui";
 import { Reveal, Marquee } from "@/components/animations";
 import { galleryContent, GalleryItem } from "@/data/home";
 
@@ -31,25 +31,25 @@ export function GalleryStrip({ content = galleryContent }: GalleryStripProps) {
         </svg>
       </div>
 
-      {/* Section Intro: Centered Eyebrow & Headline revealed with <Reveal> */}
+      {/* Section Intro: Heading, Subheading & Description revealed with <Reveal> */}
       <Container className="text-center mb-12 sm:mb-16">
         <Reveal variant="up">
-          <Eyebrow color="brand" className="mb-3 justify-center">
-            {content.eyebrow}
-          </Eyebrow>
-        </Reveal>
-
-        <Reveal variant="up" delay={0.1}>
           <h2
             id="gallery-strip-heading"
-            className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-ink"
+            className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-ink leading-[1.15]"
           >
-            {content.title}
+            {content.eyebrow}
           </h2>
         </Reveal>
 
+        <Reveal variant="up" delay={0.1}>
+          <p className="font-aileron text-lg sm:text-xl lg:text-2xl font-semibold text-brand leading-snug mt-3">
+            {content.title}
+          </p>
+        </Reveal>
+
         <Reveal variant="up" delay={0.2}>
-          <p className="text-ink-muted text-sm sm:text-base max-w-xl mx-auto mt-3 leading-relaxed">
+          <p className="text-ink-muted text-sm sm:text-base max-w-xl mx-auto mt-2 leading-relaxed">
             {content.subtitle}
           </p>
         </Reveal>

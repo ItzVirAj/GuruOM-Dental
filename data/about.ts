@@ -370,8 +370,8 @@ export const aboutPageContent: AboutPageData = {
     description:
       "Whether you need advanced full-mouth restoration, dental implants, or routine gentle care, our team in Ahilyanagar is here to welcome you.",
     primaryButton: {
-      label: "Book an Appointment",
-      href: "/appointment",
+      label: "Contact Our Clinic",
+      href: "/contact",
     },
     secondaryButton: {
       label: "Call Clinic",

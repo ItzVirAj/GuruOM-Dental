@@ -69,10 +69,10 @@ export function AboutTeam() {
           </p>
         </div>
 
-        {/* 3 Doctors Grid */}
+        {/* Doctors Grid */}
         <div
           ref={cardsRef}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-14"
+          className="grid grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto gap-8 lg:gap-10 mb-14"
         >
           {featuredDoctors.map((doctor) => (
             <div key={doctor.slug} className="h-full">

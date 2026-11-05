@@ -39,7 +39,30 @@ export const SmartImage: React.FC<SmartImageProps> = ({
 }) => {
   const slotData = slot ? plannedImages[slot] : undefined;
 
-  const finalSrc = src ?? slotData?.src;
+  // Normalize src to guarantee Next.js image compatibility:
+  // - Resolves assets/images/... or assets/... to /images/... or public root
+  // - Ensures relative paths start with a leading slash "/" so Next.js doesn't parse them as invalid external URLs
+  let normalizedSrc = (src ?? slotData?.src)?.trim() || "";
+  if (normalizedSrc) {
+    if (normalizedSrc.startsWith("assets/images/")) {
+      normalizedSrc = "/images/" + normalizedSrc.slice("assets/images/".length);
+    } else if (normalizedSrc.startsWith("/assets/images/")) {
+      normalizedSrc = "/images/" + normalizedSrc.slice("/assets/images/".length);
+    } else if (normalizedSrc.startsWith("assets/")) {
+      normalizedSrc = "/" + normalizedSrc.slice("assets/".length);
+    } else if (normalizedSrc.startsWith("/assets/")) {
+      normalizedSrc = "/" + normalizedSrc.slice("/assets/".length);
+    } else if (
+      !normalizedSrc.startsWith("/") &&
+      !normalizedSrc.startsWith("http://") &&
+      !normalizedSrc.startsWith("https://") &&
+      !normalizedSrc.startsWith("data:")
+    ) {
+      normalizedSrc = "/" + normalizedSrc;
+    }
+  }
+
+  const finalSrc = normalizedSrc;
   const finalAlt = alt ?? slotData?.alt ?? label ?? "GuruOm Dental image";
   const finalRatio = ratio ?? aspect ?? slotData?.ratio ?? "16/9";
   const finalLabel = label ?? slotData?.label ?? (slot ? `Slot: ${slot}` : finalAlt);

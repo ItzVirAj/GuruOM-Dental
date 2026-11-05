@@ -1,7 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const FORBIDDEN_WORDS = ["SECRET", "KEY", "PASSWORD", "TOKEN", "DATABASE"];
+const FORBIDDEN_WORDS = [
+  "SECRET",
+  "KEY",
+  "PASSWORD",
+  "TOKEN",
+  "DATABASE",
+  "CLOUDINARY_API_SECRET",
+  "CLOUDINARY_SECRET",
+];
 
 let hasLeak = false;
 
@@ -11,13 +19,42 @@ function checkKey(key, source) {
     for (const forbidden of FORBIDDEN_WORDS) {
       if (upper.includes(forbidden)) {
         console.error(
-          `[SECURITY VIOLATION] Dangerous public environment variable detected in ${source}: "${key}". Public variables must never expose secrets, keys, passwords, tokens, or databases.`
+          `[SECURITY VIOLATION] Dangerous public environment variable detected in ${source}: "${key}". Public variables must never expose secrets, keys, passwords, tokens, databases, or Cloudinary API secrets.`
         );
         hasLeak = true;
       }
     }
   }
 }
+
+// Ensure CLOUDINARY_API_SECRET is never referenced in client component directories
+function scanClientFiles(dir) {
+  if (!fs.existsSync(dir)) return;
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      if (entry.name !== "node_modules" && entry.name !== ".next" && entry.name !== ".git") {
+        scanClientFiles(full);
+      }
+    } else if (/\.(tsx|ts|jsx|js)$/.test(entry.name)) {
+      const code = fs.readFileSync(full, "utf8");
+      // Check if file is a client component
+      if (code.includes('"use client"') || code.includes("'use client'")) {
+        if (code.includes("CLOUDINARY_API_SECRET") || code.includes("CLOUDINARY_API_KEY")) {
+          console.error(
+            `[SECURITY VIOLATION] Client component ${path.relative(process.cwd(), full)} directly references Cloudinary API credentials!`
+          );
+          hasLeak = true;
+        }
+      }
+    }
+  }
+}
+
+scanClientFiles(path.join(process.cwd(), "components"));
+scanClientFiles(path.join(process.cwd(), "app"));
+scanClientFiles(path.join(process.cwd(), "src", "lib", "media"));
 
 // Check runtime process.env
 for (const key of Object.keys(process.env)) {

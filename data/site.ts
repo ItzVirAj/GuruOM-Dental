@@ -106,7 +106,8 @@ export const contactReasons: ContactReasonOption[] = [
   { value: "treatment", label: "Treatment question" },
   { value: "pricing", label: "Pricing question" },
   { value: "feedback", label: "Feedback" },
-  { value: "partnership", label: "Partnership or careers" },
+  { value: "partnership", label: "Partnership" },
+  { value: "careers", label: "Careers enquiry" },
 ];
 
 export const navLinks: NavLink[] = [
@@ -126,14 +127,13 @@ export const megaMenuGroups: MegaMenuGroup[] = [
       { label: "Services", href: "/services", description: "Full spectrum oral wellness" },
       { label: "Service Details", href: "/services#details", description: "In-depth treatment procedures" },
       { label: "Contact", href: "/contact", description: "Front desk & clinic directions" },
-      { label: "Appointment", href: "/appointment", description: "Direct booking & priority consults" },
     ],
   },
   {
     title: "Resources",
     items: [
       { label: "Blog", href: "/blog", description: "Dental health articles & advice" },
-      { label: "Blog Post", href: "/blog#post", description: "Deep dive patient care spotlight" },
+      { label: "Videos", href: "/videos", description: "Clinical procedures & oral hygiene walkthroughs" },
       { label: "Careers", href: "/careers", description: "Join our clinical medical team" },
     ],
   },
@@ -154,7 +154,6 @@ export const footerLinkColumns: FooterLinkCol[] = [
       { label: "Home", href: "/" },
       { label: "About Us", href: "/about" },
       { label: "Our Treatments", href: "/services" },
-      { label: "Patient Appointment", href: "/appointment" },
       { label: "Contact Desk", href: "/contact" },
     ],
   },
@@ -171,8 +170,9 @@ export const footerLinkColumns: FooterLinkCol[] = [
   {
     title: "Patient Center",
     links: [
-      { label: "Book Consultation", href: "/appointment" },
+      { label: "Reach Our Labs", href: "/contact" },
       { label: "Oral Health Blog", href: "/blog" },
+      { label: "Educational Videos", href: "/videos" },
       { label: "Careers", href: "/careers" },
       { label: "Clinic Location", href: "/contact" },
       { label: "Emergency Support", href: "/contact#emergency" },

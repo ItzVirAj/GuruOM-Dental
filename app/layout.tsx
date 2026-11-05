@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { fontDisplay, fontBody, fontAileron, fontLeagueSpartan, fontArabicaMenu, fontRainbowMiracles } from "@/lib/fonts";
+import { fontDisplay, fontBody, fontAileron, fontLeagueSpartan, fontArabicaMenu, fontRainbowMiracles, fontJustSerif } from "@/lib/fonts";
 import SmoothScroll from "@/components/animations/SmoothScroll";
 import { Navbar, Footer } from "@/components/layout";
 import { DevAgentation } from "@/components/dev/DevAgentation";
@@ -16,6 +16,11 @@ export const metadata: Metadata = {
   },
   description:
     "Calm, premium, and trustworthy dental care. Advanced implantology, aesthetic smile design, and painless root canal treatments at GuruOm Dental.",
+  alternates: {
+    types: {
+      "application/rss+xml": "/feed.xml",
+    },
+  },
 };
 
 export default function RootLayout({
@@ -26,7 +31,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`js ${fontDisplay.variable} ${fontBody.variable} ${fontAileron.variable} ${fontLeagueSpartan.variable} ${fontArabicaMenu.variable} ${fontRainbowMiracles.variable}`}
+      className={`js ${fontDisplay.variable} ${fontBody.variable} ${fontAileron.variable} ${fontLeagueSpartan.variable} ${fontJustSerif.variable} ${fontArabicaMenu.variable} ${fontRainbowMiracles.variable}`}
       suppressHydrationWarning
     >
       <body className="font-body bg-surface text-ink antialiased selection:bg-accent selection:text-on-accent min-h-screen flex flex-col">

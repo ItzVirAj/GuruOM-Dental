@@ -38,5 +38,16 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO guruom_app;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO guruom_app;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO guruom_app;
 
--- 6. Explicitly ensure no table creation or alteration rights exist on schema public
+-- 6. Set 5-second statement timeout for application safety
+ALTER ROLE guruom_app SET statement_timeout = '5s';
+
+-- 7. Database-level Append-Only enforcement for audit_log and security_events
+-- Revoke UPDATE and DELETE permissions from the app role so application compromised code cannot tamper with history
+REVOKE UPDATE, DELETE ON TABLE audit_log, security_events FROM guruom_app;
+GRANT SELECT, INSERT ON TABLE audit_log, security_events TO guruom_app;
+
+-- 8. Allow app role to execute the retention purge function
+GRANT EXECUTE ON FUNCTION purge_old_logs(integer) TO guruom_app;
+
+-- 9. Explicitly ensure no table creation or alteration rights exist on schema public
 REVOKE CREATE ON SCHEMA public FROM guruom_app;

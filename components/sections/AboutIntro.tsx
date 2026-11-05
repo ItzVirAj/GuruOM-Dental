@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
-import { Container, Button, Eyebrow, SmartImage } from "@/components/ui";
+import { Container, Button, SmartImage } from "@/components/ui";
 import { SplitHeading, MagneticWrap, useReducedMotion } from "@/components/animations";
 import { aboutIntroContent, AboutIntroContent } from "@/data/home";
 
@@ -132,24 +132,24 @@ export const AboutIntro: React.FC<AboutIntroProps> = ({
               LEFT COLUMN — TEXT CONTENT
           ===================================================== */}
           <div ref={textColRef} className="flex flex-col justify-center lg:py-4">
-            {/* Eyebrow */}
-            <div data-anim-reveal className="mb-5">
-              <Eyebrow variant="dot" color="accent">
-                {content.eyebrow}
-              </Eyebrow>
-            </div>
-
-            {/* Headline */}
-            <div data-anim-reveal className="mb-6">
+            {/* Section Main Heading */}
+            <div data-anim-reveal className="mb-3">
               <SplitHeading
                 id="about-intro-heading"
                 as="h2"
                 type="lines"
                 mask
-                className="font-display font-bold tracking-tight text-ink leading-[1.12] text-4xl sm:text-5xl lg:text-[2.9rem] xl:text-5xl"
+                className="font-display font-bold tracking-tight text-ink text-3xl sm:text-4xl lg:text-5xl leading-[1.15]"
               >
-                {content.title}
+                {content.eyebrow}
               </SplitHeading>
+            </div>
+
+            {/* Subheading */}
+            <div data-anim-reveal className="mb-6">
+              <p className="font-aileron text-lg sm:text-xl lg:text-2xl font-semibold text-brand leading-snug">
+                {content.title}
+              </p>
             </div>
 
             {/* Paragraph */}

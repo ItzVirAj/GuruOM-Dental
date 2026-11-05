@@ -3,7 +3,7 @@
 import React, { useRef, useState, useCallback, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { gsap, useGSAP } from "@/lib/gsap";
-import { Container, Eyebrow } from "@/components/ui";
+import { Container } from "@/components/ui";
 import { useReducedMotion } from "@/components/animations";
 import { MAHARASHTRA_MAP_DATA, IsometricDistrict } from "@/data/maharashtra-map.generated";
 import { labs, LabLocation, LocationType } from "@/data/labs";
@@ -256,23 +256,17 @@ export function LabsMap() {
             SECTION HEADER
         ============================================================== */}
         <div className="relative mx-auto max-w-3xl text-center mb-8 sm:mb-12">
-          <div className="mb-4 flex justify-center">
-            <Eyebrow variant="dot" color="inverse">
-              OUR MAHARASHTRA NETWORK
-            </Eyebrow>
-          </div>
-
           <div className="mb-6">
             <h2
               id="labs-heading"
               className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-[1.15]"
             >
-              Our labs &amp; service network across Maharashtra
+              Our Maharashtra Network
             </h2>
           </div>
 
           {/* ==============================================================
-              SIMPLIFIED LEGEND: 3 DIGITAL DENTAL LABS & 7 SERVICES HUBS
+              SIMPLIFIED LEGEND: 3 DIGITAL DENTAL LABS & 10 SERVICES HUBS
           ============================================================== */}
           <div className="flex items-center justify-center">
             <div className="inline-flex flex-wrap items-center justify-center gap-2.5 sm:gap-4 px-5 py-2.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-md shadow-xl text-xs sm:text-sm font-body">
@@ -303,10 +297,10 @@ export function LabsMap() {
                 onClick={() => setFilterType((prev) => (prev === "service" ? "all" : "service"))}
                 className={`inline-flex items-center gap-2 py-1 px-3 rounded-full transition-colors cursor-pointer outline-none focus-visible:ring-1 focus-visible:ring-accent ${filterType === "service" ? "bg-amber-400/25 text-white font-bold" : "text-white/90 hover:text-white"
                   }`}
-                title="Filter: 7 Services Hubs (Nashik, Jalgaon, Beed, Latur, Dharashiv, Solapur, Satara)"
+                title="Filter: 10 Services Hubs (Nashik, Jalgaon, Beed, Latur, Dharashiv, Solapur, Satara)"
               >
                 <span className="w-2 h-2 rounded-full border border-amber-400 bg-amber-400/50 shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
-                <span className="font-medium text-white/90">7 Services Hubs</span>
+                <span className="font-medium text-white/90">10 Services Hubs</span>
               </button>
             </div>
           </div>

@@ -47,7 +47,7 @@ export const plannedImages: Record<string, ImageSlot> = {
   // Hero section
   hero: {
     id: "hero",
-    src: "/images/hero-bg.webp",
+    src: "/images/PRO-Craft-Homepage-Video_V2_Moment-6-1.webp",
     alt: "GuruOm Dental modern clinical sanctuary with state-of-the-art dental chairs",
     ratio: "16/9",
     label: "Hero Clinic Atmosphere (1920x1080)",
@@ -55,7 +55,7 @@ export const plannedImages: Record<string, ImageSlot> = {
   },
   heroBg: {
     id: "heroBg",
-    src: "/images/hero-bg.webp",
+    src: "/images/PRO-Craft-Homepage-Video_V2_Moment-6-1.webp",
     alt: "GuruOm Dental modern clinical sanctuary with state-of-the-art dental chairs",
     ratio: "16/9",
     label: "Hero Clinic Atmosphere Background (1920x1080)",
@@ -63,8 +63,8 @@ export const plannedImages: Record<string, ImageSlot> = {
   },
   heroPatient: {
     id: "heroPatient",
-    src: "/images/hero-patient.jpeg",
-    alt: "Patient smiling with confidence after precision dental care",
+    src: "/images/DRGuruprasad.jpeg",
+    alt: "Dr. Guruprasad Handal - Founder, GuruOm Dental",
     ratio: "3/4",
     label: "Hero Patient Portrait (900x1200)",
     recommendedSize: "900x1200",
@@ -437,6 +437,14 @@ export const plannedImages: Record<string, ImageSlot> = {
   },
 
   // CTA Section
+  homeCta: {
+    id: "homeCta",
+    src: "",
+    alt: "Welcoming reception and clinical sanctuary at GuruOm Dental",
+    ratio: "21/9",
+    label: "Home CTA Banner: Clinic Exterior/Lounge (2100x900)",
+    recommendedSize: "2100x900",
+  },
   cta: {
     id: "cta",
     src: "",

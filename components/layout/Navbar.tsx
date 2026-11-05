@@ -2,10 +2,9 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { gsap, useGSAP } from "@/lib/gsap";
-import { Container, Button, Badge, SmartImage } from "@/components/ui";
+import { Container } from "@/components/ui";
 import { useIsDesktop, useReducedMotion } from "@/components/animations";
 import { siteConfig, navLinks, megaMenuGroups } from "@/data/site";
 
@@ -13,7 +12,26 @@ export interface NavbarProps {
   variant?: "transparent-light" | "solid";
 }
 
-export function Navbar({}: NavbarProps) {
+const NAV_HEIGHT = "3.25rem"; // 52px
+
+function Chevron({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M7 4l6 6-6 6" />
+    </svg>
+  );
+}
+
+export function Navbar({ }: NavbarProps) {
   const pathname = usePathname();
   const isDesktop = useIsDesktop();
   const prefersReducedMotion = useReducedMotion();
@@ -22,21 +40,21 @@ export function Navbar({}: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMegaOpen, setIsMegaOpen] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isMobilePagesOpen, setIsMobilePagesOpen] = useState(false);
   const [activeHoverIndex, setActiveHoverIndex] = useState<number | null>(null);
 
   // Refs
-  const navContainerRef = useRef<HTMLElement | null>(null);
-  const navInnerRef = useRef<HTMLDivElement | null>(null);
-  const linksNavRef = useRef<HTMLDivElement | null>(null);
+  const linksNavRef = useRef<HTMLElement | null>(null);
   const linkRefs = useRef<(HTMLAnchorElement | HTMLButtonElement | null)[]>([]);
   const indicatorRef = useRef<HTMLSpanElement | null>(null);
   const megaPanelRef = useRef<HTMLDivElement | null>(null);
+  const megaBackdropRef = useRef<HTMLDivElement | null>(null);
   const megaTimelineRef = useRef<gsap.core.Timeline | null>(null);
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
-  const hamburgerButtonRef = useRef<HTMLButtonElement | null>(null);
-  const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Active route matching
+  const phoneHref = `tel:${siteConfig.phone.replace(/[^+\d]/g, "")}`;
+
   const isRouteActive = useCallback(
     (href: string) => {
       if (href === "/") return pathname === "/";
@@ -46,153 +64,132 @@ export function Navbar({}: NavbarProps) {
   );
 
   // -------------------------------------------------------------
-  // A) Scroll Style State (Always visible, permanently fixed)
+  // Keep the page's --nav-h in sync with this navbar's height
   // -------------------------------------------------------------
-  // Sync scroll state reliably via passive scroll listener
   useEffect(() => {
-    const handleScroll = () => {
-      const y = window.scrollY || document.documentElement.scrollTop;
-      setIsScrolled(y > 20);
+    const root = document.documentElement;
+    const prev = root.style.getPropertyValue("--nav-h");
+    root.style.setProperty("--nav-h", NAV_HEIGHT);
+    return () => {
+      if (prev) root.style.setProperty("--nav-h", prev);
+      else root.style.removeProperty("--nav-h");
     };
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useGSAP(
-    () => {
-      const el = navContainerRef.current;
-      if (!el) return;
-      // Ensure navbar is always positioned at 0 and never translated away
-      gsap.set(el, { yPercent: 0 });
-    },
-    []
-  );
-
-  // Animate inner navbar height slightly on scroll state change (80px -> 68px)
+  // -------------------------------------------------------------
+  // Scroll state
+  // -------------------------------------------------------------
   useEffect(() => {
-    const inner = navInnerRef.current;
-    if (!inner) return;
+    const onScroll = () => {
+      const y = window.scrollY || document.documentElement.scrollTop;
+      setIsScrolled(y > 8);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-    if (prefersReducedMotion) {
-      return;
-    }
-
-    if (isScrolled) {
-      gsap.to(inner, {
-        height: 68,
-        duration: 0.25,
-        ease: "power2.out",
-        overwrite: "auto",
-      });
-    } else {
-      gsap.to(inner, {
-        height: 80,
-        duration: 0.25,
-        ease: "power2.out",
-        overwrite: "auto",
-      });
-    }
-  }, [isScrolled, prefersReducedMotion]);
+  // Close everything on route change
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsMegaOpen(false);
+    setIsMobileOpen(false);
+    setIsMobilePagesOpen(false);
+  }, [pathname]);
 
   // -------------------------------------------------------------
-  // B) Active Indicator Sliding Logic
+  // Sliding glass pill indicator
   // -------------------------------------------------------------
   const updateIndicator = useCallback(() => {
     const nav = linksNavRef.current;
     const indicator = indicatorRef.current;
     if (!nav || !indicator || !isDesktop) return;
 
-    // Find active element (either hovered item or current route link)
-    const activeEl =
-      activeHoverIndex !== null
-        ? linkRefs.current[activeHoverIndex]
-        : (nav.querySelector("a[data-active='true']") as HTMLElement);
+    const targetIndex = isMegaOpen ? navLinks.length : activeHoverIndex;
+    const hovered = targetIndex !== null;
 
-    if (activeEl) {
-      const left = activeEl.offsetLeft;
-      const width = activeEl.offsetWidth;
+    const el = hovered
+      ? linkRefs.current[targetIndex as number]
+      : (nav.querySelector("a[data-active='true']") as HTMLElement | null);
 
-      if (prefersReducedMotion) {
-        gsap.set(indicator, { opacity: 1, x: left, width });
-      } else {
-        gsap.to(indicator, {
-          opacity: 1,
-          x: left,
-          width,
-          duration: 0.28,
-          ease: "power2.out",
-          overwrite: "auto",
-        });
-      }
+    if (!el) {
+      gsap.to(indicator, { opacity: 0, duration: 0.2, overwrite: "auto" });
+      return;
+    }
+
+    const props = {
+      x: el.offsetLeft,
+      width: el.offsetWidth,
+      opacity: hovered ? 1 : 0.6,
+    };
+
+    if (prefersReducedMotion) {
+      gsap.set(indicator, props);
     } else {
       gsap.to(indicator, {
-        opacity: 0,
-        duration: 0.2,
+        ...props,
+        duration: 0.32,
+        ease: "power3.out",
         overwrite: "auto",
       });
     }
-  }, [activeHoverIndex, isDesktop, prefersReducedMotion]);
+  }, [activeHoverIndex, isMegaOpen, isDesktop, prefersReducedMotion]);
 
   useEffect(() => {
     updateIndicator();
   }, [updateIndicator, pathname]);
 
   // -------------------------------------------------------------
-  // C) Mega Menu Animation Timeline
+  // Mega menu open / close animation
   // -------------------------------------------------------------
   useGSAP(
     () => {
       const panel = megaPanelRef.current;
-      if (!panel) return;
+      const backdrop = megaBackdropRef.current;
+      if (!panel || !backdrop) return;
+
+      megaTimelineRef.current?.kill();
 
       if (isMegaOpen) {
-        if (megaTimelineRef.current) megaTimelineRef.current.kill();
-
         const tl = gsap.timeline();
         megaTimelineRef.current = tl;
+        tl.set([panel, backdrop], { visibility: "visible" });
 
         if (prefersReducedMotion) {
-          tl.fromTo(panel, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "none" });
+          tl.to([panel, backdrop], { opacity: 1, duration: 0.15, ease: "none" });
         } else {
           tl.fromTo(
             panel,
-            { opacity: 0, y: -12, scale: 0.985 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.32, ease: "power3.out" }
+            { opacity: 0, y: -10 },
+            { opacity: 1, y: 0, duration: 0.38, ease: "power3.out" },
+            0
           );
-
-          const groups = panel.querySelectorAll(".mega-group");
-          const promo = panel.querySelector(".mega-promo");
-
-          if (groups.length) {
+          tl.fromTo(
+            backdrop,
+            { opacity: 0 },
+            { opacity: 1, duration: 0.3, ease: "power2.out" },
+            0
+          );
+          const items = panel.querySelectorAll(".mega-reveal");
+          if (items.length) {
             tl.fromTo(
-              groups,
-              { opacity: 0, y: 14 },
-              { opacity: 1, y: 0, stagger: 0.05, duration: 0.3, ease: "power2.out" },
-              "-=0.2"
-            );
-          }
-
-          if (promo) {
-            tl.fromTo(
-              promo,
-              { opacity: 0, scale: 0.96 },
-              { opacity: 1, scale: 1, duration: 0.35, ease: "power2.out" },
-              "-=0.25"
+              items,
+              { opacity: 0, y: 12 },
+              { opacity: 1, y: 0, stagger: 0.045, duration: 0.4, ease: "power2.out" },
+              0.08
             );
           }
         }
-      } else if (megaTimelineRef.current) {
-        megaTimelineRef.current.kill();
-        if (panel) {
-          gsap.to(panel, {
-            opacity: 0,
-            y: prefersReducedMotion ? 0 : -8,
-            duration: 0.2,
-            ease: "power2.in",
-            overwrite: "auto",
-          });
-        }
+      } else {
+        gsap.to([panel, backdrop], {
+          opacity: 0,
+          duration: prefersReducedMotion ? 0.1 : 0.2,
+          ease: "power2.in",
+          overwrite: "auto",
+          onComplete: () => {
+            gsap.set([panel, backdrop], { visibility: "hidden" });
+          },
+        });
       }
     },
     { dependencies: [isMegaOpen, prefersReducedMotion] }
@@ -205,12 +202,10 @@ export function Navbar({}: NavbarProps) {
 
   const scheduleCloseMegaMenu = () => {
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-    closeTimerRef.current = setTimeout(() => {
-      setIsMegaOpen(false);
-    }, 220);
+    closeTimerRef.current = setTimeout(() => setIsMegaOpen(false), 160);
   };
 
-  // Close menus on Escape key
+  // Escape closes everything
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -224,55 +219,45 @@ export function Navbar({}: NavbarProps) {
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
-    if (isMobileOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = isMobileOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
   }, [isMobileOpen]);
 
-  // Mobile menu GSAP animation
+  // -------------------------------------------------------------
+  // Mobile sheet animation
+  // -------------------------------------------------------------
   useGSAP(
     () => {
-      const overlay = mobileMenuRef.current;
-      if (!overlay) return;
+      const sheet = mobileMenuRef.current;
+      if (!sheet || !isMobileOpen) return;
 
-      if (isMobileOpen) {
-        if (prefersReducedMotion) {
-          gsap.set(overlay, { opacity: 1 });
-        } else {
-          gsap.fromTo(
-            overlay,
-            { clipPath: "polygon(0 0, 100% 0, 100% 0, 0 0)" },
-            {
-              clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)",
-              duration: 0.45,
-              ease: "power3.inOut",
-            }
-          );
+      if (prefersReducedMotion) {
+        gsap.set(sheet, { opacity: 1 });
+        return;
+      }
 
-          const items = overlay.querySelectorAll(".mobile-nav-item");
-          const footer = overlay.querySelector(".mobile-nav-footer");
+      gsap.fromTo(
+        sheet,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.3, ease: "power2.out" }
+      );
 
-          if (items.length) {
-            gsap.fromTo(
-              items,
-              { opacity: 0, y: 24 },
-              { opacity: 1, y: 0, stagger: 0.06, delay: 0.15, duration: 0.4, ease: "power3.out" }
-            );
+      const items = sheet.querySelectorAll(".mobile-reveal");
+      if (items.length) {
+        gsap.fromTo(
+          items,
+          { opacity: 0, y: 20 },
+          {
+            opacity: 1,
+            y: 0,
+            stagger: 0.05,
+            delay: 0.08,
+            duration: 0.45,
+            ease: "power3.out",
           }
-
-          if (footer) {
-            gsap.fromTo(
-              footer,
-              { opacity: 0, y: 16 },
-              { opacity: 1, y: 0, delay: 0.35, duration: 0.4, ease: "power2.out" }
-            );
-          }
-        }
+        );
       }
     },
     { dependencies: [isMobileOpen, prefersReducedMotion] }
@@ -280,61 +265,57 @@ export function Navbar({}: NavbarProps) {
 
   return (
     <>
-      {/* Skip to Content accessible link */}
+      {/* Skip link */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 z-50 rounded-md bg-accent px-4 py-2 font-medium text-brand-dark shadow-lg outline-none ring-2 ring-accent transition"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 z-[60] rounded-full bg-accent px-4 py-2 text-sm font-semibold text-brand-dark shadow-lg outline-none ring-2 ring-accent"
       >
         Skip to main content
       </a>
 
-      {/* Permanently fixed, always visible, dark glassmorphism navbar */}
+      {/* Dim + blur backdrop behind the mega menu */}
+      <div
+        ref={megaBackdropRef}
+        onMouseEnter={scheduleCloseMegaMenu}
+        onClick={() => setIsMegaOpen(false)}
+        aria-hidden="true"
+        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+        style={{ visibility: "hidden", opacity: 0 }}
+      />
+
+      {/* ---------------- Header ---------------- */}
       <header
-        ref={navContainerRef}
-        className="fixed top-0 left-0 right-0 z-50 border-b transition-[background-color,border-color,box-shadow] duration-300"
-        style={{
-          height: "var(--nav-h, 5rem)",
-          backgroundColor: isScrolled ? "rgba(10, 10, 10, 0.88)" : "rgba(10, 10, 10, 0.72)",
-          backdropFilter: "blur(16px) saturate(160%)",
-          WebkitBackdropFilter: "blur(16px) saturate(160%)",
-          borderColor: isScrolled ? "rgba(255, 255, 255, 0.15)" : "rgba(255, 255, 255, 0.09)",
-          boxShadow: isScrolled ? "0 10px 30px -5px rgba(0, 0, 0, 0.4)" : "none",
-        }}
+        className={`fixed inset-x-0 top-0 z-50 backdrop-blur-xl backdrop-saturate-[180%] transition-[background-color,border-color] duration-300 border-b ${isScrolled || isMegaOpen || isMobileOpen
+            ? "bg-brand-dark/85 border-white/10"
+            : "bg-brand-dark/60 border-transparent"
+          }`}
+        style={{ height: `var(--nav-h, ${NAV_HEIGHT})` }}
       >
         <Container>
-          <div
-            ref={navInnerRef}
-            className="flex h-20 items-center justify-between transition-[height] duration-250"
-          >
-            {/* 1. Brand Logo */}
+          <div className="relative flex h-[3.25rem] items-center justify-between">
+            {/* 1. Wordmark */}
             <Link
               href="/"
-              className="group flex items-center shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg py-1"
               aria-label="GuruOm Dental - Home"
+              className="shrink-0 rounded-md font-just-serif text-[21px] font-normal tracking-tight text-white outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-accent"
+              style={{ fontFamily: "var(--font-just-serif), serif" }}
             >
-              <Image
-                src="/images/NewLogo2nd-Viraj-Guru-OM-PNG.png"
-                alt="GuruOm Dental"
-                width={160}
-                height={37}
-                priority
-                style={{ width: "auto", height: "36px" }}
-                className="w-auto h-9 max-h-9 object-contain object-left transition-transform duration-300 group-hover:scale-[1.02] drop-shadow-sm"
-              />
+              GuruOm Dental
             </Link>
 
-            {/* 2. Desktop Centered Navigation Links */}
+            {/* 2. Desktop links */}
             <nav
               ref={linksNavRef}
-              className="relative hidden lg:flex items-center gap-1"
               aria-label="Primary Navigation"
+              className="relative hidden items-center gap-0.5 lg:flex"
+              onMouseLeave={() => setActiveHoverIndex(null)}
             >
-              {/* Sliding Active Pill Indicator */}
+              {/* Glass pill */}
               <span
                 ref={indicatorRef}
-                className="pointer-events-none absolute bottom-0 h-0.5 rounded-full transition-opacity duration-200 bg-accent"
-                style={{ opacity: 0 }}
                 aria-hidden="true"
+                className="pointer-events-none absolute left-0 top-1/2 -mt-4 h-8 rounded-full bg-white/10 ring-1 ring-inset ring-white/[0.06]"
+                style={{ opacity: 0 }}
               />
 
               {navLinks.map((link, idx) => {
@@ -347,161 +328,68 @@ export function Navbar({}: NavbarProps) {
                     }}
                     href={link.href}
                     data-active={active}
-                    onMouseEnter={() => setActiveHoverIndex(idx)}
-                    onMouseLeave={() => setActiveHoverIndex(null)}
                     aria-current={active ? "page" : undefined}
-                    className={`group relative px-3 py-2 text-sm font-medium transition-colors rounded-md outline-none focus-visible:ring-2 focus-visible:ring-accent ${
-                      active ? "text-accent font-semibold" : "text-white/85 hover:text-white"
-                    }`}
+                    onMouseEnter={() => {
+                      setActiveHoverIndex(idx);
+                      scheduleCloseMegaMenu();
+                    }}
+                    onFocus={() => setActiveHoverIndex(idx)}
+                    onBlur={() => setActiveHoverIndex(null)}
+                    className={`relative z-10 flex h-8 items-center rounded-full px-3.5 text-[13px] tracking-tight outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent ${active
+                        ? "font-semibold text-white"
+                        : "font-medium text-white/70 hover:text-white"
+                      }`}
                   >
-                    {/* Text-roll hover animation */}
-                    <span className="relative inline-flex flex-col h-5 overflow-hidden">
-                      <span className="transition-transform duration-300 ease-out group-hover:-translate-y-full">
-                        {link.label}
-                      </span>
-                      <span
-                        className="absolute top-full left-0 transition-transform duration-300 ease-out group-hover:-translate-y-full text-accent font-medium"
-                        aria-hidden="true"
-                      >
-                        {link.label}
-                      </span>
-                    </span>
+                    {link.label}
                   </Link>
                 );
               })}
 
-              {/* Mega Menu "Pages" Trigger */}
-              <div
-                className="relative"
+              {/* Pages trigger */}
+              <button
+                ref={(el) => {
+                  linkRefs.current[navLinks.length] = el;
+                }}
+                type="button"
+                aria-expanded={isMegaOpen}
+                aria-haspopup="true"
+                aria-controls="desktop-mega-menu"
                 onMouseEnter={() => {
                   setActiveHoverIndex(navLinks.length);
                   openMegaMenu();
                 }}
-                onMouseLeave={() => {
-                  setActiveHoverIndex(null);
-                  scheduleCloseMegaMenu();
-                }}
-              >
-                <button
-                  ref={(el) => {
-                    linkRefs.current[navLinks.length] = el;
-                  }}
-                  type="button"
-                  onClick={() => setIsMegaOpen((prev) => !prev)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      setIsMegaOpen((prev) => !prev);
-                    }
-                  }}
-                  aria-expanded={isMegaOpen}
-                  aria-haspopup="true"
-                  aria-controls="desktop-mega-menu"
-                  className={`group flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md outline-none focus-visible:ring-2 focus-visible:ring-accent transition-colors ${
-                    isMegaOpen ? "text-accent" : "text-white/85 hover:text-white"
+                onFocus={() => setActiveHoverIndex(navLinks.length)}
+                onBlur={() => setActiveHoverIndex(null)}
+                onClick={() => setIsMegaOpen((p) => !p)}
+                className={`relative z-10 flex h-8 items-center gap-1 rounded-full px-3.5 text-[13px] font-medium tracking-tight outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent ${isMegaOpen ? "text-white" : "text-white/70 hover:text-white"
                   }`}
-                >
-                  <span>Pages</span>
-                  <svg
-                    className={`h-4 w-4 transition-transform duration-300 ${
-                      isMegaOpen ? "rotate-180 text-accent" : "text-white/60 group-hover:text-white"
+              >
+                Pages
+                <svg
+                  className={`h-3.5 w-3.5 transition-transform duration-300 ${isMegaOpen ? "rotate-180" : ""
                     }`}
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-
-                {/* Mega Menu Dropdown Panel (Dark Theme) */}
-                {isMegaOpen && (
-                  <div
-                    id="desktop-mega-menu"
-                    ref={megaPanelRef}
-                    className="absolute top-full -left-48 mt-3 w-[720px] rounded-2xl bg-black/90 backdrop-blur-xl p-6 shadow-2xl ring-1 ring-white/10 border border-white/10 z-50 text-white"
-                    onMouseEnter={openMegaMenu}
-                    onMouseLeave={scheduleCloseMegaMenu}
-                  >
-                    <div className="grid grid-cols-4 gap-6">
-                      {/* 3 Link Groups */}
-                      {megaMenuGroups.map((group) => (
-                        <div key={group.title} className="mega-group flex flex-col gap-3">
-                          <span className="text-xs font-bold uppercase tracking-wider text-accent">
-                            {group.title}
-                          </span>
-                          <ul className="flex flex-col gap-2">
-                            {group.items.map((item) => (
-                              <li key={item.label}>
-                                <Link
-                                  href={item.href}
-                                  onClick={() => setIsMegaOpen(false)}
-                                  className="group/item block rounded-lg p-1.5 transition-colors hover:bg-white/5 outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                                >
-                                  <div className="text-sm font-semibold text-white group-hover/item:text-accent transition-colors">
-                                    {item.label}
-                                  </div>
-                                  <div className="text-[11px] text-white/60 line-clamp-1 leading-snug">
-                                    {item.description}
-                                  </div>
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-
-                      {/* Mega Menu Promo Card */}
-                      <div className="mega-promo flex flex-col justify-between rounded-xl bg-white/5 p-4 border border-white/10">
-                        <div className="flex flex-col gap-2">
-                          <div className="overflow-hidden rounded-lg">
-                            <SmartImage
-                              slot="navPromo"
-                              alt="Book your first visit consultation"
-                              aspect="4/5"
-                              className="rounded-lg object-cover"
-                            />
-                          </div>
-                          <Badge variant="outline" size="sm" className="w-fit mt-1 border-accent/40 text-accent">
-                            New Patients
-                          </Badge>
-                          <h4 className="font-display text-sm font-bold text-white">
-                            Book your first visit
-                          </h4>
-                          <p className="text-xs text-white/70 leading-relaxed font-body">
-                            Experience comprehensive oral scanning with zero radiation discomfort.
-                          </p>
-                        </div>
-                        <div className="mt-4">
-                          <Button
-                            href="/appointment"
-                            variant="primary"
-                            size="sm"
-                            className="w-full text-xs justify-center"
-                            onClick={() => setIsMegaOpen(false)}
-                          >
-                            Get Started
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M5 8l5 5 5-5" />
+                </svg>
+              </button>
             </nav>
 
-            {/* 3. Right Action Area (Phone + Magnetic Button) */}
-            <div className="hidden lg:flex items-center gap-5">
+            {/* 3. Right actions */}
+            <div className="hidden items-center gap-2 lg:flex">
               <a
-                href={`tel:${siteConfig.phone.replace(/[^+\d]/g, "")}`}
-                className="flex items-center gap-2 text-sm font-medium text-white/85 hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-md"
+                href={phoneHref}
+                aria-label={`Call ${siteConfig.phone}`}
+                className="inline-flex h-8 items-center gap-2 rounded-full px-3 text-[13px] font-medium text-white/70 outline-none transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <svg
-                  className="h-4 w-4 text-accent"
+                  className="h-3.5 w-3.5 text-accent"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -512,45 +400,110 @@ export function Navbar({}: NavbarProps) {
                 >
                   <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
                 </svg>
-                <span>{siteConfig.phone}</span>
+                <span className="hidden xl:inline">{siteConfig.phone}</span>
               </a>
+
+              <Link
+                href="/contact"
+                className="inline-flex h-8 items-center rounded-full bg-accent px-4 text-[13px] font-semibold text-brand-dark outline-none transition-all duration-200 hover:brightness-110 focus-visible:ring-2 focus-visible:ring-white active:scale-[0.97]"
+              >
+                Contact
+              </Link>
             </div>
 
-            {/* 4. Mobile Hamburger Button */}
-            <div className="flex lg:hidden items-center gap-2">
-              <button
-                ref={hamburgerButtonRef}
-                type="button"
-                onClick={() => setIsMobileOpen((prev) => !prev)}
-                aria-expanded={isMobileOpen}
-                aria-controls="mobile-navigation-menu"
-                aria-label={isMobileOpen ? "Close navigation menu" : "Open navigation menu"}
-                className="relative flex h-11 w-11 items-center justify-center rounded-xl p-2.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent bg-white/10 text-white hover:bg-white/15"
-              >
-                <div className="relative flex flex-col justify-between w-5 h-4">
-                  <span
-                    className={`h-0.5 w-full rounded-full bg-current transition-all duration-300 ${
-                      isMobileOpen ? "translate-y-[7px] rotate-45" : ""
+            {/* 4. Mobile hamburger */}
+            <button
+              type="button"
+              onClick={() => setIsMobileOpen((p) => !p)}
+              aria-expanded={isMobileOpen}
+              aria-controls="mobile-navigation-menu"
+              aria-label={isMobileOpen ? "Close navigation menu" : "Open navigation menu"}
+              className="relative -mr-2 flex h-10 w-10 items-center justify-center rounded-full text-white outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-accent lg:hidden"
+            >
+              <span className="relative block h-[18px] w-[18px]">
+                <span
+                  className={`absolute left-0 h-[1.5px] w-full rounded-full bg-current transition-all duration-300 ${isMobileOpen ? "top-1/2 rotate-45" : "top-[5px]"
                     }`}
-                  />
-                  <span
-                    className={`h-0.5 w-full rounded-full bg-current transition-opacity duration-200 ${
-                      isMobileOpen ? "opacity-0" : "opacity-100"
+                />
+                <span
+                  className={`absolute left-0 h-[1.5px] w-full rounded-full bg-current transition-all duration-300 ${isMobileOpen ? "top-1/2 -rotate-45" : "top-[12px]"
                     }`}
-                  />
-                  <span
-                    className={`h-0.5 w-full rounded-full bg-current transition-all duration-300 ${
-                      isMobileOpen ? "-translate-y-[7px] -rotate-45" : ""
-                    }`}
-                  />
-                </div>
-              </button>
-            </div>
+                />
+              </span>
+            </button>
           </div>
         </Container>
+
+        {/* ---------------- Mega menu panel (always mounted) ---------------- */}
+        <div
+          id="desktop-mega-menu"
+          ref={megaPanelRef}
+          onMouseEnter={openMegaMenu}
+          onMouseLeave={scheduleCloseMegaMenu}
+          className="absolute inset-x-0 top-full hidden border-b border-white/10 bg-brand-dark/95 text-white shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)] backdrop-blur-2xl backdrop-saturate-[180%] lg:block"
+          style={{ visibility: "hidden", opacity: 0 }}
+        >
+          <Container>
+            <div className="grid grid-cols-12 gap-10 py-10">
+              {/* Link groups */}
+              <div className="col-span-9 grid grid-cols-3 gap-8">
+                {megaMenuGroups.map((group) => (
+                  <div key={group.title} className="mega-reveal flex flex-col gap-4">
+                    <span className="text-xs font-medium text-white/50">
+                      {group.title}
+                    </span>
+                    <ul className="flex flex-col gap-3.5">
+                      {group.items.map((item) => (
+                        <li key={item.label}>
+                          <Link
+                            href={item.href}
+                            onClick={() => setIsMegaOpen(false)}
+                            className="group/item block rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                          >
+                            <span className="block text-[17px] font-semibold leading-tight tracking-tight text-white transition-colors group-hover/item:text-accent">
+                              {item.label}
+                            </span>
+                            <span className="mt-0.5 block text-[12px] leading-snug text-white/50 line-clamp-1">
+                              {item.description}
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+
+              {/* Promo */}
+              <div className="mega-reveal col-span-3">
+                <div className="flex h-full flex-col justify-between gap-6 rounded-3xl border border-white/10 bg-white/[0.05] p-6">
+                  <div className="flex flex-col gap-2">
+                    <span className="w-fit rounded-full bg-accent/15 px-2.5 py-1 text-[11px] font-semibold text-accent">
+                      New patients
+                    </span>
+                    <h4 className="mt-1 font-display text-xl font-bold leading-tight tracking-tight">
+                      Book your first visit.
+                    </h4>
+                    <p className="text-[13px] leading-relaxed text-white/60">
+                      Comprehensive oral scanning with zero radiation discomfort.
+                    </p>
+                  </div>
+                  <Link
+                    href="/contact"
+                    onClick={() => setIsMegaOpen(false)}
+                    className="inline-flex w-fit items-center gap-1 rounded-full bg-accent px-4 py-2 text-[13px] font-semibold text-brand-dark outline-none transition-all hover:brightness-110 focus-visible:ring-2 focus-visible:ring-white active:scale-[0.97]"
+                  >
+                    Contact Labs
+                    <Chevron className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </Container>
+        </div>
       </header>
 
-      {/* 5. Mobile Fullscreen Overlay Menu */}
+      {/* ---------------- Mobile sheet ---------------- */}
       {isMobileOpen && (
         <div
           id="mobile-navigation-menu"
@@ -558,75 +511,106 @@ export function Navbar({}: NavbarProps) {
           role="dialog"
           aria-modal="true"
           aria-label="Mobile Navigation"
-          className="fixed inset-0 z-40 flex flex-col justify-between bg-brand-dark px-6 pt-24 pb-8 text-white lg:hidden overflow-y-auto"
+          className="fixed inset-0 z-40 flex flex-col overflow-y-auto bg-brand-dark/95 text-white backdrop-blur-2xl lg:hidden"
+          style={{ paddingTop: `calc(var(--nav-h, ${NAV_HEIGHT}) + 1rem)` }}
         >
-          {/* Main Links List */}
-          <div className="flex flex-col gap-5 pt-4">
-            <span className="text-xs font-semibold uppercase tracking-widest text-accent">
-              Menu
-            </span>
-            <ul className="flex flex-col gap-3">
+          <Container className="flex flex-1 flex-col justify-between pb-8">
+            <ul className="flex flex-col">
               {navLinks.map((link) => {
                 const active = isRouteActive(link.href);
                 return (
-                  <li key={link.href} className="mobile-nav-item">
+                  <li key={link.href} className="mobile-reveal border-b border-white/10">
                     <Link
                       href={link.href}
                       onClick={() => setIsMobileOpen(false)}
                       aria-current={active ? "page" : undefined}
-                      className={`font-display text-3xl font-bold tracking-tight transition-colors hover:text-accent outline-none focus-visible:underline ${
-                        active ? "text-accent" : "text-white"
-                      }`}
+                      className={`flex items-center justify-between py-4 font-display text-[28px] font-semibold tracking-tight outline-none transition-colors focus-visible:text-accent ${active ? "text-accent" : "text-white"
+                        }`}
                     >
                       {link.label}
+                      <Chevron className="h-5 w-5 text-white/30" />
                     </Link>
                   </li>
                 );
               })}
+
+              {/* Pages accordion */}
+              <li className="mobile-reveal border-b border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setIsMobilePagesOpen((p) => !p)}
+                  aria-expanded={isMobilePagesOpen}
+                  className="flex w-full items-center justify-between py-4 font-display text-[28px] font-semibold tracking-tight text-white outline-none focus-visible:text-accent"
+                >
+                  Pages
+                  <svg
+                    className={`h-5 w-5 text-white/30 transition-transform duration-300 ${isMobilePagesOpen ? "rotate-180" : ""
+                      }`}
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M5 8l5 5 5-5" />
+                  </svg>
+                </button>
+
+                <div
+                  className={`grid transition-[grid-template-rows] duration-300 ease-out ${isMobilePagesOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                    }`}
+                >
+                  <div className="overflow-hidden">
+                    <div className="flex flex-col gap-6 pb-5 pt-1">
+                      {megaMenuGroups.map((group) => (
+                        <div key={group.title} className="flex flex-col gap-2.5">
+                          <span className="text-xs font-medium text-white/50">
+                            {group.title}
+                          </span>
+                          {group.items.map((item) => (
+                            <Link
+                              key={item.label}
+                              href={item.href}
+                              onClick={() => setIsMobileOpen(false)}
+                              className="text-lg font-semibold tracking-tight text-white/90 outline-none transition-colors hover:text-accent focus-visible:text-accent"
+                            >
+                              {item.label}
+                            </Link>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </li>
             </ul>
 
-            {/* Quick pages group for mobile */}
-            <div className="mobile-nav-item mt-4 pt-4 border-t border-white/10 flex flex-wrap gap-2">
-              <Link
-                href="/services"
-                onClick={() => setIsMobileOpen(false)}
-                className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
-              >
-                All Services
-              </Link>
+            {/* Footer */}
+            <div className="mobile-reveal mt-10 flex flex-col gap-5">
+              <div className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-white/50">Front desk</span>
+                <a
+                  href={phoneHref}
+                  className="text-xl font-semibold tracking-tight text-white transition-colors hover:text-accent"
+                >
+                  {siteConfig.phone}
+                </a>
+                <span className="mt-1 text-xs leading-relaxed text-white/50">
+                  {siteConfig.address.full}
+                </span>
+              </div>
+
               <Link
                 href="/contact"
                 onClick={() => setIsMobileOpen(false)}
-                className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+                className="flex h-12 w-full items-center justify-center rounded-full bg-accent text-[15px] font-semibold text-brand-dark outline-none transition-all active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-white"
               >
-                Clinic Location
+                Contact
               </Link>
             </div>
-          </div>
-
-          {/* Footer Contact Info & CTA in Mobile Menu */}
-          <div className="mobile-nav-footer mt-8 flex flex-col gap-5 border-t border-white/15 pt-6">
-            <div className="flex flex-col gap-1 text-sm text-surface-alt">
-              <span className="font-semibold text-white">Call Front Desk</span>
-              <a
-                href={`tel:${siteConfig.phone.replace(/[^+\d]/g, "")}`}
-                className="text-accent hover:underline text-base font-bold"
-              >
-                {siteConfig.phone}
-              </a>
-              <span className="text-xs text-white/70 mt-1">{siteConfig.address.full}</span>
-            </div>
-
-            <Button
-              href="/appointment"
-              variant="secondary"
-              size="lg"
-              className="w-full text-brand-dark font-bold justify-center"
-              onClick={() => setIsMobileOpen(false)}
-            >
-              Book Appointment
-            </Button>
-          </div>
+          </Container>
         </div>
       )}
     </>

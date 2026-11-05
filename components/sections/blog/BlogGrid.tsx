@@ -5,7 +5,9 @@ import Link from "next/link";
 import { Search, X, Calendar, Clock, ArrowRight, RotateCcw } from "lucide-react";
 import type { BlogPost, BlogCategory } from "@/src/server/blog/types";
 import { formatDate } from "@/src/lib/blog-format";
+import Image from "next/image";
 import { SmartImage } from "@/components/ui/SmartImage";
+import cloudinaryLoader from "@/src/lib/media/cloudinary-loader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
@@ -186,11 +188,10 @@ export const BlogGrid: React.FC<BlogGridProps> = ({
               type="button"
               onClick={() => handleCategoryChange("all")}
               aria-pressed={selectedCategory === "all"}
-              className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 ${
-                selectedCategory === "all"
-                  ? "bg-brand text-white shadow-soft"
-                  : "bg-surface text-ink hover:bg-surface-alt border border-line"
-              }`}
+              className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 ${selectedCategory === "all"
+                ? "bg-brand text-white shadow-soft"
+                : "bg-surface text-ink hover:bg-surface-alt border border-line"
+                }`}
             >
               All Topics ({posts.length})
             </button>
@@ -205,11 +206,10 @@ export const BlogGrid: React.FC<BlogGridProps> = ({
                   type="button"
                   onClick={() => handleCategoryChange(cat.slug)}
                   aria-pressed={isSelected}
-                  className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 ${
-                    isSelected
-                      ? "bg-brand text-white shadow-soft"
-                      : "bg-surface text-ink hover:bg-surface-alt border border-line"
-                  }`}
+                  className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 ${isSelected
+                    ? "bg-brand text-white shadow-soft"
+                    : "bg-surface text-ink hover:bg-surface-alt border border-line"
+                    }`}
                 >
                   <span>{cat.label}</span>
                   <span className="ml-1.5 opacity-70 text-[11px]">({count})</span>
@@ -252,12 +252,26 @@ export const BlogGrid: React.FC<BlogGridProps> = ({
                   >
                     {/* Cover Thumbnail 16/10 */}
                     <div className="relative w-full aspect-[16/10] overflow-hidden bg-surface-alt">
-                      <SmartImage
-                        slot={post.coverSlot || undefined}
-                        alt={post.title}
-                        ratio="16/10"
-                        className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                      />
+                      {post.coverMedia ? (
+                        <Image
+                          loader={cloudinaryLoader}
+                          src={post.coverMedia.publicId}
+                          alt={post.coverAltOverride || post.coverMedia.alt || post.title}
+                          role={post.coverMedia.decorative && !post.coverAltOverride ? "presentation" : undefined}
+                          fill
+                          placeholder={post.coverMedia.blurDataUrl ? "blur" : "empty"}
+                          blurDataURL={post.coverMedia.blurDataUrl || undefined}
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 380px"
+                          className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                        />
+                      ) : (
+                        <SmartImage
+                          slot={post.coverSlot || undefined}
+                          alt={post.title}
+                          ratio="16/10"
+                          className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                        />
+                      )}
                       {/* Subtle dark tint on hover */}
                       <div className="absolute inset-0 bg-brand-dark/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>

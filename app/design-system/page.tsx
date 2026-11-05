@@ -64,7 +64,7 @@ export default function DesignSystemPage() {
                 <Badge variant="accent" size="sm">Design System v1.0</Badge>
               </div>
               <p className="text-body text-ink-muted max-w-2xl">
-                Calm, premium, trustworthy, and clinical but warm. Built on Tailwind CSS v4 (@theme), Next/Font (Instrument Serif & DM Sans), and motion-ready primitives.
+                Calm, premium, trustworthy, and clinical but warm. Built on Tailwind CSS v4 (@theme), Next/Font (JUST Serif & DM Sans), and motion-ready primitives.
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -113,7 +113,7 @@ export default function DesignSystemPage() {
           <div className="mb-10">
             <Eyebrow variant="line" color="brand">Fluid Clamp Scale</Eyebrow>
             <h2 className="text-display-md text-ink mt-2">2. Typography Scale</h2>
-            <p className="text-body text-ink-muted">Instrument Serif (Display) + DM Sans (Body). Fluid clamp() units scale seamlessly across viewports.</p>
+            <p className="text-body text-ink-muted">JUST Serif (Display) + DM Sans (Body). Fluid clamp() units scale seamlessly across viewports.</p>
           </div>
 
           <div className="space-y-10 border-t border-line pt-8">

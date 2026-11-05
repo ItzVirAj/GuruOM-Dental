@@ -39,10 +39,11 @@ async function runCheck() {
   try {
     // 1. Verify Seeded Post Count
     console.log("Checking seeded database counts...");
+    const seededSlugs = blogPosts.map((p) => p.slug);
     const currentPostCount = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(schema.posts)
-      .where(isNull(schema.posts.deletedAt));
+      .where(inArray(schema.posts.slug, seededSlugs));
 
     const totalCount = currentPostCount[0]?.count ?? 0;
     const expectedCount = blogPosts.length;

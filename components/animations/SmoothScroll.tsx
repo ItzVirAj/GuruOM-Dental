@@ -44,6 +44,14 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
       gestureOrientation: "vertical",
       smoothWheel: true,
       syncTouch: false, // Keep native touch physics on mobile/touch devices
+      prevent: (node) => {
+        return Boolean(
+          node instanceof HTMLElement &&
+            (node.hasAttribute("data-lenis-prevent") ||
+              node.closest("[data-lenis-prevent]") ||
+              node.closest("[data-owner-portal]"))
+        );
+      },
     });
 
     lenisRef.current = lenis;

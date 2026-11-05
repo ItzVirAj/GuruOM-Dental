@@ -5,7 +5,9 @@ import Link from "next/link";
 import { ArrowRight, Clock, Calendar } from "lucide-react";
 import type { BlogPost } from "@/src/server/blog/types";
 import { formatDate } from "@/src/lib/blog-format";
+import Image from "next/image";
 import { SmartImage } from "@/components/ui/SmartImage";
+import cloudinaryLoader from "@/src/lib/media/cloudinary-loader";
 import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
 
@@ -57,12 +59,26 @@ export const BlogRelatedPosts: React.FC<BlogRelatedPostsProps> = ({ posts }) => 
                     className="flex flex-col flex-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 rounded-3xl"
                   >
                     <div className="relative w-full aspect-[16/10] overflow-hidden bg-surface-alt">
-                      <SmartImage
-                        slot={post.coverSlot || undefined}
-                        alt={post.title}
-                        ratio="16/10"
-                        className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                      />
+                      {post.coverMedia ? (
+                        <Image
+                          loader={cloudinaryLoader}
+                          src={post.coverMedia.publicId}
+                          alt={post.coverAltOverride || post.coverMedia.alt || post.title}
+                          role={post.coverMedia.decorative && !post.coverAltOverride ? "presentation" : undefined}
+                          fill
+                          placeholder={post.coverMedia.blurDataUrl ? "blur" : "empty"}
+                          blurDataURL={post.coverMedia.blurDataUrl || undefined}
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 380px"
+                          className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                        />
+                      ) : (
+                        <SmartImage
+                          slot={post.coverSlot || undefined}
+                          alt={post.title}
+                          ratio="16/10"
+                          className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                        />
+                      )}
                     </div>
 
                     <div className="p-5 flex flex-col flex-1 justify-between">

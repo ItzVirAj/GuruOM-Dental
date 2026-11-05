@@ -60,6 +60,23 @@ export interface LegalInventory {
     activeToday: boolean;
   }[];
   forms: FormInventoryItem[];
+  securityAndAuditLogs?: {
+    securityEvents: {
+      used: boolean;
+      description: string;
+      retention: string;
+    };
+    rateLimitingHashes: {
+      used: boolean;
+      description: string;
+      retention: string;
+    };
+    ownerAuditLog: {
+      used: boolean;
+      description: string;
+      retention: string;
+    };
+  };
   pendingIntegrations: {
     feature: string;
     plannedProvider: string;
@@ -78,12 +95,11 @@ export const legalDataInventory: LegalInventory = {
   },
   clientStorage: {
     sessionStorage: {
-      used: true,
-      keys: ["guruom_booking_draft_v1"],
-      retention: "Cleared immediately upon booking submission or tab closure.",
+      used: false,
+      keys: [],
+      retention: "Not in active use.",
       containsPii: false,
-      description:
-        "Used exclusively in the appointment booking wizard to preserve non-PII step selections (treatment, doctor preference, visit type, care plan, date, and time slot) across step transitions. Patient full name, phone number, email, and notes are strictly excluded from sessionStorage.",
+      description: "No client-side sessionStorage is stored.",
     },
     localStorage: {
       used: false,
@@ -97,7 +113,43 @@ export const legalDataInventory: LegalInventory = {
     description:
       "No analytics SDKs (such as Google Analytics, Mixpanel, Meta Pixel) or tag managers are installed. Web vitals or performance metrics are not transmitted to external telemetry servers.",
   },
+  securityAndAuditLogs: {
+    securityEvents: {
+      used: true,
+      description:
+        "Security event logs recording failed authentication attempts, account lockouts, CSRF rejections, and CSP violation reports for threat mitigation and defense.",
+      retention: "Retained for up to 180 days, then purged via automated maintenance.",
+    },
+    rateLimitingHashes: {
+      used: true,
+      description:
+        "Pseudonymized rate limiting backed by PostgreSQL. IP addresses are cryptographically salted and hashed using SHA-256 before storage; raw IP addresses are never persisted for rate limiting.",
+      retention: "Automatically expires and purged after window expiry (1 to 10 minutes).",
+    },
+    ownerAuditLog: {
+      used: true,
+      description:
+        "Tamper-evident administrative audit log chaining administrative mutations with SHA-256 hashes to guarantee administrative transparency and accountability.",
+      retention: "Retained for up to 180 days with linear hash checkpoint verification.",
+    },
+  },
   thirdPartyServices: [
+    {
+      name: "YouTube (Privacy-Enhanced Player)",
+      purpose: "Click-to-play educational and clinical video walkthroughs on /videos and blog posts",
+      trigger: "user_click",
+      dataTransmitted:
+        "Zero HTTP requests are sent to YouTube, Google, or ytimg when pages load. Video thumbnails are pre-imported and delivered from our Cloudinary CDN. Only when a visitor clicks play does the player load an iframe from YouTube's privacy-enhanced domain (https://www.youtube-nocookie.com). Once activated, YouTube (Google) may set cookies and collect usage telemetry under its own privacy policy.",
+      activeToday: true,
+    },
+    {
+      name: "Cloudinary CDN",
+      purpose: "Optimized image and video thumbnail hosting and delivery",
+      trigger: "page_load",
+      dataTransmitted:
+        "Delivers compressed WebP/AVIF images directly to browsers from res.cloudinary.com. No visitor personal data is shared with Cloudinary.",
+      activeToday: true,
+    },
     {
       name: "Google Maps (Embed Iframe)",
       purpose: "Interactive clinic navigation map on /contact",
@@ -123,28 +175,6 @@ export const legalDataInventory: LegalInventory = {
     },
   ],
   forms: [
-    {
-      id: "appointment-booking",
-      name: "Appointment Consultation Wizard",
-      route: "/appointment",
-      collectedFields: [
-        { field: "serviceSlug", type: "string", required: true, purpose: "Selected treatment category", clientStorage: "sessionStorage" },
-        { field: "doctorSlug", type: "string", required: true, purpose: "Preferred practitioner or any", clientStorage: "sessionStorage" },
-        { field: "visitType", type: "enum", required: true, purpose: "First visit, follow-up, or urgent", clientStorage: "sessionStorage" },
-        { field: "planId", type: "string", required: false, purpose: "Optional dental wellness plan reference", clientStorage: "sessionStorage" },
-        { field: "date", type: "string (YYYY-MM-DD)", required: true, purpose: "Requested consultation date", clientStorage: "sessionStorage" },
-        { field: "timeSlot", type: "string", required: true, purpose: "Requested time slot", clientStorage: "sessionStorage" },
-        { field: "flexible", type: "boolean", required: false, purpose: "Whether patient schedule is flexible", clientStorage: "sessionStorage" },
-        { field: "fullName", type: "string", required: true, purpose: "Patient identity for clinic records", clientStorage: "none" },
-        { field: "phone", type: "string (Indian 10-digit)", required: true, purpose: "Appointment confirmation and SMS/call reminders", clientStorage: "none" },
-        { field: "email", type: "string", required: false, purpose: "Optional digital appointment summary", clientStorage: "none" },
-        { field: "notes", type: "string (max 500 chars)", required: false, purpose: "Non-sensitive scheduling preferences", clientStorage: "none" },
-        { field: "consent", type: "boolean (true)", required: true, purpose: "Agreement to communication and clinic privacy policy", clientStorage: "none" },
-        { field: "website", type: "string", required: false, purpose: "Honeypot anti-spam bot trap (discarded)", clientStorage: "none" },
-      ],
-      submissionDestination: "Next.js Server Action (submitAppointment in app/appointment/actions.ts)",
-      isImplemented: true,
-    },
     {
       id: "contact-inquiry",
       name: "General Contact & Feedback Form",

@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { gsap, ScrollTrigger, EASE, useGSAP } from "@/lib/gsap";
-import { Container, Eyebrow } from "@/components/ui";
+import { Container } from "@/components/ui";
 import { Counter, SplitHeading, useReducedMotion } from "@/components/animations";
 import { statsContent, StatItem } from "@/data/home";
 
@@ -67,18 +67,19 @@ export function Stats({ content = statsContent }: StatsProps) {
         {/* Top Header: Eyebrow + SplitHeading (Mobile centered, Desktop Left/Right split) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-end mb-16 sm:mb-20 lg:mb-24">
           <div className="lg:col-span-7 text-center lg:text-left">
-            <Eyebrow color="inverse" className="mb-4">
-              {content.eyebrow}
-            </Eyebrow>
             <SplitHeading
+              id="stats-heading"
               as="h2"
               type="lines"
               mask
               start="top 80%"
-              className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-white leading-[1.12]"
+              className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-[1.15]"
             >
-              {content.title}
+              {content.eyebrow}
             </SplitHeading>
+            <p className="font-aileron text-lg sm:text-xl lg:text-2xl font-semibold text-accent leading-snug mt-3">
+              {content.title}
+            </p>
           </div>
 
           <div className="lg:col-span-5 text-center lg:text-left">

@@ -8,7 +8,6 @@ export { GalleryStrip } from "./GalleryStrip";
 export type { GalleryStripProps } from "./GalleryStrip";
 export { Services } from "./Services";
 export type { ServicesProps } from "./Services";
-export * from "./appointment";
 export * from "./contact";
 export * from "./blog";
 export * from "./legal";

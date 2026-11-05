@@ -9,7 +9,7 @@ export const BLOG_REVALIDATE_SECONDS = 300; // 5 minutes
  */
 export async function revalidateBlog(slug?: string): Promise<void> {
   try {
-    revalidateTag(BLOG_CACHE_TAG, "max-age");
+    revalidateTag(BLOG_CACHE_TAG, "max");
   } catch {
     // If cache API is invoked outside an active request context, fall back silently
   }

@@ -1,10 +1,21 @@
 import type { ContentBlock } from "@/src/lib/blog-content";
+import type { PublicVideoDTO } from "@/src/server/videos/queries";
 
 export interface PublicCategory {
   slug: string;
   label: string;
   sortOrder: number;
   count?: number;
+}
+
+export interface ResolvedMedia {
+  id: string;
+  publicId: string;
+  width: number;
+  height: number;
+  alt: string | null;
+  decorative: boolean;
+  blurDataUrl: string | null;
 }
 
 /**
@@ -26,6 +37,12 @@ export interface PublicBlogPost {
   coverSlot?: string | null;
   coverImageUrl?: string | null;
   coverImageAlt?: string | null;
+  coverMediaId?: string | null;
+  coverAltOverride?: string | null;
+  coverMedia?: ResolvedMedia | null;
+  resolvedMediaMap?: Record<string, ResolvedMedia>;
+  id?: string;
+  resolvedVideosMap?: Record<string, PublicVideoDTO>;
   featured: boolean;
   relatedServiceSlug?: string | null;
   readingTimeMinutes: number;

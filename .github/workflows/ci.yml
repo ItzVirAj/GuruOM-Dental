@@ -1,0 +1,47 @@
+name: Continuous Integration & Security Audits
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Build, Audit & Security Verification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: TypeScript Type Check
+        run: npx tsc --noEmit
+
+      - name: ESLint Code Quality
+        run: npm run lint
+
+      - name: Secret Leak Scanner
+        run: npm run check:leaks
+
+      - name: NPM Dependency Vulnerability Audit
+        run: npm audit --audit-level=high
+
+      - name: Next.js Production Build (No Secrets Required)
+        env:
+          NODE_ENV: production
+          SITE_URL: "https://guruomdental.com"
+          BETTER_AUTH_URL: "https://guruomdental.com"
+          BETTER_AUTH_SECRET: "ci_placeholder_dummy_secret_at_least_32_characters_for_ci_build"
+          ADMIN_PATH: "ci-dummy-secret-admin-path-9876543210"
+          OWNER_AREA_ENABLED: "false"
+        run: npm run build

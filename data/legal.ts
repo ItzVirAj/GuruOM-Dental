@@ -179,6 +179,8 @@ export const privacyPolicyData: LegalDocument = {
         {
           type: "list",
           items: [
+            "Embedded Educational Videos: Video thumbnails are stored on our image host (Cloudinary) and delivered directly from our CDN. No request to YouTube, Google, or ytimg occurs until you click play. Upon clicking play, the video streams from YouTube's privacy-enhanced domain (youtube-nocookie.com). Following playback activation, YouTube (Google) may set cookies and process data under Google's Privacy Policy.",
+            "Media Storage CDN: Editorial imagery and video thumbnails are delivered via Cloudinary (res.cloudinary.com) for performance and device responsiveness. No personal health information is shared with Cloudinary.",
             "Interactive Map Embed: On our Contact page, the Google Maps embed does not load automatically upon page render. It only loads after you click 'Load Interactive Map'. Once clicked, Google's servers receive your browser request and IP address, subject to Google's Privacy Policy.",
             "Direct Navigation Links: Clicking 'Open in Google Maps', 'Get Directions', or social media icons opens external services in a new tab. These third-party websites operate independently under their own privacy notices.",
             "WhatsApp Chat: Clicking our WhatsApp chat button opens the WhatsApp application or web portal. GuruOm Dental does not transmit your website browsing history to WhatsApp.",
@@ -225,7 +227,9 @@ export const privacyPolicyData: LegalDocument = {
             "Website Inquiries & Appointment Requests: Retained for [PLACEHOLDER: Retention period, e.g., 90 days following inquiry resolution or conversion into an in-clinic patient chart].",
             "Medical & Dental Records: Once you attend an in-person consultation, clinical records are maintained in accordance with statutory medical record retention guidelines [PLACEHOLDER: Clinical Establishment Act / National Medical Commission / Dental Council of India guidelines, typically 3 to 8 years].",
             "Newsletter Subscriptions: Retained until you request unsubscription or withdrawal of consent.",
-            "Technical Rate-Limit Logs: Stored ephemerally in server memory and discarded after 15 minutes.",
+            "Security Logs: Diagnostic security event records (such as authentication failures, lockout triggers, and CSP violation notices) are retained for up to 180 days for incident investigation before automated purging.",
+            "Technical Rate-Limit Hashes: Rate-limiting counters use pseudonymized, cryptographically salted SHA-256 hashes (never raw IP addresses) and are automatically purged immediately upon expiration of the rate-limit window.",
+            "Administrative Audit Trail: Internal owner-area administrative changes are recorded in a tamper-evident append-only cryptographic hash log retained for up to 180 days with linear hash checkpoint verification.",
           ],
         },
       ],

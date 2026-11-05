@@ -1,12 +1,15 @@
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Calendar, Clock, User, ArrowRight, Stethoscope, Sparkles } from "lucide-react";
+import { coverUrl } from "@/src/lib/media/cloudinary-loader";
+import { CloudinaryImage } from "@/components/ui/CloudinaryImage";
 import {
   getLivePostBySlug,
   getRelatedPosts,
   getAdjacentPosts,
   getAllLiveSlugs,
+  getHistoricalSlugRedirect,
 } from "@/src/server/blog/queries";
 import { formatDate } from "@/src/lib/blog-format";
 import { servicesData } from "@/data/services";
@@ -32,6 +35,8 @@ interface PostPageProps {
   }>;
 }
 
+export const instant = false;
+
 export async function generateStaticParams() {
   const slugs = await getAllLiveSlugs();
   if (slugs.length === 0) {
@@ -50,10 +55,18 @@ export async function generateMetadata({
   const post = await getLivePostBySlug(slug);
 
   if (!post) {
+    const historicalSlug = await getHistoricalSlugRedirect(slug);
+    if (historicalSlug) {
+      permanentRedirect(`/blog/${historicalSlug}`);
+    }
     return {
       title: "Article Not Found | GuruOm Dental",
     };
   }
+
+  const ogImageUrl = post.coverMedia
+    ? coverUrl(post.coverMedia, "og")
+    : `${siteConfig.url}/images/og-default.jpg`;
 
   return {
     title: `${post.title} | GuruOm Dental Journal`,
@@ -68,6 +81,14 @@ export async function generateMetadata({
       tags: post.tags,
       url: `${siteConfig.url}/blog/${post.slug}`,
       siteName: siteConfig.name,
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: post.coverAltOverride || post.coverMedia?.alt || post.title,
+        },
+      ],
     },
     alternates: {
       canonical: `/blog/${post.slug}`,
@@ -80,6 +101,10 @@ export default async function BlogPostPage({ params }: PostPageProps) {
   const post = await getLivePostBySlug(slug);
 
   if (!post) {
+    const historicalSlug = await getHistoricalSlugRedirect(slug);
+    if (historicalSlug) {
+      permanentRedirect(`/blog/${historicalSlug}`);
+    }
     notFound();
   }
 
@@ -101,16 +126,27 @@ export default async function BlogPostPage({ params }: PostPageProps) {
   const tocItems: TocItem[] = post.content
     .filter((b) => b.type === "heading")
     .map((b) => {
-      const headingBlock = b as { type: "heading"; level: 2 | 3; text: string; id?: string };
+      const headingBlock = b as {
+        type: "heading";
+        level: 2 | 3;
+        text?: string;
+        runs?: Array<{ text: string }>;
+        id?: string;
+      };
+      const rawText =
+        headingBlock.text ||
+        headingBlock.runs?.map((r) => r.text).join("") ||
+        "";
       const generatedId =
         headingBlock.id ||
-        headingBlock.text
+        rawText
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, "-")
-          .replace(/(^-|-$)+/g, "");
+          .replace(/(^-|-$)+/g, "") ||
+        "section";
       return {
         id: generatedId,
-        text: headingBlock.text,
+        text: rawText,
         level: headingBlock.level,
       };
     });
@@ -195,15 +231,31 @@ export default async function BlogPostPage({ params }: PostPageProps) {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
             {/* Main Article Column (About 720px on desktop) */}
             <div className="lg:col-span-8 max-w-[740px] w-full mx-auto space-y-8">
-              {/* Article Cover Image (16/9) */}
+              {/* Article Cover Image (16/10) */}
               <div className="rounded-3xl overflow-hidden border border-line bg-surface-alt shadow-card">
-                <SmartImage
-                  slot={post.coverSlot || undefined}
-                  alt={post.title}
-                  ratio="16/9"
-                  priority={true}
-                  className="w-full h-full object-cover"
-                />
+                {post.coverMedia ? (
+                  <div className="relative aspect-[16/10] w-full overflow-hidden">
+                    <CloudinaryImage
+                      src={post.coverMedia.publicId}
+                      alt={post.coverAltOverride || post.coverMedia.alt || post.title}
+                      role={post.coverMedia.decorative && !post.coverAltOverride ? "presentation" : undefined}
+                      fill
+                      priority={true}
+                      placeholder={post.coverMedia.blurDataUrl ? "blur" : "empty"}
+                      blurDataURL={post.coverMedia.blurDataUrl || undefined}
+                      sizes="(max-width: 768px) 100vw, 740px"
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  <SmartImage
+                    slot={post.coverSlot || undefined}
+                    alt={post.title}
+                    ratio="16/9"
+                    priority={true}
+                    className="w-full h-full object-cover"
+                  />
+                )}
               </div>
 
               {/* Mobile Table of Contents Disclosure (Hidden on Desktop) */}
@@ -211,7 +263,11 @@ export default async function BlogPostPage({ params }: PostPageProps) {
 
               {/* Core Semantic Article Content */}
               <article id="article-content" className="prose-content">
-                <BlogContent content={post.content} />
+                <BlogContent
+                  content={post.content}
+                  resolvedMediaMap={post.resolvedMediaMap}
+                  resolvedVideosMap={post.resolvedVideosMap}
+                />
               </article>
 
               {/* Author Box, Medically Reviewed Badge & Clinical Disclaimer */}

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import {
   Hero,
   AboutIntro,
@@ -6,8 +7,16 @@ import {
   LabsMap,
   Services,
 } from "@/components/sections";
+import {
+  HomeDoctors,
+  LatestJournal,
+  HomeFaq,
+  HomeFinalCta,
+} from "@/components/sections/home";
 
-export default function Home() {
+export const instant = false;
+
+export default async function Home() {
   return (
     <>
       {/* 1. Main Immersive Hero Section */}
@@ -30,6 +39,20 @@ export default function Home() {
 
       {/* 6. Featured Services Grid Section */}
       <Services />
+
+      {/* 7. Meet Our Doctors Section */}
+      <HomeDoctors />
+
+      {/* 8. From Our Journal & Video Section (Suspense boundary for dynamic data access) */}
+      <Suspense fallback={null}>
+        <LatestJournal />
+      </Suspense>
+
+      {/* 9. Common Questions Section */}
+      <HomeFaq />
+
+      {/* 10. Final CTA Band */}
+      <HomeFinalCta />
     </>
   );
 }

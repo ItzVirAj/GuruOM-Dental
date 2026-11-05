@@ -46,3 +46,8 @@ next-env.d.ts
 scripts/.venv/
 .venv/
 
+# database backups
+/backups/
+*.ndjson.gz
+*.enc
+

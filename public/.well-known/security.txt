@@ -1,0 +1,18 @@
+# GuruOm Dental Security Contact & Vulnerability Disclosure Policy
+# RFC 9116 compliant security.txt
+
+# Contact email (PLACEHOLDER - update with your security inbox or PGP key before production launch)
+Contact: mailto:security@guruomdental.com
+
+# Expiration date for this disclosure policy
+Expires: 2027-12-31T23:59:59.000Z
+
+# Canonical URL for this file
+Canonical: https://guruomdental.com/.well-known/security.txt
+
+# Preferred communication languages
+Preferred-Languages: en
+
+# Privacy Policy & Security Acknowledgements
+Policy: https://guruomdental.com/privacy-policy
+Acknowledgments: https://guruomdental.com

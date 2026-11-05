@@ -74,10 +74,11 @@
   --color-danger: var(--danger);
 
   /* Typography families */
-  --font-display: var(--font-display), "Instrument Serif", Georgia, serif;
+  --font-display: var(--font-display), "JUST Serif", Georgia, serif;
   --font-body: var(--font-body), "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-aileron: var(--font-aileron), "Aileron", sans-serif;
   --font-league-spartan: var(--font-league-spartan), sans-serif;
+  --font-just-serif: var(--font-just-serif), serif;
   --font-arabica-menu: var(--font-arabica-menu), sans-serif;
   --font-rainbow-miracles: var(--font-rainbow-miracles), cursive, sans-serif;
 
@@ -266,6 +267,116 @@ h1, h2, h3, h4, h5, h6 {
 html.lenis-scrolling #our-labs {
   pointer-events: none !important;
 }
+
+/* ==========================================================================
+   TIPTAP RICH TEXT EDITOR STYLES
+   ========================================================================== */
+.ProseMirror {
+  outline: none !important;
+  min-height: 420px;
+  font-family: var(--font-body);
+  color: var(--ink);
+  line-height: 1.8;
+}
+
+.ProseMirror p {
+  margin-bottom: 1.25rem;
+}
+
+.ProseMirror h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  margin-top: 2.25rem;
+  margin-bottom: 0.75rem;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+.ProseMirror h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.ProseMirror ul {
+  list-style-type: disc;
+  margin-left: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal;
+  margin-left: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.ProseMirror li {
+  margin-bottom: 0.4rem;
+}
+
+.ProseMirror blockquote {
+  border-left: 3px solid var(--brand);
+  padding-left: 1.25rem;
+  font-style: italic;
+  color: var(--ink-muted);
+  margin: 1.5rem 0;
+}
+
+.ProseMirror a {
+  color: #b8560b;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 500;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #9ca3af;
+  pointer-events: none;
+  height: 0;
+}
+
+/* Callout block */
+.editor-callout {
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  border: 1px solid var(--line);
+}
+.editor-callout-tip {
+  background-color: rgba(46, 158, 107, 0.08);
+  border-color: rgba(46, 158, 107, 0.3);
+}
+.editor-callout-note {
+  background-color: rgba(56, 52, 53, 0.05);
+  border-color: rgba(56, 52, 53, 0.2);
+}
+.editor-callout-warning {
+  background-color: rgba(201, 138, 0, 0.08);
+  border-color: rgba(201, 138, 0, 0.3);
+}
+.editor-callout-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+.editor-callout-tip .editor-callout-title {
+  color: #1b6c45;
+}
+.editor-callout-note .editor-callout-title {
+  color: var(--ink);
+}
+.editor-callout-warning .editor-callout-title {
+  color: #8c5d00;
+}
+
 
 
 

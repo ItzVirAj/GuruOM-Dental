@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+export const instant = false;
+
 export const metadata: Metadata = {
   title: "Owner Portal",
   robots: {
@@ -15,7 +17,11 @@ export default function OwnerLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 z-50 bg-surface flex flex-col min-h-screen font-body overflow-y-auto">
+    <div
+      data-lenis-prevent
+      data-owner-portal
+      className="fixed inset-0 z-50 bg-surface flex flex-col font-body overflow-y-auto overscroll-contain"
+    >
       <meta name="robots" content="noindex,nofollow,noarchive" />
       {children}
     </div>

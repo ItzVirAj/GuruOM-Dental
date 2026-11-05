@@ -1,20 +1,25 @@
 import "server-only";
 
 import { unstable_cache } from "next/cache";
-import { eq, and, desc, asc, sql, ilike, or, lt, gt } from "drizzle-orm";
+import { eq, and, desc, asc, sql, ilike, or, lt, gt, isNull, inArray } from "drizzle-orm";
 import { getDb } from "@/src/db";
-import { posts, categories, tags, postTags } from "@/src/db/schema";
+import { posts, categories, tags, postTags, postSlugHistory, media } from "@/src/db/schema";
 import { isPostLiveCondition } from "./live";
 import { BLOG_CACHE_TAG, BLOG_REVALIDATE_SECONDS } from "./revalidate";
-import type { PublicBlogPost, PublicCategory } from "./types";
+import type { PublicBlogPost, PublicCategory, ResolvedMedia } from "./types";
 import type { ContentBlock } from "@/src/lib/blog-content";
+import { getVideosForPost } from "@/src/server/videos/queries";
 
 function cachedQuery<T>(
   queryFn: () => Promise<T>,
   keyParts: string[]
 ): Promise<T> {
-  if (process.env.NODE_ENV === "development") {
-    // In local development, bypass cache so DB updates and seeds reflect immediately
+  if (
+    process.env.NODE_ENV === "development" ||
+    process.env.NODE_ENV === "test" ||
+    !process.env.NEXT_RUNTIME
+  ) {
+    // In local development, tests, or scripts, bypass cache so DB updates reflect immediately
     return queryFn();
   }
   return unstable_cache(queryFn, keyParts, {
@@ -49,6 +54,10 @@ function mapRowToPublicBlogPost(
     coverSlot: row.coverSlot,
     coverImageUrl: row.coverImageUrl,
     coverImageAlt: row.coverImageAlt,
+    coverMediaId: row.coverMediaId,
+    coverAltOverride: row.coverAltOverride,
+    coverMedia: null,
+    resolvedMediaMap: {},
     featured: row.featured,
     relatedServiceSlug: row.relatedServiceSlug,
     readingTimeMinutes: row.readingTimeMinutes,
@@ -89,6 +98,83 @@ async function fetchTagsForPosts(
   }
 
   return map;
+}
+
+/**
+ * Resolves mediaId references in one single batch query for a list of posts.
+ * Strictly excludes soft-deleted media records.
+ */
+async function fetchMediaForPosts(
+  db: NonNullable<ReturnType<typeof getDb>>,
+  postList: PublicBlogPost[]
+): Promise<Map<string, ResolvedMedia>> {
+  const mediaMap = new Map<string, ResolvedMedia>();
+  const mediaIds = new Set<string>();
+
+  for (const p of postList) {
+    if (p.coverMediaId) {
+      mediaIds.add(p.coverMediaId);
+    }
+    if (Array.isArray(p.content)) {
+      for (const b of p.content) {
+        if (b.type === "image" && "mediaId" in b && b.mediaId) {
+          mediaIds.add(b.mediaId);
+        }
+      }
+    }
+  }
+
+  if (mediaIds.size === 0) return mediaMap;
+
+  try {
+    const idArray = Array.from(mediaIds);
+    const rows = await db
+      .select({
+        id: media.id,
+        publicId: media.publicId,
+        width: media.width,
+        height: media.height,
+        alt: media.alt,
+        decorative: media.decorative,
+        blurDataUrl: media.blurDataUrl,
+      })
+      .from(media)
+      .where(and(inArray(media.id, idArray), isNull(media.deletedAt)));
+
+    for (const r of rows) {
+      mediaMap.set(r.id, r);
+    }
+  } catch (error) {
+    console.warn(
+      "[Blog Media Batch Query] Failed to fetch media:",
+      error instanceof Error ? error.message : "Unknown error"
+    );
+  }
+
+  return mediaMap;
+}
+
+function attachMediaToPosts(
+  postList: PublicBlogPost[],
+  mediaMap: Map<string, ResolvedMedia>
+) {
+  for (const post of postList) {
+    if (post.coverMediaId) {
+      post.coverMedia = mediaMap.get(post.coverMediaId) || null;
+    }
+    const resolved: Record<string, ResolvedMedia> = {};
+    if (Array.isArray(post.content)) {
+      for (const b of post.content) {
+        if (b.type === "image" && "mediaId" in b && b.mediaId) {
+          const m = mediaMap.get(b.mediaId);
+          if (m) {
+            resolved[b.mediaId] = m;
+          }
+        }
+      }
+    }
+    post.resolvedMediaMap = resolved;
+  }
 }
 
 export interface GetLivePostsParams {
@@ -164,6 +250,9 @@ export async function getLivePosts(
           )
         );
 
+        const mediaMap = await fetchMediaForPosts(db, mappedPosts);
+        attachMediaToPosts(mappedPosts, mediaMap);
+
         return { posts: mappedPosts, total };
       } catch (error) {
         console.error(
@@ -205,11 +294,20 @@ export async function getLivePostBySlug(
         const r = rows[0];
         const tagsMap = await fetchTagsForPosts(db, [r.post.id]);
 
-        return mapRowToPublicBlogPost(
+        const post = mapRowToPublicBlogPost(
           r.post,
           tagsMap.get(r.post.id) || [],
           r.categoryLabel
         );
+
+        const mediaMap = await fetchMediaForPosts(db, [post]);
+        attachMediaToPosts([post], mediaMap);
+
+        post.id = r.post.id;
+        const videosMap = await getVideosForPost(r.post.id);
+        post.resolvedVideosMap = videosMap;
+
+        return post;
       } catch (error) {
         console.error(
           "[Blog Slug Query Error]",
@@ -262,11 +360,20 @@ export async function getFeaturedPost(): Promise<PublicBlogPost | null> {
         const r = rows[0];
         const tagsMap = await fetchTagsForPosts(db, [r.post.id]);
 
-        return mapRowToPublicBlogPost(
+        const post = mapRowToPublicBlogPost(
           r.post,
           tagsMap.get(r.post.id) || [],
           r.categoryLabel
         );
+
+        const mediaMap = await fetchMediaForPosts(db, [post]);
+        attachMediaToPosts([post], mediaMap);
+
+        post.id = r.post.id;
+        const videosMap = await getVideosForPost(r.post.id);
+        post.resolvedVideosMap = videosMap;
+
+        return post;
       } catch (error) {
         console.error(
           "[Featured Post Query Error]",
@@ -342,13 +449,18 @@ export async function getRelatedPosts(
         const postIds = finalRows.map((r) => r.post.id);
         const tagsMap = await fetchTagsForPosts(db, postIds);
 
-        return finalRows.map((r) =>
+        const mapped = finalRows.map((r) =>
           mapRowToPublicBlogPost(
             r.post,
             tagsMap.get(r.post.id) || [],
             r.categoryLabel
           )
         );
+
+        const mediaMap = await fetchMediaForPosts(db, mapped);
+        attachMediaToPosts(mapped, mediaMap);
+
+        return mapped;
       } catch (error) {
         console.error(
           "[Related Posts Query Error]",
@@ -416,18 +528,18 @@ export async function getAdjacentPosts(
 
         const prev = prevRows[0]
           ? mapRowToPublicBlogPost(
-              prevRows[0].post,
-              tagsMap.get(prevRows[0].post.id) || [],
-              prevRows[0].categoryLabel
-            )
+            prevRows[0].post,
+            tagsMap.get(prevRows[0].post.id) || [],
+            prevRows[0].categoryLabel
+          )
           : null;
 
         const next = nextRows[0]
           ? mapRowToPublicBlogPost(
-              nextRows[0].post,
-              tagsMap.get(nextRows[0].post.id) || [],
-              nextRows[0].categoryLabel
-            )
+            nextRows[0].post,
+            tagsMap.get(nextRows[0].post.id) || [],
+            nextRows[0].categoryLabel
+          )
           : null;
 
         return { prev, next };
@@ -532,3 +644,94 @@ export async function getAllLiveSlugs(): Promise<
     ["all-live-slugs"]
   );
 }
+
+/**
+ * Looks up historical slug redirects for live posts.
+ * If oldSlug is found in post_slug_history and the corresponding post is currently LIVE,
+ * returns the current live post slug.
+ */
+export async function getHistoricalSlugRedirect(oldSlug: string): Promise<string | null> {
+  return cachedQuery(
+    async () => {
+      const db = getDb();
+      if (!db || !oldSlug) return null;
+
+      try {
+        const rows = await db
+          .select({ currentSlug: posts.slug })
+          .from(postSlugHistory)
+          .innerJoin(posts, eq(postSlugHistory.postId, posts.id))
+          .where(and(eq(postSlugHistory.oldSlug, oldSlug), isPostLiveCondition()))
+          .limit(1);
+
+        return rows[0]?.currentSlug ?? null;
+      } catch (error) {
+        console.error("[Historical Slug Redirect Error]:", error);
+        return null;
+      }
+    },
+    ["historical-slug", oldSlug]
+  );
+}
+
+/**
+ * Returns up to `limit` LIVE posts associated with a specific service slug.
+ */
+export async function getLivePostsForService(
+  serviceSlug: string,
+  limit = 3
+): Promise<PublicBlogPost[]> {
+  if (!serviceSlug) return [];
+
+  return cachedQuery(
+    async () => {
+      const db = getDb();
+      if (!db) return [];
+
+      const clampedLimit = Math.min(Math.max(1, limit), 6);
+
+      try {
+        const rows = await db
+          .select({
+            post: posts,
+            categoryLabel: categories.label,
+          })
+          .from(posts)
+          .innerJoin(categories, eq(posts.categorySlug, categories.slug))
+          .where(
+            and(
+              isPostLiveCondition(),
+              eq(posts.relatedServiceSlug, serviceSlug)
+            )
+          )
+          .orderBy(desc(posts.publishAt))
+          .limit(clampedLimit);
+
+        if (rows.length === 0) return [];
+
+        const postIds = rows.map((r) => r.post.id);
+        const tagsMap = await fetchTagsForPosts(db, postIds);
+
+        const postList = rows.map((r) =>
+          mapRowToPublicBlogPost(r.post, tagsMap.get(r.post.id) || [], r.categoryLabel)
+        );
+
+        const mediaMap = await fetchMediaForPosts(db, postList);
+
+        return postList.map((p) => {
+          const coverMedia = p.coverMediaId ? mediaMap.get(p.coverMediaId) || null : null;
+          return {
+            ...p,
+            coverMedia,
+          };
+        });
+      } catch (error) {
+        console.error("[Blog Service Posts Error]:", error);
+        return [];
+      }
+    },
+    ["posts-for-service", serviceSlug, String(limit)]
+  );
+}
+
+

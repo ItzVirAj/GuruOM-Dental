@@ -1,46 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getLivePosts } from "@/src/server/blog/queries";
-
-// ==============================================================================
-// In-Memory Dev-Grade Rate Limiter
-// ==============================================================================
-// Note: In multi-instance serverless production, rate limiting should be handled
-// via Redis (e.g. Upstash) or an edge proxy (e.g. Cloudflare).
-// For development and single-node deployment, an in-memory window prevents spam.
-// ==============================================================================
-const ipRequestCounts = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
-const MAX_REQUESTS_PER_WINDOW = 60; // 60 requests/min
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const entry = ipRequestCounts.get(ip);
-
-  if (!entry || now > entry.resetAt) {
-    ipRequestCounts.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return true;
-  }
-
-  if (entry.count >= MAX_REQUESTS_PER_WINDOW) {
-    return false;
-  }
-
-  entry.count += 1;
-  return true;
-}
-
-// Clean up stale IPs periodically
-if (process.env.NODE_ENV !== "test") {
-  setInterval(() => {
-    const now = Date.now();
-    for (const [ip, entry] of ipRequestCounts.entries()) {
-      if (now > entry.resetAt) {
-        ipRequestCounts.delete(ip);
-      }
-    }
-  }, 5 * 60 * 1000);
-}
+import { checkRateLimit } from "@/src/server/security/rate-limit";
+import { logger } from "@/src/lib/logger";
 
 const querySchema = z.object({
   category: z.string().max(50).optional(),
@@ -58,10 +20,25 @@ export async function GET(request: NextRequest) {
     request.headers.get("x-real-ip") ||
     "127.0.0.1";
 
-  if (!checkRateLimit(ip)) {
+  try {
+    const rateCheck = await checkRateLimit("blog_query", ip);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please wait a moment." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(rateCheck.retryAfterSeconds),
+            "Cache-Control": "no-store, no-cache, must-revalidate",
+          },
+        }
+      );
+    }
+  } catch (err) {
+    logger.error("[BLOG_RATE_LIMIT_ERROR]", err);
     return NextResponse.json(
-      { error: "Too many requests. Please wait a moment." },
-      { status: 429, headers: { "Retry-After": "60" } }
+      { error: "Rate limiting service temporarily unavailable." },
+      { status: 503, headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } }
     );
   }
 
@@ -90,17 +67,18 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result, {
       headers: {
-        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+        "Cache-Control": "no-store, no-cache, must-revalidate",
+        Pragma: "no-cache",
       },
     });
   } catch (error) {
-    console.error(
+    logger.error(
       "[Public Blog API Error]",
       error instanceof Error ? error.message : "Internal API error"
     );
     return NextResponse.json(
       { error: "Unable to fetch blog posts" },
-      { status: 500 }
+      { status: 500, headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } }
     );
   }
 }

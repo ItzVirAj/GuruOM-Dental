@@ -5,7 +5,9 @@ import Link from "next/link";
 import { Calendar, Clock, User, ArrowRight } from "lucide-react";
 import type { BlogPost } from "@/src/server/blog/types";
 import { formatDate } from "@/src/lib/blog-format";
+import Image from "next/image";
 import { SmartImage } from "@/components/ui/SmartImage";
+import cloudinaryLoader from "@/src/lib/media/cloudinary-loader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
@@ -32,13 +34,28 @@ export const BlogHero: React.FC<BlogHeroProps> = ({ post }) => {
               {/* Image Left (~45% / 5 cols) */}
               <div className="lg:col-span-5 relative overflow-hidden rounded-2xl bg-surface-alt">
                 <div className="relative w-full aspect-[16/10] overflow-hidden">
-                  <SmartImage
-                    slot={post.coverSlot || undefined}
-                    alt={post.title}
-                    ratio="16/10"
-                    priority={true}
-                    className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                  />
+                  {post.coverMedia ? (
+                    <Image
+                      loader={cloudinaryLoader}
+                      src={post.coverMedia.publicId}
+                      alt={post.coverAltOverride || post.coverMedia.alt || post.title}
+                      role={post.coverMedia.decorative && !post.coverAltOverride ? "presentation" : undefined}
+                      fill
+                      priority={true}
+                      placeholder={post.coverMedia.blurDataUrl ? "blur" : "empty"}
+                      blurDataURL={post.coverMedia.blurDataUrl || undefined}
+                      sizes="(max-width: 1024px) 100vw, 500px"
+                      className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                    />
+                  ) : (
+                    <SmartImage
+                      slot={post.coverSlot || undefined}
+                      alt={post.title}
+                      ratio="16/10"
+                      priority={true}
+                      className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                    />
+                  )}
                   {/* Subtle inner overlay on hover */}
                   <div className="absolute inset-0 bg-brand-dark/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
