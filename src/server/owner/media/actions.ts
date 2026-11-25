@@ -3,7 +3,7 @@
 import "server-only";
 import { headers } from "next/headers";
 import { getDb } from "@/src/db/client";
-import { galleryCards, media, postMedia, posts } from "@/src/db/schema";
+import { galleryCards, homeImageSlots, media, postMedia, posts } from "@/src/db/schema";
 import {
   eq,
   and,
@@ -124,6 +124,7 @@ export async function listMediaAction(
         // Media not referenced in post_media
         conditions.push(
           sql`${media.id} NOT IN (SELECT DISTINCT media_id FROM ${postMedia})`,
+          sql`NOT EXISTS (SELECT 1 FROM ${homeImageSlots} WHERE ${homeImageSlots.mediaId} = ${media.id})`,
           sql`NOT EXISTS (SELECT 1 FROM ${galleryCards} WHERE ${galleryCards.mediaId} = ${media.id})`
         );
       }
@@ -171,7 +172,8 @@ export async function listMediaAction(
         deletedAt: media.deletedAt,
         usageCount: sql<number>`(
           SELECT count(*)::int FROM ${postMedia} WHERE ${postMedia.mediaId} = ${media}."id"
-        ) + (SELECT count(*)::int FROM ${galleryCards} WHERE ${galleryCards.mediaId} = ${media}."id")`,
+        ) + (SELECT count(*)::int FROM ${galleryCards} WHERE ${galleryCards.mediaId} = ${media}."id")
+          + (SELECT count(*)::int FROM ${homeImageSlots} WHERE ${homeImageSlots.mediaId} = ${media}."id")`,
       })
       .from(media)
       .where(whereClause)
@@ -315,10 +317,11 @@ export async function deleteMediaAction(
 
     const now = new Date();
     const [, deleted] = await db.batch([
-      db.execute(sql`LOCK TABLE gallery_cards IN SHARE MODE`),
+      db.execute(sql`LOCK TABLE gallery_cards, home_image_slots IN SHARE MODE`),
       db.update(media).set({ deletedAt: now })
       .where(and(eq(media.id, id),
-        sql`NOT EXISTS (SELECT 1 FROM ${galleryCards} WHERE ${galleryCards.mediaId} = ${media.id})`))
+        sql`NOT EXISTS (SELECT 1 FROM ${homeImageSlots} WHERE ${homeImageSlots.mediaId} = ${media.id})`,
+          sql`NOT EXISTS (SELECT 1 FROM ${galleryCards} WHERE ${galleryCards.mediaId} = ${media.id})`))
       .returning({ id: media.id }),
     ]);
     if (!deleted.length) return { success: false, blockedByGallery: true };

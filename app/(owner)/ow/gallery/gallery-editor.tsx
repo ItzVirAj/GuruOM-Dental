@@ -98,7 +98,7 @@ export function GalleryEditor({ initial }: { initial: { items: GalleryItem[]; re
         <fieldset disabled={saving} className="min-w-0">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold">Homepage gallery</h1>
+              <h2 className="text-xl font-bold">Gallery cards</h2>
               <p className="mt-1 text-sm text-ink-muted">{items.length} {items.length === 1 ? "card" : "cards"}{dirty && " · Unpublished changes"}</p>
             </div>
             <div className="flex gap-2">

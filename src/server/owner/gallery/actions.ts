@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { galleryContent, type GalleryItem } from "@/data/home";
 import { getTransactionDb } from "@/src/db/client";
-import { galleryCards, media, mediaDeletions, postMedia, posts, postRevisions, postWorkingCopies, videos } from "@/src/db/schema";
+import { galleryCards, homeImageSlots, media, mediaDeletions, postMedia, posts, postRevisions, postWorkingCopies, videos } from "@/src/db/schema";
 import { galleryRevision } from "@/src/server/gallery";
 import { requireOwner } from "@/src/server/auth/guard";
 import { getClientIp } from "@/src/server/auth/ip";
@@ -53,8 +53,10 @@ export async function saveGallery(items: GalleryItem[], expectedRevision: string
         const removed = [...new Set(current.flatMap(card =>
           card.mediaId && !kept.has(card.mediaId) ? [card.mediaId] : []))];
         if (removed.length) {
+          await tx.execute(sql`LOCK TABLE home_image_slots IN SHARE MODE`);
           const unused = await tx.delete(media).where(and(
             inArray(media.id, removed),
+            sql`NOT EXISTS (SELECT 1 FROM ${homeImageSlots} WHERE ${homeImageSlots.mediaId} = ${media.id})`,
             sql`NOT EXISTS (SELECT 1 FROM ${postMedia} WHERE ${postMedia.mediaId} = ${media.id})`,
             sql`NOT EXISTS (SELECT 1 FROM ${posts} WHERE ${posts.coverMediaId} = ${media.id}
                 OR ${posts.coverImageUrl} = ${media.secureUrl}

@@ -1,3 +1,7 @@
+"use client";
+
+import { useHomeImage } from "./HomeImageContext";
+import cloudinaryLoader from "@/src/lib/media/cloudinary-loader";
 import React from "react";
 import Image from "next/image";
 import { Image as ImageIcon } from "lucide-react";
@@ -37,6 +41,7 @@ export const SmartImage: React.FC<SmartImageProps> = ({
   className = "",
   sizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
 }) => {
+  const replacement = useHomeImage(slot);
   const slotData = slot ? plannedImages[slot] : undefined;
 
   // Normalize src to guarantee Next.js image compatibility:
@@ -62,8 +67,8 @@ export const SmartImage: React.FC<SmartImageProps> = ({
     }
   }
 
-  const finalSrc = normalizedSrc;
-  const finalAlt = alt ?? slotData?.alt ?? label ?? "GuruOm Dental image";
+  const finalSrc = replacement?.publicId ?? normalizedSrc;
+  const finalAlt = replacement?.alt ?? alt ?? slotData?.alt ?? label ?? "GuruOm Dental image";
   const finalRatio = ratio ?? aspect ?? slotData?.ratio ?? "16/9";
   const finalLabel = label ?? slotData?.label ?? (slot ? `Slot: ${slot}` : finalAlt);
   const isFullHeight =
@@ -113,6 +118,7 @@ export const SmartImage: React.FC<SmartImageProps> = ({
   return (
     <div className={`relative w-full overflow-hidden ${ratioClass} ${className}`}>
       <Image
+        loader={replacement ? cloudinaryLoader : undefined}
         src={finalSrc}
         alt={finalAlt}
         fill

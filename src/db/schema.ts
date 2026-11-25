@@ -633,3 +633,8 @@ export const galleryCards = pgTable("gallery_cards", {
   mediaId: uuid("media_id").references(() => media.id),
   position: integer("position").notNull(),
 });
+
+export const homeImageSlots = pgTable("home_image_slots", {
+  slot: text("slot").primaryKey(),
+  mediaId: uuid("media_id").notNull().references(() => media.id),
+});

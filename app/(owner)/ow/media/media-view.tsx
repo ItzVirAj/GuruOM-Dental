@@ -180,7 +180,7 @@ export function MediaView({ initialData }: MediaViewProps) {
     try {
       const res = await deleteMediaAction(selectedMedia.id);
       if (res.blockedByGallery) {
-        alert("Remove this image from the homepage gallery before deleting it.");
+        alert("This photo is in use on the homepage. Replace it or remove its gallery card before deleting it.");
         return;
       }
       if (!res.success && res.blockedByPosts) {

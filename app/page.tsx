@@ -16,6 +16,8 @@ import {
 
 import { loadGallery } from "@/src/server/gallery";
 import { galleryContent } from "@/data/home";
+import { HomeImageProvider } from "@/components/ui/HomeImageContext";
+import { loadHomeImages } from "@/src/server/home-images";
 import { connection } from "next/server";
 
 async function HomepageGallery() {
@@ -28,8 +30,9 @@ async function HomepageGallery() {
 export const instant = false;
 
 export default async function Home() {
+  const images = await loadHomeImages().catch(() => ({}));
   return (
-    <>
+    <HomeImageProvider images={images}>
       {/* 1. Main Immersive Hero Section */}
       <Hero />
 
@@ -64,6 +67,6 @@ export default async function Home() {
 
       {/* 10. Final CTA Band */}
       <HomeFinalCta />
-    </>
+    </HomeImageProvider>
   );
 }

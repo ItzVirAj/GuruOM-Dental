@@ -2,6 +2,9 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useHomeImage } from "@/components/ui/HomeImageContext";
+import { heroLogoSrc } from "@/data/home-images";
+import cloudinaryLoader from "@/src/lib/media/cloudinary-loader";
 import Image from "next/image";
 
 import {
@@ -46,6 +49,7 @@ const SERVICE_REGIONS = [
 ];
 
 export function Hero({ showPortrait = true }: HeroProps) {
+  const logo = useHomeImage("heroTitleLogo");
   const lenis = useLenis();
   const prefersReducedMotion = useReducedMotion();
 
@@ -808,7 +812,8 @@ export function Hero({ showPortrait = true }: HeroProps) {
                 <span className="block overflow-hidden py-2">
                   <Image
                     ref={logoImageRef}
-                    src="/images/NewLogo-Viraj-Guru-OM-PNG.png"
+                    loader={logo ? cloudinaryLoader : undefined}
+                    src={logo?.publicId ?? heroLogoSrc}
                     alt="GuruOm Dental - Healthy smiles, gently cared for."
                     width={843}
                     height={193}
