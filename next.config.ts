@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
 
   /* Server Actions Origin Restriction */
   experimental: {
+    agentUpgrade: "security",
     serverActions: {
       allowedOrigins: [
         "guruomdental.com",
