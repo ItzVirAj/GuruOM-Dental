@@ -14,6 +14,17 @@ import {
   HomeFinalCta,
 } from "@/components/sections/home";
 
+import { loadGallery } from "@/src/server/gallery";
+import { galleryContent } from "@/data/home";
+import { connection } from "next/server";
+
+async function HomepageGallery() {
+  await connection();
+  const gallery = await loadGallery().catch(() => null);
+  if (!gallery) return null;
+  return <GalleryStrip content={{ ...galleryContent, items: gallery.items }} />;
+}
+
 export const instant = false;
 
 export default async function Home() {
@@ -32,7 +43,7 @@ export default async function Home() {
       <Stats />
 
       {/* 4. Inside GuruOm Dental Gallery Strip */}
-      <GalleryStrip />
+      <Suspense fallback={null}><HomepageGallery /></Suspense>
 
       {/* 5. Our Lab & Service Network Across Maharashtra (3D Isometric Map) */}
       <LabsMap />

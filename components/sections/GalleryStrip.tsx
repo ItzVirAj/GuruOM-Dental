@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { CloudinaryImage } from "@/components/ui/CloudinaryImage";
 import { Container, SmartImage } from "@/components/ui";
 import { Reveal, Marquee } from "@/components/animations";
 import { galleryContent, GalleryItem } from "@/data/home";
@@ -12,8 +12,21 @@ export interface GalleryStripProps {
 export function GalleryStrip({ content = galleryContent }: GalleryStripProps) {
   const items = content.items;
 
-  // Row 2 uses the items reversed so the two rows have visual variety
-  const reversedItems = useMemo(() => [...items].reverse(), [items]);
+  if (!items.length) return null;
+
+  const cards = items.map((item: GalleryItem) => (
+    <article key={item.id} className="relative shrink-0 aspect-[4/5] w-[260px] sm:w-[280px] lg:w-[320px] overflow-hidden rounded-2xl shadow-soft bg-surface-alt">
+      {item.publicId ? (
+        <CloudinaryImage src={item.publicId} alt={item.alt ?? item.title} fill sizes="(max-width: 640px) 260px, 320px" className="object-cover" />
+      ) : (
+        <SmartImage slot={item.imageSlot} label={item.title} aspect="4/5" className="h-full" />
+      )}
+      <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/85 to-transparent px-4 pb-4 pt-12">
+        <h3 className="font-semibold text-white text-lg break-words">{item.title}</h3>
+        {item.label && <span className="mt-1 inline-block rounded-full bg-white/95 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-ink break-all">{item.label}</span>}
+      </div>
+    </article>
+  ));
 
   return (
     <section
@@ -55,80 +68,18 @@ export function GalleryStrip({ content = galleryContent }: GalleryStripProps) {
         </Reveal>
       </Container>
 
-      {/* Two Marquee Rows Container */}
-      <div className="flex flex-col gap-6 sm:gap-8 w-full overflow-hidden">
-        {/* Row 1: moves Left at 40 px/s */}
-        <Marquee
-          speed={40}
-          direction="left"
-          slowOnHover={true}
-          hoverSlowFactor={0.2}
-          scrollVelocityBoost={true}
-          pauseWhenHidden={true}
-          fadeEdges={true}
-          gap={24}
-          className="py-3"
-        >
-          {items.map((item: GalleryItem) => (
-            <div
-              key={`row1-${item.id}`}
-              className="group/card relative shrink-0 w-[260px] sm:w-[280px] lg:w-[320px] rounded-2xl overflow-hidden shadow-soft transition-all duration-300 hover:scale-[1.04] hover:-translate-y-2 hover:shadow-card cursor-pointer will-change-transform bg-surface-alt"
-            >
-              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl">
-                <SmartImage
-                  slot={item.imageSlot}
-                  aspect="4/5"
-                  className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover/card:scale-105"
-                  sizes="(max-width: 640px) 260px, (max-width: 1024px) 280px, 320px"
-                />
-              </div>
-
-              {/* Pill label chip overlaid at bottom-left */}
-              <div className="absolute bottom-3.5 left-3.5 z-10 pointer-events-none">
-                <span className="inline-flex items-center px-3.5 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-white/60 shadow-xs text-[11px] font-bold uppercase tracking-wider text-ink transition-colors group-hover/card:bg-brand group-hover/card:text-white">
-                  {item.label}
-                </span>
-              </div>
-            </div>
-          ))}
-        </Marquee>
-
-        {/* Row 2: moves Right at 55 px/s in reversed order */}
-        <Marquee
-          speed={55}
-          direction="right"
-          slowOnHover={true}
-          hoverSlowFactor={0.2}
-          scrollVelocityBoost={true}
-          pauseWhenHidden={true}
-          fadeEdges={true}
-          gap={24}
-          className="py-3"
-        >
-          {reversedItems.map((item: GalleryItem) => (
-            <div
-              key={`row2-${item.id}`}
-              className="group/card relative shrink-0 w-[260px] sm:w-[280px] lg:w-[320px] rounded-2xl overflow-hidden shadow-soft transition-all duration-300 hover:scale-[1.04] hover:-translate-y-2 hover:shadow-card cursor-pointer will-change-transform bg-surface-alt"
-            >
-              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl">
-                <SmartImage
-                  slot={item.imageSlot}
-                  aspect="4/5"
-                  className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover/card:scale-105"
-                  sizes="(max-width: 640px) 260px, (max-width: 1024px) 280px, 320px"
-                />
-              </div>
-
-              {/* Pill label chip overlaid at bottom-left */}
-              <div className="absolute bottom-3.5 left-3.5 z-10 pointer-events-none">
-                <span className="inline-flex items-center px-3.5 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-white/60 shadow-xs text-[11px] font-bold uppercase tracking-wider text-ink transition-colors group-hover/card:bg-brand group-hover/card:text-white">
-                  {item.label}
-                </span>
-              </div>
-            </div>
-          ))}
-        </Marquee>
-      </div>
+      {cards.length < 4 ? (
+        <div className="flex flex-wrap justify-center gap-6 px-4">{cards}</div>
+      ) : (
+        <div className="flex flex-col gap-6 sm:gap-8 w-full overflow-hidden">
+          <Marquee speed={40} direction="left" slowOnHover scrollVelocityBoost fadeEdges gap={24} className="py-3">
+            {cards}
+          </Marquee>
+          <Marquee speed={55} direction="right" slowOnHover scrollVelocityBoost fadeEdges gap={24} className="py-3">
+            {[...cards].reverse()}
+          </Marquee>
+        </div>
+      )}
     </section>
   );
 }

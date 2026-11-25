@@ -179,6 +179,10 @@ export function MediaView({ initialData }: MediaViewProps) {
     if (!selectedMedia) return;
     try {
       const res = await deleteMediaAction(selectedMedia.id);
+      if (res.blockedByGallery) {
+        alert("Remove this image from the homepage gallery before deleting it.");
+        return;
+      }
       if (!res.success && res.blockedByPosts) {
         setDeleteBlockedPosts(res.blockedByPosts);
         return;
@@ -606,7 +610,7 @@ export function MediaView({ initialData }: MediaViewProps) {
                   <div className="absolute top-2 left-2 flex flex-col gap-1">
                     {item.usageCount > 0 ? (
                       <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-white/95 text-ink shadow-xs backdrop-blur-xs">
-                        {item.usageCount} {item.usageCount === 1 ? "post" : "posts"}
+                        {item.usageCount} {item.usageCount === 1 ? "use" : "uses"}
                       </span>
                     ) : (
                       <span className="px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-black/60 text-white/90 backdrop-blur-xs">

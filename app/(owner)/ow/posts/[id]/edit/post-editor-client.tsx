@@ -2278,6 +2278,7 @@ export function PostEditorClient({
       {/* Media Picker Modal */}
       <MediaPickerModal
         isOpen={mediaPickerTarget !== null}
+        defaultAspect={mediaPickerTarget === "cover" ? "16/10" : "free"}
         onClose={() => {
           setMediaPickerTarget(null);
           replaceLegacyNodeRef.current = null;

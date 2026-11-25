@@ -33,13 +33,12 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
 
   return (
     <div
-      className={`space-y-4 ${
-        isCenter ? "text-center mx-auto max-w-3xl flex flex-col items-center" : "max-w-2xl"
-      } ${className}`}
+      className={`space-y-4 ${isCenter ? "text-center mx-auto max-w-3xl flex flex-col items-center" : "max-w-2xl"
+        } ${className}`}
     >
       {eyebrow && (
         <Eyebrow
-          color={dark ? "inverse" : "brand"}
+          color={dark ? "accent" : "brand"}
           className={isCenter ? "justify-center" : ""}
         >
           {eyebrow}
@@ -50,18 +49,16 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
         <SplitHeading
           as={HeadingTag}
           type={splitType}
-          className={`text-display-md font-display font-normal ${
-            dark ? "text-ink-inverse" : "text-ink"
-          } ${titleClassName}`}
+          className={`text-display-md font-display font-normal ${dark ? "text-panel-ink" : "text-ink"
+            } ${titleClassName}`}
         >
           {title}
         </SplitHeading>
       ) : (
         <HeadingTag
           data-split="heading"
-          className={`text-display-md font-display font-normal ${
-            dark ? "text-ink-inverse" : "text-ink"
-          } ${titleClassName}`}
+          className={`text-display-md font-display font-normal ${dark ? "text-panel-ink" : "text-ink"
+            } ${titleClassName}`}
         >
           {title}
         </HeadingTag>
@@ -69,9 +66,8 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
 
       {description && (
         <p
-          className={`text-body-lg ${
-            dark ? "text-ink-inverse/80" : "text-ink-muted"
-          } ${descriptionClassName}`}
+          className={`text-body-lg ${dark ? "text-panel-ink-muted" : "text-ink-muted"
+            } ${descriptionClassName}`}
         >
           {description}
         </p>

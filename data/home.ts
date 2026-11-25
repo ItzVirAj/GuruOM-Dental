@@ -203,7 +203,11 @@ export const statsContent: StatsContent = {
 export interface GalleryItem {
   id: string;
   label: string;
-  imageSlot: string;
+  title: string;
+  imageSlot?: string;
+  mediaId?: string;
+  publicId?: string;
+  alt?: string;
 }
 
 export interface GalleryContent {
@@ -218,14 +222,14 @@ export const galleryContent: GalleryContent = {
   title: "Where clinical science meets refined aesthetics.",
   subtitle: "A visual tour across our advanced operatory suites, 3D imaging lab, and serene patient lounge.",
   items: [
-    { id: "preventive", label: "Preventive", imageSlot: "gallery1" },
-    { id: "oral-surgery", label: "Oral Surgery", imageSlot: "gallery2" },
-    { id: "laser-care", label: "Laser Care", imageSlot: "gallery3" },
-    { id: "cosmetic", label: "Cosmetic", imageSlot: "gallery4" },
-    { id: "implants", label: "Implants", imageSlot: "gallery5" },
-    { id: "orthodontics", label: "Orthodontics", imageSlot: "gallery6" },
-    { id: "pediatric", label: "Pediatric", imageSlot: "gallery7" },
-    { id: "emergency", label: "Emergency", imageSlot: "gallery8" },
+    { id: "preventive", label: "Preventive", title: "Veneer Makeover", imageSlot: "gallery1" },
+    { id: "oral-surgery", label: "Oral Surgery", title: "Implantology Case", imageSlot: "gallery2" },
+    { id: "laser-care", label: "Laser Care", title: "Clear Aligners", imageSlot: "gallery3" },
+    { id: "cosmetic", label: "Cosmetic", title: "Full Mouth Rehab", imageSlot: "gallery4" },
+    { id: "implants", label: "Implants", title: "Micro Endodontics", imageSlot: "gallery5" },
+    { id: "orthodontics", label: "Orthodontics", title: "Laser Periodontics", imageSlot: "gallery6" },
+    { id: "pediatric", label: "Pediatric", title: "Sterilization Suite", imageSlot: "gallery7" },
+    { id: "emergency", label: "Emergency", title: "Relaxation Suite", imageSlot: "gallery8" },
   ],
 };
 

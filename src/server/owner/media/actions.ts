@@ -3,7 +3,7 @@
 import "server-only";
 import { headers } from "next/headers";
 import { getDb } from "@/src/db/client";
-import { media, postMedia, posts } from "@/src/db/schema";
+import { galleryCards, media, postMedia, posts } from "@/src/db/schema";
 import {
   eq,
   and,
@@ -123,7 +123,8 @@ export async function listMediaAction(
       } else if (filter === "unused") {
         // Media not referenced in post_media
         conditions.push(
-          sql`${media.id} NOT IN (SELECT DISTINCT media_id FROM ${postMedia})`
+          sql`${media.id} NOT IN (SELECT DISTINCT media_id FROM ${postMedia})`,
+          sql`NOT EXISTS (SELECT 1 FROM ${galleryCards} WHERE ${galleryCards.mediaId} = ${media.id})`
         );
       }
     }
@@ -169,8 +170,8 @@ export async function listMediaAction(
         createdAt: media.createdAt,
         deletedAt: media.deletedAt,
         usageCount: sql<number>`(
-          SELECT count(*)::int FROM ${postMedia} WHERE ${postMedia.mediaId} = ${media.id}
-        )`,
+          SELECT count(*)::int FROM ${postMedia} WHERE ${postMedia.mediaId} = ${media}."id"
+        ) + (SELECT count(*)::int FROM ${galleryCards} WHERE ${galleryCards.mediaId} = ${media}."id")`,
       })
       .from(media)
       .where(whereClause)
@@ -286,7 +287,7 @@ export async function getMediaUsageAction(id: string): Promise<MediaUsagePost[]>
  */
 export async function deleteMediaAction(
   id: string
-): Promise<{ success: boolean; blockedByPosts?: MediaUsagePost[] }> {
+): Promise<{ success: boolean; blockedByGallery?: boolean; blockedByPosts?: MediaUsagePost[] }> {
   return withOwner(async ({ user: owner }) => {
     await enforceRateLimit("owner_mutation");
     const { ip, userAgent } = await getRequestMetadata();
@@ -313,10 +314,14 @@ export async function deleteMediaAction(
     }
 
     const now = new Date();
-    await db
-      .update(media)
-      .set({ deletedAt: now })
-      .where(eq(media.id, id));
+    const [, deleted] = await db.batch([
+      db.execute(sql`LOCK TABLE gallery_cards IN SHARE MODE`),
+      db.update(media).set({ deletedAt: now })
+      .where(and(eq(media.id, id),
+        sql`NOT EXISTS (SELECT 1 FROM ${galleryCards} WHERE ${galleryCards.mediaId} = ${media.id})`))
+      .returning({ id: media.id }),
+    ]);
+    if (!deleted.length) return { success: false, blockedByGallery: true };
 
     await audit({
       actorUserId: owner.id,

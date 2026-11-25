@@ -15,6 +15,7 @@ export function OwnerHeader({ ownerEmail }: OwnerHeaderProps) {
     { label: "Dashboard", href: homeHref, iconKey: "dashboard" },
     { label: "Posts", href: ownerHref("/posts"), iconKey: "posts" },
     { label: "Media", href: ownerHref("/media"), iconKey: "media" },
+    { label: "Gallery", href: ownerHref("/gallery"), iconKey: "media" },
     { label: "Videos", href: ownerHref("/videos"), iconKey: "videos" },
     { label: "Categories", href: ownerHref("/categories"), iconKey: "categories" },
     { label: "Activity", href: ownerHref("/activity"), iconKey: "activity" },
@@ -52,7 +53,7 @@ export function OwnerHeader({ ownerEmail }: OwnerHeaderProps) {
           {/* Desktop Center: Segmented Navigation Capsule */}
           <nav
             aria-label="Owner navigation"
-            className="hidden md:flex items-center bg-black/[0.04] p-1 rounded-full border border-black/[0.04] shadow-[inset_0_1px_1px_rgba(0,0,0,0.02)]"
+            className="hidden xl:flex items-center bg-black/[0.04] p-1 rounded-full border border-black/[0.04] shadow-[inset_0_1px_1px_rgba(0,0,0,0.02)]"
           >
             <OwnerNavLinks items={navItems} />
 
@@ -132,7 +133,7 @@ export function OwnerHeader({ ownerEmail }: OwnerHeaderProps) {
         </div>
 
         {/* Mobile Navigation bar (iOS-style Segmented scroll) */}
-        <div className="md:hidden py-1.5 border-t border-black/[0.05] overflow-x-auto no-scrollbar">
+        <div className="xl:hidden py-1.5 border-t border-black/[0.05] overflow-x-auto no-scrollbar">
           <nav
             aria-label="Mobile owner navigation"
             className="inline-flex items-center gap-1 p-0.5 rounded-full bg-black/[0.03] border border-black/[0.04] min-w-full"

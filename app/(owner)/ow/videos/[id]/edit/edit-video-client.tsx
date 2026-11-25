@@ -633,6 +633,7 @@ export function EditVideoClient({
       {/* Media Picker Modal */}
       <MediaPickerModal
         isOpen={isMediaModalOpen}
+        defaultAspect="16/9"
         onClose={() => setIsMediaModalOpen(false)}
         onSelect={handleSelectMediaThumbnail}
         title="Select Video Thumbnail"

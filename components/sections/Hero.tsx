@@ -306,6 +306,22 @@ export function Hero({ showPortrait = true }: HeroProps) {
               start: "top top",
               end: "bottom top",
               scrub: true,
+              onEnter: () =>
+                gsap.set(bgImageInnerRef.current, {
+                  willChange: "transform",
+                }),
+              onLeave: () =>
+                gsap.set(bgImageInnerRef.current, {
+                  willChange: "auto",
+                }),
+              onEnterBack: () =>
+                gsap.set(bgImageInnerRef.current, {
+                  willChange: "transform",
+                }),
+              onLeaveBack: () =>
+                gsap.set(bgImageInnerRef.current, {
+                  willChange: "auto",
+                }),
             },
           });
         }
@@ -320,6 +336,22 @@ export function Hero({ showPortrait = true }: HeroProps) {
               start: "top top",
               end: "bottom top",
               scrub: true,
+              onEnter: () =>
+                gsap.set(contentColRef.current, {
+                  willChange: "transform, opacity",
+                }),
+              onLeave: () =>
+                gsap.set(contentColRef.current, {
+                  willChange: "auto",
+                }),
+              onEnterBack: () =>
+                gsap.set(contentColRef.current, {
+                  willChange: "transform, opacity",
+                }),
+              onLeaveBack: () =>
+                gsap.set(contentColRef.current, {
+                  willChange: "auto",
+                }),
             },
           });
         }
@@ -335,6 +367,9 @@ export function Hero({ showPortrait = true }: HeroProps) {
           const portrait = portraitFrameRef.current;
 
           if (!portrait) return;
+
+          // Promote the portrait layer only while hovered over the hero
+          gsap.set(portrait, { willChange: "transform" });
 
           const setX = gsap.quickTo(portrait, "x", {
             duration: 0.9,
@@ -368,6 +403,7 @@ export function Hero({ showPortrait = true }: HeroProps) {
               "mousemove",
               handleMouseMove
             );
+            gsap.set(portrait, { willChange: "auto" });
           };
         }
       );
@@ -663,7 +699,7 @@ export function Hero({ showPortrait = true }: HeroProps) {
       >
         <div
           ref={bgImageInnerRef}
-          className="absolute inset-0 will-change-transform"
+          className="absolute inset-0"
         >
           <SmartImage
             slot="heroBg"
@@ -708,20 +744,24 @@ export function Hero({ showPortrait = true }: HeroProps) {
           to-transparent
         " />
 
-        {/* Ambient accent glow */}
-        <div className="
-          absolute -left-40 top-[25%]
-          h-[450px] w-[450px]
-          rounded-full bg-accent/[0.10]
-          blur-[140px]
-        " />
-
-        <div className="
-          absolute -right-40 bottom-[5%]
-          h-[500px] w-[500px]
-          rounded-full bg-accent/[0.07]
-          blur-[150px]
-        " />
+        {/* Ambient accent glow — use SVG-based soft radials instead of
+            expensive CSS blur() which forces GPU layers at 140–150px radius */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-40 top-[25%] h-[450px] w-[450px]"
+          style={{
+            background:
+              "radial-gradient(ellipse at center, rgba(247,146,47,0.13) 0%, transparent 70%)",
+          }}
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-40 bottom-[5%] h-[500px] w-[500px]"
+          style={{
+            background:
+              "radial-gradient(ellipse at center, rgba(247,146,47,0.09) 0%, transparent 70%)",
+          }}
+        />
 
         {/* Fine texture */}
         <div className="
@@ -756,7 +796,6 @@ export function Hero({ showPortrait = true }: HeroProps) {
               flex max-w-[700px] flex-col
               gap-6 sm:gap-7
               lg:col-span-7
-              will-change-transform
             "
           >
             {/* Logo headline */}
@@ -975,13 +1014,15 @@ export function Hero({ showPortrait = true }: HeroProps) {
               rounded-full border border-accent/10
             " />
 
-            <div className="
-              absolute left-1/2 top-1/2
-              h-[290px] w-[290px]
-              -translate-x-1/2 -translate-y-1/2
-              rounded-full bg-accent/[0.06]
-              blur-[90px]
-            " />
+            {/* Ambient glow — radial-gradient avoids expensive GPU blur layer */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute left-1/2 top-1/2 h-[290px] w-[290px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+              style={{
+                background:
+                  "radial-gradient(ellipse at center, rgba(247,146,47,0.08) 0%, transparent 70%)",
+              }}
+            />
 
             {/* Portrait */}
             <div
@@ -989,7 +1030,7 @@ export function Hero({ showPortrait = true }: HeroProps) {
               className="
                 relative z-10 w-full
                 max-w-[360px]
-                opacity-0 will-change-transform
+                opacity-0
               "
             >
               {showPortrait ? (
