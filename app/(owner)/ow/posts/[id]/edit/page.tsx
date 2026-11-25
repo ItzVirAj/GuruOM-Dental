@@ -39,6 +39,7 @@ async function EditPostContent({ params }: EditPostPageProps) {
       workingCopy={postData.workingCopy}
       revisions={postData.revisions}
       categories={postData.categories}
+      embeddedVideos={postData.embeddedVideos}
       baseOwnerPath={ownerHref("")}
       postsListHref={ownerHref("/posts")}
     />

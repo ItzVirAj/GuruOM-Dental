@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { Phone, Calendar, ShieldCheck, Sparkles, Clock } from "lucide-react";
+import Link from "next/link";
+import { Phone, Calendar, ShieldCheck, Sparkles, Clock, ArrowUpRight } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { Button } from "@/components/ui/Button";
 import { SmartImage } from "@/components/ui/SmartImage";
 import { SplitHeading } from "@/components/animations/SplitHeading";
 import { siteConfig } from "@/data/site";
@@ -19,92 +19,82 @@ export const HomeFinalCta: React.FC = () => {
   return (
     <section
       aria-label="Book your appointment"
-      className="py-16 sm:py-20 md:py-28 bg-brand-dark text-white relative overflow-hidden"
+      className="py-12 sm:py-16 md:py-24 bg-brand-dark text-white relative overflow-hidden"
     >
-      {/* Subtle decorative glow overlay */}
-      <div
-        className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-primary via-transparent to-transparent pointer-events-none"
-        aria-hidden="true"
-      />
-
       <Container className="relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-          {/* LEFT: Heading, Copy, Buttons, Trust Chips */}
-          <div className="lg:col-span-7 space-y-6 sm:space-y-8">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-brand-light text-xs font-semibold backdrop-blur-md">
-              <span className="w-1.5 h-1.5 rounded-full bg-brand-light" />
-              Patient-Centered Excellence
-            </span>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center">
+          {/* Clinic Sanctuary Plate: Anchors top on mobile, right column on desktop */}
+          <div className="order-first lg:order-last lg:col-span-5">
+            <figure className="overflow-hidden rounded-sm border border-white/15 bg-black/25">
+              <div className="relative aspect-[16/10] lg:aspect-[4/3] overflow-hidden border-b-[3px] border-accent">
+                <SmartImage
+                  slot="homeCta"
+                  alt="GuruOm Dental welcoming reception and clinical lounge in Ahilyanagar"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <figcaption className="flex items-baseline justify-between gap-3 px-4 py-3 text-xs">
+                <span className="font-display text-sm text-white">
+                  {siteConfig.name} Sanctuary
+                </span>
+                <span className="font-body text-white/70">
+                  {siteConfig.address.city} — Mon to Sat
+                </span>
+              </figcaption>
+            </figure>
+          </div>
+
+          {/* Copy, Ergonomic Mobile CTAs, and Clinical Guarantees */}
+          <div className="lg:col-span-7 flex flex-col gap-5 sm:gap-6">
+            <p className="text-sm font-semibold text-accent font-body">
+              Visit our clinic
+            </p>
 
             <SplitHeading
               as="h2"
-              className="text-display-md sm:text-display-lg lg:text-display-xl font-display text-white tracking-tight"
+              className="text-display-md sm:text-display-lg font-display text-white tracking-tight"
             >
               Ready for a calmer dental experience?
             </SplitHeading>
 
-            <p className="text-white/80 text-sm sm:text-base leading-relaxed max-w-xl">
+            <p className="text-white/80 text-body font-body max-w-xl">
               From routine cleanings to microscopic tooth-saving care and guided implants, our specialists ensure every treatment is gentle, clear, and unhurried.
             </p>
 
-            {/* CTAs */}
-            <div className="flex flex-wrap items-center gap-4 pt-2">
-              <Button
-                href="/appointment"
-                variant="primary"
-                size="lg"
-                className="bg-brand text-brand-dark hover:bg-white transition-all shadow-md font-semibold"
+            {/* Primary & Direct Call Actions */}
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 pt-1">
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center gap-2 min-h-[48px] px-6 py-3 rounded-full bg-accent text-on-accent hover:bg-white hover:text-brand-dark transition-colors font-semibold text-sm sm:text-base shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-brand-dark"
               >
-                <Calendar className="w-4 h-4 mr-1.5" />
-                Book an Appointment
-              </Button>
+                <Calendar className="w-4 h-4 shrink-0" aria-hidden="true" />
+                <span>Book an appointment</span>
+                <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />
+              </Link>
 
-              <Button
+              <a
                 href={`tel:${siteConfig.phone.replace(/\s+/g, "")}`}
-                variant="secondary"
-                size="lg"
-                className="bg-white/10 hover:bg-white/20 text-white border-white/20 transition-all font-semibold"
-                showIcon={false}
+                className="inline-flex items-center justify-center gap-2 min-h-[48px] px-6 py-3 rounded-full border border-white/25 bg-white/5 hover:bg-white/15 text-white transition-colors font-semibold text-sm sm:text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-brand-dark"
               >
-                <Phone className="w-4 h-4 mr-1.5 text-brand-light" />
-                {siteConfig.phone}
-              </Button>
+                <Phone className="w-4 h-4 text-accent shrink-0" aria-hidden="true" />
+                <span>{siteConfig.phone}</span>
+              </a>
             </div>
 
-            {/* Trust Chips */}
-            <div className="pt-4 border-t border-white/15 flex flex-wrap gap-4 sm:gap-6">
+            {/* Trust Guarantees */}
+            <div className="pt-5 border-t border-white/15 grid grid-cols-1 sm:flex sm:flex-wrap gap-3 sm:gap-6">
               {heroContent.trustChips.map((chip) => {
                 const Icon = chipIcons[chip.icon] || ShieldCheck;
                 return (
                   <div
                     key={chip.id}
-                    className="inline-flex items-center gap-2 text-xs font-medium text-white/90"
+                    className="inline-flex items-center gap-2.5 text-sm sm:text-xs font-medium text-white/85 font-body"
                   >
-                    <Icon className="w-4 h-4 text-brand-light shrink-0" />
+                    <Icon className="w-4 h-4 text-accent shrink-0" aria-hidden="true" />
                     <span>{chip.label}</span>
                   </div>
                 );
               })}
-            </div>
-          </div>
-
-          {/* RIGHT: Visual SmartImage Slot */}
-          <div className="lg:col-span-5">
-            <div className="relative rounded-3xl overflow-hidden border border-white/15 shadow-2xl aspect-[4/3] bg-white/5">
-              <SmartImage
-                slot="homeCta"
-                alt="GuruOm Dental welcoming reception and clinical lounge in Ahilyanagar"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/60 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute bottom-4 left-4 right-4 p-3 rounded-2xl bg-brand-dark/70 backdrop-blur-md border border-white/10 text-xs text-white/90">
-                <span className="font-semibold block text-brand-light">
-                  {siteConfig.name} Clinic Sanctuary
-                </span>
-                <span className="text-[11px] text-white/70">
-                  {siteConfig.address.city}, Maharashtra • Mon – Sat
-                </span>
-              </div>
             </div>
           </div>
         </div>

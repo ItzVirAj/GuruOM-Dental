@@ -8,11 +8,35 @@ import { useReducedMotion } from "@/components/animations";
 import { MAHARASHTRA_MAP_DATA, IsometricDistrict } from "@/data/maharashtra-map.generated";
 import { labs, LabLocation, LocationType } from "@/data/labs";
 
+const FULL_BOUNDS = MAHARASHTRA_MAP_DATA.viewBoxBounds;
+const MOBILE_DEFAULT_CAMERA = { cx: -205, cy: -35, zoom: 2.05 };
+const MIN_ZOOM = 0.9;
+const MAX_ZOOM = 3.6;
+
+function clampCamera(cx: number, cy: number, zoom: number) {
+  const clampedZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom));
+  const minX = FULL_BOUNDS.minX - 60;
+  const maxX = FULL_BOUNDS.minX + FULL_BOUNDS.width + 60;
+  const minY = FULL_BOUNDS.minY - 50;
+  const maxY = FULL_BOUNDS.minY + FULL_BOUNDS.height + 50;
+  return {
+    cx: Math.min(maxX, Math.max(minX, cx)),
+    cy: Math.min(maxY, Math.max(minY, cy)),
+    zoom: clampedZoom,
+  };
+}
+
 export function LabsMap() {
   const sectionRef = useRef<HTMLElement | null>(null);
+  const viewportRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const mapGroupRef = useRef<SVGGElement | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
+
+  const cameraRef = useRef({ ...MOBILE_DEFAULT_CAMERA });
+  const pointersRef = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const dragDistanceRef = useRef(0);
+  const suppressClickUntilRef = useRef(0);
 
   const prefersReducedMotion = useReducedMotion();
 
@@ -229,9 +253,140 @@ export function LabsMap() {
   }, []);
 
   const handleLabSelect = useCallback((lab: LabLocation) => {
+    if (performance.now() < suppressClickUntilRef.current) return;
     setSelectedLab((prev) => (prev?.id === lab.id ? null : lab));
     setActiveLabId(lab.id);
   }, []);
+
+  // Apply vector viewBox for mobile Ahilyanagar-centered pan & pinch-zoom
+  const applyMobileViewBox = useCallback(() => {
+    const viewport = viewportRef.current;
+    const svg = svgRef.current;
+    if (!viewport || !svg) return;
+
+    if (!window.matchMedia("(max-width: 767px)").matches) {
+      svg.setAttribute("viewBox", MAHARASHTRA_MAP_DATA.viewBox);
+      return;
+    }
+
+    const rect = viewport.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
+    const { cx, cy, zoom } = cameraRef.current;
+    const vw = FULL_BOUNDS.width / zoom;
+    const vh = vw * (rect.height / rect.width);
+    const x = cx - vw / 2;
+    const y = cy - vh / 2;
+    svg.setAttribute("viewBox", `${x.toFixed(2)} ${y.toFixed(2)} ${vw.toFixed(2)} ${vh.toFixed(2)}`);
+  }, []);
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    const mql = window.matchMedia("(max-width: 767px)");
+    const syncViewport = () => {
+      if (mql.matches && cameraRef.current.zoom === MOBILE_DEFAULT_CAMERA.zoom &&
+          cameraRef.current.cx === MOBILE_DEFAULT_CAMERA.cx) {
+        cameraRef.current = { ...MOBILE_DEFAULT_CAMERA };
+      }
+      applyMobileViewBox();
+    };
+
+    syncViewport();
+    const observer = new ResizeObserver(applyMobileViewBox);
+    observer.observe(viewport);
+    mql.addEventListener("change", syncViewport);
+
+    return () => {
+      observer.disconnect();
+      mql.removeEventListener("change", syncViewport);
+    };
+  }, [applyMobileViewBox]);
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    const handlePointerMove = (e: PointerEvent) => {
+      if (!pointersRef.current.has(e.pointerId) || !window.matchMedia("(max-width: 767px)").matches) return;
+      const rect = viewport.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+
+      const prevPoints = new Map(pointersRef.current);
+      pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      if (pointersRef.current.size === 1) {
+        const prev = prevPoints.get(e.pointerId);
+        if (!prev) return;
+        const dx = e.clientX - prev.x;
+        const dy = e.clientY - prev.y;
+        dragDistanceRef.current += Math.hypot(dx, dy);
+        if (dragDistanceRef.current < 5) return;
+
+        const { cx, cy, zoom } = cameraRef.current;
+        const vw = FULL_BOUNDS.width / zoom;
+        const vh = vw * (rect.height / rect.width);
+        cameraRef.current = clampCamera(
+          cx - dx * (vw / rect.width),
+          cy - dy * (vh / rect.height),
+          zoom
+        );
+        applyMobileViewBox();
+      } else if (pointersRef.current.size === 2) {
+        const ids = Array.from(pointersRef.current.keys());
+        const prevA = prevPoints.get(ids[0]);
+        const prevB = prevPoints.get(ids[1]);
+        const nextA = pointersRef.current.get(ids[0]);
+        const nextB = pointersRef.current.get(ids[1]);
+        if (!prevA || !prevB || !nextA || !nextB) return;
+
+        const prevDist = Math.hypot(prevB.x - prevA.x, prevB.y - prevA.y);
+        const nextDist = Math.hypot(nextB.x - nextA.x, nextB.y - nextA.y);
+        if (prevDist < 1) return;
+
+        dragDistanceRef.current += 20;
+        const prevMid = { x: (prevA.x + prevB.x) / 2, y: (prevA.y + prevB.y) / 2 };
+        const nextMid = { x: (nextA.x + nextB.x) / 2, y: (nextA.y + nextB.y) / 2 };
+
+        const { cx, cy, zoom } = cameraRef.current;
+        const oldVw = FULL_BOUNDS.width / zoom;
+        const oldVh = oldVw * (rect.height / rect.width);
+        const worldFocusX = cx + ((prevMid.x - rect.left) / rect.width - 0.5) * oldVw;
+        const worldFocusY = cy + ((prevMid.y - rect.top) / rect.height - 0.5) * oldVh;
+
+        const nextZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom * (nextDist / prevDist)));
+        const nextVw = FULL_BOUNDS.width / nextZoom;
+        const nextVh = nextVw * (rect.height / rect.width);
+
+        const nextCx = worldFocusX - ((nextMid.x - rect.left) / rect.width - 0.5) * nextVw;
+        const nextCy = worldFocusY - ((nextMid.y - rect.top) / rect.height - 0.5) * nextVh;
+
+        cameraRef.current = clampCamera(nextCx, nextCy, nextZoom);
+        applyMobileViewBox();
+      }
+    };
+
+    const handlePointerEnd = (e: PointerEvent) => {
+      if (!pointersRef.current.has(e.pointerId)) return;
+      pointersRef.current.delete(e.pointerId);
+      if (dragDistanceRef.current >= 6) {
+        suppressClickUntilRef.current = performance.now() + 140;
+      }
+      if (pointersRef.current.size === 0) {
+        dragDistanceRef.current = 0;
+      }
+    };
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerEnd);
+    window.addEventListener("pointercancel", handlePointerEnd);
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerEnd);
+      window.removeEventListener("pointercancel", handlePointerEnd);
+    };
+  }, [applyMobileViewBox]);
 
   return (
     <section
@@ -310,11 +465,18 @@ export function LabsMap() {
             THE ISOMETRIC MAP CANVAS
         ============================================================== */}
         <div className="relative mx-auto w-full max-w-[1100px] mb-0">
-          {/* Aspect-ratio container prevents any layout shift */}
+          {/* Responsive map viewport: taller Ahilyanagar-focused canvas on mobile, exact aspect on desktop */}
           <div
-            className="relative w-full select-none"
+            ref={viewportRef}
+            data-lenis-prevent
+            className="relative w-full h-[56svh] min-h-[410px] max-h-[540px] md:h-auto md:min-h-0 md:max-h-none md:[aspect-ratio:var(--map-aspect)] overflow-hidden rounded-2xl border border-white/15 bg-black/20 touch-none md:overflow-visible md:rounded-none md:border-0 md:bg-transparent md:touch-auto select-none"
             style={{
-              aspectRatio: `${MAHARASHTRA_MAP_DATA.viewBoxBounds.width} / ${MAHARASHTRA_MAP_DATA.viewBoxBounds.height}`,
+              "--map-aspect": `${MAHARASHTRA_MAP_DATA.viewBoxBounds.width} / ${MAHARASHTRA_MAP_DATA.viewBoxBounds.height}`,
+            } as React.CSSProperties}
+            onPointerDown={(e) => {
+              if (!window.matchMedia("(max-width: 767px)").matches) return;
+              if (pointersRef.current.size === 0) dragDistanceRef.current = 0;
+              pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
             }}
           >
             <svg
@@ -741,16 +903,17 @@ export function LabsMap() {
                 </g>
               </g>
             </svg>
+          </div>
 
-            {/* Interactive Detail Card (Appears when a lab or service area is selected) */}
-            {selectedLab && (
-              <div
-                ref={cardRef}
-                role="dialog"
-                aria-label={`Details for ${selectedLab.name}`}
-                className="absolute top-4 right-4 z-20 w-84 max-w-[calc(100vw-2rem)] rounded-2xl p-5 shadow-2xl border border-white/20 transition-all duration-300 animate-in fade-in slide-in-from-top-2"
-                style={{ backgroundColor: "rgba(26, 23, 24, 0.96)" }}
-              >
+          {/* Interactive Detail Card (Docked cleanly below map on mobile, floating overlay on desktop) */}
+          {selectedLab && (
+            <div
+              ref={cardRef}
+              role="dialog"
+              aria-label={`Details for ${selectedLab.name}`}
+              className="relative mt-4 md:mt-0 md:absolute md:top-4 md:right-4 z-20 w-full md:w-84 max-w-full rounded-2xl p-5 shadow-2xl border border-white/20 transition-all duration-300 animate-in fade-in slide-in-from-top-2"
+              style={{ backgroundColor: "rgba(26, 23, 24, 0.96)" }}
+            >
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div>
                     <span
@@ -835,7 +998,6 @@ export function LabsMap() {
                 </div>
               </div>
             )}
-          </div>
         </div>
       </Container>
     </section>

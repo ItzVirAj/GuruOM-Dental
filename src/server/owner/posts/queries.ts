@@ -9,8 +9,9 @@ import {
   postWorkingCopies,
   postRevisions,
   media,
+  videos,
 } from "@/src/db/schema";
-import { eq, and, sql, desc, asc, isNull, isNotNull, ilike, or, gt, lte } from "drizzle-orm";
+import { eq, and, sql, desc, asc, isNull, isNotNull, ilike, or, gt, lte, inArray } from "drizzle-orm";
 import { formatUtcToIst, formatRelativeTime } from "./timezone";
 
 export type PostTab = "all" | "published" | "scheduled" | "draft" | "archived" | "trash";
@@ -289,6 +290,61 @@ export async function getOwnerPostForEditing(id: string) {
     .from(categories)
     .orderBy(categories.sortOrder);
 
+  // 6. Hydrate embedded YouTube video metadata (for drafts, thumbnails & status toggles)
+  const embeddedVideoIds = new Set<string>();
+  const collectVideoIds = (blocks: unknown) => {
+    if (!Array.isArray(blocks)) return;
+    for (const block of blocks) {
+      if (
+        block &&
+        typeof block === "object" &&
+        "type" in block &&
+        block.type === "youtube" &&
+        "videoId" in block &&
+        typeof block.videoId === "string"
+      ) {
+        embeddedVideoIds.add(block.videoId);
+      }
+    }
+  };
+  collectVideoIds(postRow.content);
+  collectVideoIds(workingCopyRow?.data && typeof workingCopyRow.data === "object" ? (workingCopyRow.data as Record<string, unknown>).content : undefined);
+
+  const embeddedVideos: Record<
+    string,
+    {
+      id: string;
+      title: string;
+      thumbnailUrl: string;
+      youtubeId: string;
+      status: "draft" | "published";
+    }
+  > = {};
+
+  if (embeddedVideoIds.size > 0) {
+    const videoRows = await db
+      .select({
+        id: videos.id,
+        title: videos.title,
+        youtubeId: videos.youtubeId,
+        status: videos.status,
+        thumbnailUrl: media.secureUrl,
+      })
+      .from(videos)
+      .innerJoin(media, eq(videos.thumbnailMediaId, media.id))
+      .where(inArray(videos.id, Array.from(embeddedVideoIds)));
+
+    for (const vr of videoRows) {
+      embeddedVideos[vr.id] = {
+        id: vr.id,
+        title: vr.title,
+        thumbnailUrl: vr.thumbnailUrl,
+        youtubeId: vr.youtubeId,
+        status: vr.status,
+      };
+    }
+  }
+
   return {
     post: {
       id: postRow.id,
@@ -350,6 +406,7 @@ export async function getOwnerPostForEditing(id: string) {
       snapshot: (r.snapshot || {}) as Record<string, unknown>,
     })),
     categories: allCategories,
+    embeddedVideos,
   };
 }
 

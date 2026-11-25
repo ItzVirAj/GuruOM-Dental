@@ -11,11 +11,15 @@ import {
   GripVertical,
   Trash2,
   Play,
-  AlertCircle,
+  Eye,
+  EyeOff,
   Video as VideoIcon,
   MessageSquare,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import cloudinaryLoader from "@/src/lib/media/cloudinary-loader";
+import { setVideoStatusAction } from "@/src/server/owner/videos/actions";
 
 interface VideoNodeAttrs {
   videoId: string;
@@ -24,26 +28,52 @@ interface VideoNodeAttrs {
   youtubeId?: string;
   caption?: string;
   status?: "draft" | "published";
+  visible?: boolean;
 }
 
 function VideoNodeView(props: NodeViewProps) {
   const { node, updateAttributes, deleteNode, selected } = props;
   const {
+    videoId,
     title = "YouTube Video",
     thumbnailUrl,
     caption,
     status = "published",
+    visible = true,
   } = (node.attrs || {}) as VideoNodeAttrs;
 
   const [editingCaption, setEditingCaption] = useState(caption || "");
   const [showCaptionInput, setShowCaptionInput] = useState(Boolean(caption));
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [statusError, setStatusError] = useState<string | null>(null);
 
   const isDraft = status === "draft";
+  const isVisible = visible !== false;
 
   const handleBlurCaption = () => {
     updateAttributes({
       caption: editingCaption.trim() || undefined,
     });
+  };
+
+  const handleToggleArticleVisibility = () => {
+    updateAttributes({ visible: !isVisible });
+  };
+
+  const handlePublishLibraryVideo = async () => {
+    if (!videoId || isUpdatingStatus) return;
+    setIsUpdatingStatus(true);
+    setStatusError(null);
+    try {
+      await setVideoStatusAction(videoId, "published");
+      updateAttributes({ status: "published", visible: true });
+    } catch (err) {
+      setStatusError(
+        err instanceof Error ? err.message : "Could not publish video."
+      );
+    } finally {
+      setIsUpdatingStatus(false);
+    }
   };
 
   return (
@@ -52,40 +82,88 @@ function VideoNodeView(props: NodeViewProps) {
       data-drag-handle
     >
       <div
-        className={`rounded-2xl overflow-hidden border bg-surface transition-all ${
+        className={`rounded-2xl overflow-hidden border bg-white transition-all ${
           selected
-            ? "ring-2 ring-brand border-brand shadow-card"
-            : "border-line shadow-xs"
-        }`}
+            ? "ring-2 ring-accent border-brand-dark shadow-card"
+            : "border-line shadow-soft"
+        } ${!isVisible ? "opacity-80" : ""}`}
       >
-        {/* Floating Action Bar */}
-        <div className="absolute top-3 right-3 flex items-center gap-1.5 p-1 rounded-xl bg-black/75 text-white backdrop-blur-xs z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            type="button"
-            onClick={() => setShowCaptionInput((v) => !v)}
-            title="Add or edit caption"
-            className="p-1.5 rounded-lg hover:bg-white/20 text-white transition-colors"
-          >
-            <MessageSquare className="w-3.5 h-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={deleteNode}
-            title="Delete video embed"
-            className="p-1.5 rounded-lg hover:bg-red-500/50 text-red-300 hover:text-white transition-colors"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
-          <div
-            className="p-1.5 cursor-grab active:cursor-grabbing text-white/70"
-            title="Drag to reposition"
-          >
-            <GripVertical className="w-3.5 h-3.5" />
+        {/* Persistent Top Control Bar (accessible on desktop, touch, & keyboard) */}
+        <div className="px-3.5 py-2.5 bg-brand-dark text-white flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span
+              className="p-1 -ml-1 cursor-grab active:cursor-grabbing text-white/60 hover:text-white"
+              title="Drag to reposition"
+            >
+              <GripVertical className="w-3.5 h-3.5" />
+            </span>
+            <span className="h-2 w-2 rounded-full bg-accent shrink-0" aria-hidden="true" />
+            <span className="text-xs font-medium text-white/90 truncate">
+              YouTube video
+            </span>
+            {isDraft && (
+              <span className="rounded-md bg-amber-400/20 border border-amber-300/40 px-2 py-0.5 text-[11px] font-medium text-amber-200">
+                Draft in library
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            {/* Public article visibility toggle */}
+            <button
+              type="button"
+              onClick={handleToggleArticleVisibility}
+              aria-pressed={isVisible}
+              title={
+                isVisible
+                  ? "Visible to readers — click to hide from this post"
+                  : "Hidden from readers — click to show in this post"
+              }
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                isVisible
+                  ? "bg-emerald-500/20 text-emerald-200 hover:bg-emerald-500/30 border border-emerald-400/30"
+                  : "bg-white/10 text-white/80 hover:bg-white/20 border border-white/15"
+              }`}
+            >
+              {isVisible ? (
+                <>
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Visible to readers</span>
+                </>
+              ) : (
+                <>
+                  <EyeOff className="w-3.5 h-3.5" />
+                  <span>Hidden in post</span>
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowCaptionInput((v) => !v)}
+              title="Add or edit caption"
+              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                showCaptionInput
+                  ? "bg-white/20 text-white"
+                  : "text-white/75 hover:bg-white/15 hover:text-white"
+              }`}
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+            </button>
+
+            <button
+              type="button"
+              onClick={deleteNode}
+              title="Remove video embed"
+              className="p-1.5 rounded-lg text-red-300 hover:bg-red-500/30 hover:text-white transition-colors cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
 
         {/* 16:9 Thumbnail Area */}
-        <div className="relative aspect-video w-full bg-ink/90 overflow-hidden">
+        <div className="relative aspect-video w-full bg-brand-dark overflow-hidden">
           {thumbnailUrl ? (
             <Image
               loader={cloudinaryLoader}
@@ -93,57 +171,74 @@ function VideoNodeView(props: NodeViewProps) {
               alt={title}
               fill
               sizes="700px"
-              className="object-cover"
+              className={`object-cover transition-all ${!isVisible ? "grayscale-[40%] opacity-65" : ""}`}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-ink">
+            <div className="w-full h-full flex items-center justify-center bg-brand-dark">
               <VideoIcon className="w-12 h-12 text-white/30" />
             </div>
           )}
 
-          {/* Dark gradient & Badges */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent pointer-events-none" />
 
-          {/* Top Badges */}
-          <div className="absolute top-3 left-3 flex items-center gap-2">
-            <span className="px-2.5 py-1 text-[11px] font-medium tracking-wide uppercase rounded-full bg-black/60 text-white backdrop-blur-md border border-white/20">
-              YouTube Video
-            </span>
-            {isDraft && (
-              <span className="px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider rounded-full bg-amber-500 text-amber-950 shadow-xs">
-                Draft
-              </span>
+          {/* Center Play / Hidden Badge */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            {isVisible ? (
+              <div className="w-14 h-14 rounded-full bg-brand-dark/90 border border-white/25 text-white flex items-center justify-center shadow-xl">
+                <Play className="w-6 h-6 translate-x-0.5 fill-current" />
+              </div>
+            ) : (
+              <div className="px-3.5 py-2 rounded-xl bg-black/75 border border-white/20 text-white text-xs font-medium flex items-center gap-2 backdrop-blur-xs">
+                <EyeOff className="w-4 h-4 text-white/80" />
+                <span>Hidden on live article</span>
+              </div>
             )}
           </div>
 
-          {/* Play Icon Graphic */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-14 h-14 rounded-full bg-brand/90 text-white flex items-center justify-center shadow-xl">
-              <Play className="w-6 h-6 translate-x-0.5 fill-current" />
-            </div>
-          </div>
-
           {/* Title on Overlay */}
-          <div className="absolute bottom-3 left-3 right-3 pointer-events-none">
-            <h4 className="font-display font-medium text-white text-sm sm:text-base line-clamp-1 drop-shadow">
+          <div className="absolute bottom-3 left-3.5 right-3.5 pointer-events-none">
+            <h4 className="font-just-serif font-normal text-white text-base sm:text-lg line-clamp-1 drop-shadow">
               {title}
             </h4>
           </div>
         </div>
 
-        {/* Draft Warning Notice */}
+        {/* Draft Library Status Action Banner */}
         {isDraft && (
-          <div className="p-3 bg-amber-50 border-t border-amber-200 text-amber-900 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-            <span>
-              This video is a draft and will not show on the live post until it is published.
-            </span>
+          <div className="px-4 py-3 bg-accent-soft border-t border-accent/30 text-ink text-xs flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-start gap-2 min-w-0 flex-1">
+              <AlertCircle className="w-4 h-4 text-accent-deep shrink-0 mt-0.5" />
+              <span className="leading-snug">
+                This video is currently a draft in your Video Library, so readers cannot view it on the live article yet.
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handlePublishLibraryVideo}
+              disabled={isUpdatingStatus}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-dark text-white font-medium hover:bg-brand disabled:opacity-50 transition-colors cursor-pointer shrink-0"
+            >
+              {isUpdatingStatus ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Publishing…</span>
+                </>
+              ) : (
+                <span>Publish video</span>
+              )}
+            </button>
+          </div>
+        )}
+
+        {statusError && (
+          <div className="px-4 py-2 bg-red-50 border-t border-red-200 text-red-700 text-xs">
+            {statusError}
           </div>
         )}
 
         {/* Caption Input / Display */}
         {showCaptionInput && (
-          <div className="p-3 bg-surface border-t border-line">
+          <div className="px-4 py-2.5 bg-surface border-t border-line">
             <input
               type="text"
               value={editingCaption}
@@ -181,6 +276,9 @@ export const VideoNode = Node.create({
       },
       status: {
         default: "published",
+      },
+      visible: {
+        default: true,
       },
       caption: {
         default: null,

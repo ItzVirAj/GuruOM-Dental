@@ -23,67 +23,60 @@ export const BlogAuthorBox: React.FC<BlogAuthorBoxProps> = ({
 
   return (
     <div className="space-y-6 pt-8 border-t border-line">
-      {/* Author & Reviewer Card */}
-      <div className="p-6 rounded-3xl bg-surface/60 border border-line space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          {/* Author Details */}
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0">
-              <User className="w-6 h-6" aria-hidden="true" />
-            </div>
-            <div>
-              <span className="text-[10px] uppercase font-semibold tracking-wider text-ink-muted block">
-                Written By
-              </span>
-              <h4 className="font-display font-semibold text-ink text-base">
-                {authorName}
-              </h4>
-              <p className="text-xs text-ink-muted">{authorRole}</p>
-            </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+        {/* Author Attribution */}
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-full bg-surface border border-line text-brand-dark flex items-center justify-center shrink-0">
+            <User className="w-5 h-5" aria-hidden="true" />
           </div>
-
-          {/* Clinical Peer Review Badge */}
-          {reviewingDoctor && (
-            <Link
-              href={`/doctors/${reviewingDoctor.slug}`}
-              className="group flex items-center gap-3 p-2.5 rounded-2xl bg-white border border-line hover:border-brand/40 transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-            >
-              <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 bg-surface-alt">
-                <SmartImage
-                  slot={reviewingDoctor.imageSlot}
-                  alt={reviewingDoctor.name}
-                  ratio="1/1"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="text-left pr-2">
-                <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-success">
-                  <ShieldCheck className="w-3 h-3 text-success" />
-                  Medically Reviewed
-                </span>
-                <span className="block text-xs font-semibold text-ink group-hover:text-brand transition-colors">
-                  {reviewingDoctor.name}
-                </span>
-                <span className="text-[10px] text-ink-muted block truncate max-w-[160px]">
-                  {reviewingDoctor.role}
-                </span>
-              </div>
-            </Link>
-          )}
+          <div>
+            <p className="text-xs text-ink-muted">Written by</p>
+            <h4 className="font-just-serif font-normal text-ink text-lg leading-snug">
+              {authorName}
+            </h4>
+            <p className="text-xs text-ink-muted">{authorRole}</p>
+          </div>
         </div>
+
+        {/* Clinical Peer Review Link */}
+        {reviewingDoctor && (
+          <Link
+            href="/about"
+            className="group flex items-center gap-3 p-3 rounded-xl bg-surface border border-line hover:border-brand-dark transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 bg-surface-alt">
+              <SmartImage
+                slot={reviewingDoctor.imageSlot}
+                alt={reviewingDoctor.name}
+                ratio="1/1"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="text-left pr-1">
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-success">
+                <ShieldCheck className="w-3.5 h-3.5 text-success" aria-hidden="true" />
+                <span>Medically reviewed</span>
+              </span>
+              <span className="block text-sm font-semibold text-ink group-hover:text-brand-dark transition-colors">
+                {reviewingDoctor.name}
+              </span>
+              <span className="text-xs text-ink-muted block truncate max-w-[180px]">
+                {reviewingDoctor.role}
+              </span>
+            </div>
+          </Link>
+        )}
       </div>
 
-      {/* Mandatory Clinical Advice Disclaimer */}
+      {/* Clinical Advice Note */}
       <div
         role="note"
         aria-label="Medical advice disclaimer"
-        className="p-4 rounded-2xl bg-surface-alt/70 border border-line flex items-start gap-3 text-xs text-ink-muted leading-relaxed"
+        className="p-4 rounded-xl bg-surface border border-line flex items-start gap-3 text-xs text-ink-muted leading-relaxed"
       >
-        <AlertCircle className="w-4 h-4 text-brand shrink-0 mt-0.5" aria-hidden="true" />
+        <AlertCircle className="w-4 h-4 text-ink-muted shrink-0 mt-0.5" aria-hidden="true" />
         <p>
-          <strong>Medical Disclaimer:</strong> This article is for general informational and educational
-          purposes only and does not constitute clinical dental or medical diagnosis. Please consult a qualified
-          dentist regarding your personal oral health situation.
+          <strong className="text-ink font-medium">Medical disclaimer:</strong> This article is for educational purposes and does not replace a clinical examination. Consult a qualified dentist regarding your individual care.
         </p>
       </div>
     </div>

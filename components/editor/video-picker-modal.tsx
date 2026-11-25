@@ -10,12 +10,15 @@ import {
   Video as VideoIcon,
   AlertCircle,
   CheckCircle2,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import type { OwnerVideoItem } from "@/src/server/owner/videos/queries";
 import {
   previewVideoLinkAction,
   createVideoAction,
   getOwnerVideosListAction,
+  setVideoStatusAction,
 } from "@/src/server/owner/videos/actions";
 import cloudinaryLoader from "@/src/lib/media/cloudinary-loader";
 
@@ -25,12 +28,26 @@ export interface SelectedVideoPayload {
   thumbnailUrl: string;
   youtubeId: string;
   status: "draft" | "published";
+  visible: boolean;
 }
 
 export interface VideoPickerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (video: SelectedVideoPayload) => void;
+}
+
+interface PreviewLinkState {
+  youtubeId: string;
+  startSeconds: number | null;
+  title: string;
+  channelName?: string;
+  existingVideo: {
+    id: string;
+    title: string;
+    thumbnailUrl: string;
+    status: "draft" | "published";
+  } | null;
 }
 
 export function VideoPickerModal({
@@ -42,19 +59,16 @@ export function VideoPickerModal({
   const [videos, setVideos] = useState<OwnerVideoItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [embedVisibleInPost, setEmbedVisibleInPost] = useState(true);
 
   // Add by link state
   const [urlInput, setUrlInput] = useState("");
   const [isChecking, setIsChecking] = useState(false);
   const [checkError, setCheckError] = useState<string | null>(null);
-  const [previewData, setPreviewData] = useState<{
-    youtubeId: string;
-    startSeconds: number | null;
-    title: string;
-    channelName?: string;
-  } | null>(null);
+  const [previewData, setPreviewData] = useState<PreviewLinkState | null>(null);
   const [customTitle, setCustomTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [publishImmediately, setPublishImmediately] = useState(true);
   const [consentChecked, setConsentChecked] = useState(false);
   const [isCreating, startCreatingTransition] = useTransition();
 
@@ -67,7 +81,6 @@ export function VideoPickerModal({
     getOwnerVideosListAction()
       .then((items) => {
         if (mounted) {
-          // Exclude trashed videos from picker
           setVideos(items.filter((v) => !v.deletedAt));
         }
       })
@@ -117,24 +130,55 @@ export function VideoPickerModal({
     }
   };
 
-  const handleCreateAndInsert = () => {
-    if (!previewData || !consentChecked) return;
+  const handleCreateOrInsertExisting = () => {
+    if (!previewData) return;
+
+    if (previewData.existingVideo) {
+      const existing = previewData.existingVideo;
+      startCreatingTransition(async () => {
+        try {
+          let nextStatus = existing.status;
+          if (publishImmediately && existing.status === "draft") {
+            await setVideoStatusAction(existing.id, "published");
+            nextStatus = "published";
+          }
+          onSelect({
+            videoId: existing.id,
+            title: existing.title,
+            thumbnailUrl: existing.thumbnailUrl,
+            youtubeId: previewData.youtubeId,
+            status: nextStatus,
+            visible: embedVisibleInPost,
+          });
+          onClose();
+        } catch (err: unknown) {
+          setCheckError(
+            err instanceof Error ? err.message : "Failed updating video visibility."
+          );
+        }
+      });
+      return;
+    }
+
+    if (!consentChecked) return;
 
     startCreatingTransition(async () => {
       try {
+        const targetStatus = publishImmediately ? "published" : "draft";
         const created = await createVideoAction({
           url: urlInput,
           title: customTitle.trim() || previewData.title,
-          description: description.trim() || previewData.title,
+          description: description.trim() || customTitle.trim() || previewData.title,
+          status: targetStatus,
         });
 
-        // Insert directly into editor
         onSelect({
           videoId: created.id,
           title: created.title,
-          thumbnailUrl: "",
-          youtubeId: previewData.youtubeId,
-          status: "draft",
+          thumbnailUrl: created.thumbnailUrl,
+          youtubeId: created.youtubeId,
+          status: created.status,
+          visible: embedVisibleInPost,
         });
         onClose();
       } catch (err: unknown) {
@@ -152,19 +196,17 @@ export function VideoPickerModal({
       aria-labelledby="video-picker-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in"
     >
-      <div className="bg-white rounded-3xl max-w-3xl w-full border border-line shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+      <div className="bg-white rounded-2xl max-w-3xl w-full border border-line shadow-float overflow-hidden flex flex-col max-h-[86vh] font-aileron">
         {/* Modal Header */}
-        <div className="p-5 border-b border-line/60 flex items-center justify-between">
+        <div className="px-6 py-4 bg-brand-dark text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-brand/10 text-brand flex items-center justify-center">
-              <Play className="w-5 h-5 fill-current translate-x-0.5" />
-            </div>
+            <span className="h-2.5 w-2.5 rounded-full bg-accent shrink-0" aria-hidden="true" />
             <div>
-              <h3 id="video-picker-title" className="font-display font-bold text-base text-ink">
-                Embed YouTube Video
+              <h3 id="video-picker-title" className="font-just-serif text-xl font-normal tracking-tight text-white">
+                Embed YouTube video
               </h3>
-              <p className="text-xs text-ink-muted">
-                Select a video from your library or add a new YouTube link.
+              <p className="text-xs text-white/70">
+                Choose from your library or paste a YouTube link.
               </p>
             </div>
           </div>
@@ -172,40 +214,66 @@ export function VideoPickerModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl text-ink-muted hover:text-ink hover:bg-black/5 transition-colors"
+            aria-label="Close video picker"
+            className="p-2 rounded-lg text-white/75 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Tab Switcher */}
-        <div className="px-6 border-b border-line flex items-center gap-4 bg-paper-sunken/40">
+        {/* Tab Switcher + Embed Visibility Control */}
+        <div className="px-6 border-b border-line flex flex-wrap items-center justify-between gap-3 bg-surface">
+          <div className="flex items-center gap-5">
+            <button
+              type="button"
+              onClick={() => setActiveTab("library")}
+              className={`py-3 text-xs sm:text-sm font-medium border-b-2 -mb-px transition-colors cursor-pointer ${
+                activeTab === "library"
+                  ? "border-brand-dark text-ink font-semibold"
+                  : "border-transparent text-ink-muted hover:text-ink"
+              }`}
+            >
+              Video library ({videos.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("link")}
+              className={`py-3 text-xs sm:text-sm font-medium border-b-2 -mb-px transition-colors cursor-pointer ${
+                activeTab === "link"
+                  ? "border-brand-dark text-ink font-semibold"
+                  : "border-transparent text-ink-muted hover:text-ink"
+              }`}
+            >
+              Add by YouTube link
+            </button>
+          </div>
+
           <button
             type="button"
-            onClick={() => setActiveTab("library")}
-            className={`py-3 text-xs sm:text-sm font-medium border-b-2 -mb-px transition-colors ${
-              activeTab === "library"
-                ? "border-brand text-brand font-semibold"
-                : "border-transparent text-ink-muted hover:text-ink"
+            onClick={() => setEmbedVisibleInPost((v) => !v)}
+            aria-pressed={embedVisibleInPost}
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+              embedVisibleInPost
+                ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+                : "border-line bg-white text-ink-muted"
             }`}
           >
-            Video Library ({videos.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("link")}
-            className={`py-3 text-xs sm:text-sm font-medium border-b-2 -mb-px transition-colors ${
-              activeTab === "link"
-                ? "border-brand text-brand font-semibold"
-                : "border-transparent text-ink-muted hover:text-ink"
-            }`}
-          >
-            Add by Link
+            {embedVisibleInPost ? (
+              <>
+                <Eye className="w-3.5 h-3.5" />
+                <span>Insert as visible</span>
+              </>
+            ) : (
+              <>
+                <EyeOff className="w-3.5 h-3.5" />
+                <span>Insert hidden in article</span>
+              </>
+            )}
           </button>
         </div>
 
         {/* Tab Body */}
-        <div className="p-6 flex-1 overflow-y-auto">
+        <div className="p-6 flex-1 overflow-y-auto bg-surface/40">
           {activeTab === "library" ? (
             <div className="space-y-4">
               {/* Search Bar */}
@@ -216,7 +284,7 @@ export function VideoPickerModal({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search library videos..."
-                  className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm rounded-xl border border-line bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                  className="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-line bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                 />
               </div>
 
@@ -228,13 +296,13 @@ export function VideoPickerModal({
               ) : filteredVideos.length === 0 ? (
                 <div className="py-16 text-center text-ink-muted space-y-2">
                   <VideoIcon className="w-8 h-8 mx-auto text-ink-muted/40" />
-                  <p className="text-xs">No videos match your search.</p>
+                  <p className="text-sm">No matching videos in your library.</p>
                   <button
                     type="button"
                     onClick={() => setActiveTab("link")}
-                    className="text-xs text-brand font-medium hover:underline inline-block mt-1"
+                    className="text-xs text-brand font-semibold hover:underline inline-block mt-1 cursor-pointer"
                   >
-                    + Add a new video by link
+                    Add a video using a YouTube link
                   </button>
                 </div>
               ) : (
@@ -250,12 +318,13 @@ export function VideoPickerModal({
                           thumbnailUrl: v.thumbnailUrl,
                           youtubeId: v.youtubeId,
                           status: v.status,
+                          visible: embedVisibleInPost,
                         });
                         onClose();
                       }}
-                      className="group p-3 rounded-2xl border border-line bg-surface hover:bg-white hover:border-brand/40 hover:shadow-sm transition-all text-left flex gap-3 items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                      className="group p-3 rounded-xl border border-line bg-white hover:border-brand-dark hover:shadow-soft transition-all text-left flex gap-3 items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent cursor-pointer"
                     >
-                      <div className="relative w-24 aspect-video rounded-lg overflow-hidden bg-ink/90 shrink-0">
+                      <div className="relative w-24 aspect-video rounded-lg overflow-hidden bg-brand-dark shrink-0">
                         {v.thumbnailUrl ? (
                           <Image
                             loader={cloudinaryLoader}
@@ -278,21 +347,16 @@ export function VideoPickerModal({
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5 mb-1">
                           <span
-                            className={`px-1.5 py-0.2 rounded text-[9px] font-semibold uppercase tracking-wider ${
+                            className={`px-2 py-0.5 rounded-md text-[11px] font-medium ${
                               v.status === "published"
                                 ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                : "bg-amber-50 text-amber-700 border border-amber-200"
+                                : "bg-amber-50 text-amber-800 border border-amber-200"
                             }`}
                           >
-                            {v.status}
+                            {v.status === "published" ? "Published" : "Draft"}
                           </span>
-                          {v.categoryLabel && (
-                            <span className="text-[10px] text-ink-muted truncate">
-                              • {v.categoryLabel}
-                            </span>
-                          )}
                         </div>
-                        <h4 className="text-xs font-semibold text-ink group-hover:text-brand line-clamp-2 leading-tight">
+                        <h4 className="text-xs font-semibold text-ink group-hover:text-brand line-clamp-2 leading-snug">
                           {v.title}
                         </h4>
                       </div>
@@ -305,8 +369,8 @@ export function VideoPickerModal({
             /* Add by Link Tab */
             <div className="space-y-4">
               <form onSubmit={handleCheckLink} className="space-y-2">
-                <label htmlFor="modal-yt-url" className="text-xs font-medium text-ink block">
-                  YouTube Video URL
+                <label htmlFor="modal-yt-url" className="text-sm font-medium text-ink block">
+                  YouTube link
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -315,14 +379,14 @@ export function VideoPickerModal({
                     value={urlInput}
                     onChange={(e) => setUrlInput(e.target.value)}
                     placeholder="https://www.youtube.com/watch?v=..."
-                    className="flex-1 px-3 py-2 text-xs rounded-xl border border-line bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand font-mono"
+                    className="flex-1 px-3.5 py-2.5 text-sm rounded-xl border border-line bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   />
                   <button
                     type="submit"
                     disabled={isChecking || !urlInput.trim()}
-                    className="px-4 py-2 bg-brand text-white rounded-xl text-xs font-medium disabled:opacity-40 flex items-center gap-1.5 shrink-0"
+                    className="px-4 py-2.5 bg-brand-dark hover:bg-brand text-white rounded-xl text-xs font-semibold disabled:opacity-40 flex items-center gap-1.5 shrink-0 cursor-pointer"
                   >
-                    {isChecking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Check"}
+                    {isChecking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Verify link"}
                   </button>
                 </div>
               </form>
@@ -335,63 +399,93 @@ export function VideoPickerModal({
               )}
 
               {previewData && (
-                <div className="p-4 rounded-xl bg-surface border border-line space-y-3 animate-in fade-in">
+                <div className="p-4 rounded-xl bg-white border border-line space-y-3.5 animate-in fade-in">
                   <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Video Verified: {previewData.title}</span>
+                    <span>
+                      {previewData.existingVideo
+                        ? `Found in library: ${previewData.existingVideo.title}`
+                        : `Verified: ${previewData.title}`}
+                    </span>
                   </div>
 
-                  <div className="space-y-2 text-xs">
-                    <div>
-                      <label className="font-medium text-ink block mb-1">
-                        Title in Article
-                      </label>
-                      <input
-                        type="text"
-                        value={customTitle}
-                        onChange={(e) => setCustomTitle(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl border border-line bg-white"
-                      />
-                    </div>
+                  <div className="space-y-3 text-xs">
+                    {!previewData.existingVideo && (
+                      <>
+                        <div>
+                          <label className="font-medium text-ink block mb-1">
+                            Video title
+                          </label>
+                          <input
+                            type="text"
+                            value={customTitle}
+                            onChange={(e) => setCustomTitle(e.target.value)}
+                            className="w-full px-3 py-2 rounded-xl border border-line bg-surface/40 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent"
+                          />
+                        </div>
 
-                    <div>
-                      <label className="font-medium text-ink block mb-1">
-                        Description / Summary (Optional)
-                      </label>
-                      <textarea
-                        rows={2}
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Brief summary..."
-                        className="w-full px-3 py-2 rounded-xl border border-line bg-white"
-                      />
-                    </div>
+                        <div>
+                          <label className="font-medium text-ink block mb-1">
+                            Summary (optional)
+                          </label>
+                          <textarea
+                            rows={2}
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="Brief clinical summary..."
+                            className="w-full px-3 py-2 rounded-xl border border-line bg-surface/40 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent"
+                          />
+                        </div>
+                      </>
+                    )}
 
-                    <label className="flex items-start gap-2 pt-1 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={consentChecked}
-                        onChange={(e) => setConsentChecked(e.target.checked)}
-                        className="mt-0.5 rounded border-line text-brand"
-                      />
-                      <span className="text-[11px] text-ink leading-tight">
-                        I confirm this video is owned or authorized to be shown and does not identify patients without written consent.
-                      </span>
-                    </label>
+                    {/* Visibility & Publish option */}
+                    {(!previewData.existingVideo || previewData.existingVideo.status === "draft") && (
+                      <label className="flex items-start gap-2.5 p-3 rounded-xl bg-surface border border-line cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={publishImmediately}
+                          onChange={(e) => setPublishImmediately(e.target.checked)}
+                          className="mt-0.5 rounded border-line accent-brand-dark cursor-pointer"
+                        />
+                        <span className="text-xs text-ink leading-snug">
+                          Publish to Video Library so this embed is visible on the live article immediately
+                        </span>
+                      </label>
+                    )}
+
+                    {!previewData.existingVideo && (
+                      <label className="flex items-start gap-2 pt-0.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={consentChecked}
+                          onChange={(e) => setConsentChecked(e.target.checked)}
+                          className="mt-0.5 rounded border-line accent-brand-dark cursor-pointer"
+                        />
+                        <span className="text-[11px] text-ink-muted leading-tight">
+                          I confirm this video is owned or authorized to be shown and does not identify patients without written consent.
+                        </span>
+                      </label>
+                    )}
 
                     <button
                       type="button"
-                      disabled={isCreating || !consentChecked}
-                      onClick={handleCreateAndInsert}
-                      className="w-full mt-3 py-2.5 rounded-xl bg-brand hover:bg-brand-accent text-white font-medium text-xs shadow-xs disabled:opacity-40 flex items-center justify-center gap-1.5"
+                      disabled={
+                        isCreating ||
+                        (!previewData.existingVideo && !consentChecked)
+                      }
+                      onClick={handleCreateOrInsertExisting}
+                      className="w-full mt-2 py-2.5 rounded-xl bg-brand-dark hover:bg-brand text-white font-semibold text-xs shadow-xs disabled:opacity-40 flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       {isCreating ? (
                         <>
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          Importing & Inserting...
+                          <span>Adding video…</span>
                         </>
+                      ) : previewData.existingVideo ? (
+                        <span>Insert video into post</span>
                       ) : (
-                        "Import and Insert into Post"
+                        <span>Add and insert video</span>
                       )}
                     </button>
                   </div>

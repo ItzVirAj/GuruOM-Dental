@@ -63,7 +63,7 @@ export const BlogContent: React.FC<BlogContentProps> = ({
   isOwnerPreview = false,
 }) => {
   return (
-    <div className="space-y-6 text-ink font-body leading-relaxed text-base sm:text-lg">
+    <div className="space-y-6 text-ink font-body leading-[1.8] text-base sm:text-[17px]">
       {content.map((block, index) => {
         switch (block.type) {
           case "heading": {
@@ -79,10 +79,10 @@ export const BlogContent: React.FC<BlogContentProps> = ({
               <HeadingTag
                 key={`block-${index}`}
                 id={headingId}
-                className={`group flex items-center gap-2 font-display text-ink tracking-tight scroll-mt-28 ${
+                className={`group flex items-center gap-2 font-just-serif font-normal text-brand-dark tracking-[-0.02em] scroll-mt-28 ${
                   block.level === 2
-                    ? "text-display-xs sm:text-display-sm pt-6 pb-1 border-b border-line/60"
-                    : "text-lg sm:text-xl pt-4 font-semibold"
+                    ? "text-2xl sm:text-[1.9rem] leading-tight pt-8 pb-2 border-b border-line"
+                    : "text-xl sm:text-2xl leading-snug pt-5"
                 }`}
               >
                 <span>{block.text}</span>
@@ -101,7 +101,7 @@ export const BlogContent: React.FC<BlogContentProps> = ({
             return (
               <p
                 key={`block-${index}`}
-                className="text-ink/85 leading-relaxed font-body text-sm sm:text-base"
+                className="text-ink/90 leading-[1.8] font-body text-base sm:text-[17px]"
               >
                 <RenderRuns runs={block.runs} fallbackText={block.text} />
               </p>
@@ -112,14 +112,14 @@ export const BlogContent: React.FC<BlogContentProps> = ({
             return (
               <ListTag
                 key={`block-${index}`}
-                className={`space-y-2.5 my-4 pl-6 text-sm sm:text-base text-ink/85 ${
+                className={`space-y-2.5 my-5 pl-6 text-base sm:text-[17px] text-ink/90 ${
                   block.ordered
-                    ? "list-decimal marker:font-semibold marker:text-brand"
-                    : "list-disc marker:text-brand"
+                    ? "list-decimal marker:font-semibold marker:text-brand-dark"
+                    : "list-disc marker:text-accent-deep"
                 }`}
               >
                 {block.items.map((item, itemIdx) => (
-                  <li key={itemIdx} className="leading-relaxed pl-1">
+                  <li key={itemIdx} className="leading-[1.75] pl-1">
                     {typeof item === "string" ? (
                       item
                     ) : (
@@ -135,7 +135,7 @@ export const BlogContent: React.FC<BlogContentProps> = ({
             return (
               <blockquote
                 key={`block-${index}`}
-                className="my-6 pl-5 border-l-4 border-brand bg-brand/5 p-4 sm:p-5 rounded-r-2xl italic text-ink text-sm sm:text-base leading-relaxed"
+                className="my-8 pl-6 border-l-2 border-accent py-1 text-ink font-just-serif text-xl sm:text-2xl leading-relaxed"
               >
                 <p>
                   &ldquo;
@@ -143,8 +143,8 @@ export const BlogContent: React.FC<BlogContentProps> = ({
                   &rdquo;
                 </p>
                 {block.cite && (
-                  <cite className="not-italic block mt-2 text-xs font-semibold text-brand-dark tracking-wide">
-                    — {block.cite}
+                  <cite className="not-italic block mt-3 font-aileron text-xs font-medium text-ink-muted">
+                    {block.cite}
                   </cite>
                 )}
               </blockquote>
@@ -155,10 +155,10 @@ export const BlogContent: React.FC<BlogContentProps> = ({
             const isWarning = block.tone === "warning";
 
             const toneStyles = isTip
-              ? "bg-success/10 border-success/30 text-ink"
+              ? "bg-surface border-l-4 border-l-success border-y border-r border-line text-ink"
               : isWarning
-              ? "bg-warning/10 border-warning/30 text-ink"
-              : "bg-surface border-brand/30 text-brand-dark";
+              ? "bg-accent-soft/60 border-l-4 border-l-accent border-y border-r border-line text-ink"
+              : "bg-surface border-l-4 border-l-brand-dark border-y border-r border-line text-ink";
 
             const IconComponent = isTip
               ? Lightbulb
@@ -169,24 +169,24 @@ export const BlogContent: React.FC<BlogContentProps> = ({
             const iconColor = isTip
               ? "text-success"
               : isWarning
-              ? "text-warning"
-              : "text-brand";
+              ? "text-accent-deep"
+              : "text-brand-dark";
 
             return (
               <aside
                 key={`block-${index}`}
                 role="note"
-                className={`my-6 p-4 sm:p-5 rounded-2xl border ${toneStyles} flex items-start gap-3.5`}
+                className={`my-7 p-5 rounded-r-xl ${toneStyles} flex items-start gap-3.5`}
               >
                 <IconComponent
                   className={`w-5 h-5 shrink-0 mt-0.5 ${iconColor}`}
                   aria-hidden="true"
                 />
                 <div className="space-y-1 flex-1 min-w-0">
-                  <h4 className="font-display font-semibold text-xs sm:text-sm tracking-tight">
+                  <h4 className="font-aileron font-semibold text-sm text-ink">
                     {block.title}
                   </h4>
-                  <p className="text-xs sm:text-sm leading-relaxed opacity-90 font-body">
+                  <p className="text-sm leading-relaxed text-ink/85 font-body">
                     <RenderRuns runs={block.runs} fallbackText={block.text} />
                   </p>
                 </div>
@@ -198,15 +198,15 @@ export const BlogContent: React.FC<BlogContentProps> = ({
             const resolved = block.mediaId ? resolvedMediaMap?.[block.mediaId] : null;
             const isWide = block.layout === "wide";
             const figureClass = isWide
-              ? "my-10 -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 space-y-2.5 transition-all"
-              : "my-8 space-y-2";
+              ? "my-10 lg:-mr-12 space-y-2.5 transition-all"
+              : "my-8 space-y-2.5";
 
             const altText = block.alt || resolved?.alt || "";
             const isDecorative = Boolean(resolved?.decorative && !block.alt);
 
             return (
               <figure key={`block-${index}`} className={figureClass}>
-                <div className="rounded-2xl overflow-hidden border border-line bg-surface-alt shadow-sm">
+                <div className="rounded-xl overflow-hidden border border-line bg-surface-alt">
                   {resolved ? (
                     <Image
                       loader={cloudinaryLoader}
@@ -247,13 +247,24 @@ export const BlogContent: React.FC<BlogContentProps> = ({
 
           case "youtube": {
             const resolvedVideo = resolvedVideosMap ? resolvedVideosMap[block.videoId] : undefined;
-            // Silently skip if video is not live, missing, or draft
+            // Silently skip if video is not live, missing, draft, or hidden in this post
             if (!resolvedVideo) {
+              return null;
+            }
+            if (block.visible === false && !isOwnerPreview) {
               return null;
             }
 
             return (
-              <figure key={`block-${index}`} className="my-8 space-y-2">
+              <figure
+                key={`block-${index}`}
+                className={`my-8 space-y-2 ${block.visible === false ? "opacity-60" : ""}`}
+              >
+                {block.visible === false && isOwnerPreview && (
+                  <p className="text-center text-xs font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-lg py-1.5 px-3">
+                    Hidden from readers in this article (owner preview only)
+                  </p>
+                )}
                 <VideoFacade
                   youtubeId={resolvedVideo.youtubeId}
                   title={resolvedVideo.title}

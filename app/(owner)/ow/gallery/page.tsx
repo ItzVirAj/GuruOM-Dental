@@ -9,7 +9,11 @@ export const metadata = { title: "Homepage Gallery | Owner Management" };
 
 export default async function GalleryPage() {
   const { user } = await requireOwner();
-  const [gallery, images] = await Promise.all([loadGallery(), loadHomeImages()]);
+  const [gallery, labGallery, images] = await Promise.all([
+    loadGallery("gallery"),
+    loadGallery("lab"),
+    loadHomeImages(),
+  ]);
   return (
     <div className="min-h-screen bg-surface-alt text-ink">
       <OwnerHeader ownerEmail={user.email} />
@@ -20,6 +24,18 @@ export default async function GalleryPage() {
           <details className="rounded-2xl border border-line bg-white">
             <summary className="cursor-pointer px-5 py-4 font-semibold">Gallery strip</summary>
             <div className="border-t border-line p-4"><GalleryEditor initial={gallery} /></div>
+          </details>
+          <details className="rounded-2xl border border-line bg-white">
+            <summary className="cursor-pointer px-5 py-4 font-semibold">Lab Photos — Ahilyanagar Lab pics</summary>
+            <div className="border-t border-line p-4">
+              <GalleryEditor
+                initial={labGallery}
+                section="lab"
+                heading="Ahilyanagar Lab cards"
+                emptyNotice="The Ahilyanagar Lab Photos section is hidden on the homepage when you publish zero cards."
+                pickerSubject="lab"
+              />
+            </div>
           </details>
         </div>
       </main>

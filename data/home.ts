@@ -233,6 +233,18 @@ export const galleryContent: GalleryContent = {
   ],
 };
 
+export const labGalleryContent: GalleryContent = {
+  eyebrow: "Lab Photos",
+  title: "Ahilyanagar Lab pics",
+  subtitle: "Inside our Ahilyanagar digital dental lab — CAD/CAM milling workstations, 3D prosthetic design, and master ceramic artistry.",
+  items: [
+    { id: "lab-cadcam", label: "CAD/CAM", title: "CAD/CAM Milling Suite", imageSlot: "labGallery1" },
+    { id: "lab-3d-scan", label: "3D Design", title: "Digital Design Studio", imageSlot: "labGallery2" },
+    { id: "lab-zirconia", label: "Zirconia", title: "Zirconia Sintering Lab", imageSlot: "labGallery3" },
+    { id: "lab-ceramic", label: "Ceramics", title: "Ceramic Finishing Bench", imageSlot: "labGallery4" },
+  ],
+};
+
 // ============================================================================
 // Services Grid Section Content
 // ============================================================================

@@ -212,7 +212,7 @@ export const Services: React.FC<ServicesProps> = ({
     >
       <Container>
         {/* Header Row: Heading + Subheading (left), intro + CTA (right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-end pb-12 md:pb-16 border-b border-line/60">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-12 items-end pb-8 md:pb-16 border-b border-line/60">
           <div className="lg:col-span-7">
             <SplitHeading
               id="services-heading"
@@ -224,12 +224,12 @@ export const Services: React.FC<ServicesProps> = ({
             >
               {content.eyebrow}
             </SplitHeading>
-            <p className="font-aileron text-lg sm:text-xl lg:text-2xl font-semibold text-brand leading-snug mt-3">
+            <p className="font-aileron text-lg sm:text-xl lg:text-2xl font-semibold text-brand leading-snug mt-2.5 md:mt-3">
               {content.title}
             </p>
           </div>
 
-          <div className="lg:col-span-5 flex flex-col sm:flex-row lg:flex-col items-start lg:items-end justify-between gap-5">
+          <div className="lg:col-span-5 flex flex-col sm:flex-row lg:flex-col items-start lg:items-end justify-between gap-4 md:gap-5">
             <p className="text-body text-ink-muted leading-relaxed max-w-md lg:text-right">
               {content.intro}
             </p>
@@ -239,10 +239,10 @@ export const Services: React.FC<ServicesProps> = ({
           </div>
         </div>
 
-        {/* Featured 2x2 Grid (4 Large Cards) */}
+        {/* Featured Services: Compact Clinical Index List on mobile, 2x2 Cards on md+ */}
         <Reveal
           stagger={0.12}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 pt-12 md:pt-16"
+          className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-6 lg:gap-8 pt-2 md:pt-16"
         >
           {featuredServices.map((service, index) => {
             const Icon = iconMap[service.icon] || Sparkles;
@@ -254,15 +254,15 @@ export const Services: React.FC<ServicesProps> = ({
                 data-service-card
                 onMouseEnter={(e) => onCardMouseEnter(e.currentTarget)}
                 onMouseLeave={(e) => onCardMouseLeave(e.currentTarget)}
-                className="group flex flex-col justify-between rounded-3xl bg-white border border-line p-6 sm:p-8 shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 select-none will-change-transform"
+                className="group grid grid-cols-[92px_minmax(0,1fr)_auto] items-center gap-3.5 py-4 border-b border-line md:flex md:flex-col md:justify-between md:items-stretch md:gap-0 md:rounded-3xl md:bg-white md:border md:border-line md:p-8 md:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 select-none will-change-transform"
               >
-                <div>
-                  {/* Top: 4/3 Aspect Image with Overlapping Elements */}
-                  <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden mb-6 bg-surface-alt">
+                <div className="contents md:block">
+                  {/* Top: Unobstructed 92x108 thumbnail on mobile, 4/3 Showcase Plate on md+ */}
+                  <div className="relative w-[92px] h-[108px] shrink-0 md:w-full md:h-auto md:aspect-[4/3] rounded-xs md:rounded-2xl overflow-hidden md:mb-6 bg-surface-alt">
                     {/* Parallax Container for Desktop */}
                     <div
                       data-parallax-img
-                      className="w-full h-full scale-105 will-change-transform"
+                      className="w-full h-full md:scale-105 will-change-transform"
                     >
                       <div
                         data-card-img
@@ -277,15 +277,15 @@ export const Services: React.FC<ServicesProps> = ({
                       </div>
                     </div>
 
-                    {/* Top-Right Badge Number */}
-                    <div className="absolute top-4 right-4 z-10">
+                    {/* Top-Right Badge Number (Desktop cards only) */}
+                    <div className="hidden md:block absolute top-4 right-4 z-10">
                       <Badge variant="accent" size="sm">
                         {String(index + 1).padStart(2, "0")}
                       </Badge>
                     </div>
 
-                    {/* Bottom-Left Overlapping IconCircle */}
-                    <div className="absolute bottom-4 left-4 z-10 pointer-events-none">
+                    {/* Bottom-Left Overlapping IconCircle (Desktop cards only) */}
+                    <div className="hidden md:block absolute bottom-4 left-4 z-10 pointer-events-none">
                       <IconCircle
                         variant="white"
                         size="md"
@@ -299,25 +299,26 @@ export const Services: React.FC<ServicesProps> = ({
                     </div>
                   </div>
 
-                  {/* Service Title */}
-                  <h3 className="font-display text-heading text-ink group-hover:text-brand transition-colors duration-300">
-                    {service.title}
-                  </h3>
+                  {/* Title & Concise Summary */}
+                  <div className="min-w-0">
+                    <h3 className="font-display text-[1.2rem] leading-tight md:text-heading text-ink group-hover:text-brand transition-colors duration-300">
+                      {service.title}
+                    </h3>
 
-                  {/* Short Description */}
-                  <p className="text-body text-ink-muted line-clamp-2 mt-2.5 leading-relaxed font-body">
-                    {service.shortDescription}
-                  </p>
+                    <p className="text-sm md:text-body text-ink-muted line-clamp-2 mt-1 md:mt-2.5 leading-snug md:leading-relaxed font-body">
+                      {service.shortDescription}
+                    </p>
+                  </div>
                 </div>
 
-                {/* Footer Row: View Details Link + Animated Arrow Circle */}
-                <div className="flex items-center justify-between pt-6 mt-6 border-t border-line/60">
-                  <span className="text-xs font-semibold tracking-wider uppercase text-brand font-body">
+                {/* Footer Row / Mobile Action Cue */}
+                <div className="shrink-0 md:flex md:items-center md:justify-between md:pt-6 md:mt-6 md:border-t md:border-line/60">
+                  <span className="hidden md:inline text-xs font-semibold tracking-wider uppercase text-brand font-body">
                     View details
                   </span>
                   <span
                     data-card-arrow-circle
-                    className="w-8 h-8 rounded-full border border-line bg-surface-alt flex items-center justify-center text-brand"
+                    className="w-8 h-8 rounded-full border border-line bg-white md:bg-surface-alt flex items-center justify-center text-ink md:text-brand"
                     aria-hidden="true"
                   >
                     <ArrowUpRight
@@ -336,7 +337,7 @@ export const Services: React.FC<ServicesProps> = ({
           <Reveal
             delay={0.2}
             stagger={0.08}
-            className="mt-12 sm:mt-16 pt-8 border-t border-line/70"
+            className="mt-8 sm:mt-12 md:mt-16 pt-6 md:pt-8 md:border-t md:border-line/70"
           >
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
               <div>

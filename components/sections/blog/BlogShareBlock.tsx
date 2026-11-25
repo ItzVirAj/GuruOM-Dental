@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Share2, Copy, CheckCheck, MessageCircle, Mail } from "lucide-react";
+import { Copy, CheckCheck, MessageCircle, Mail } from "lucide-react";
 
 export interface BlogShareBlockProps {
   title: string;
@@ -16,7 +16,6 @@ export const BlogShareBlock: React.FC<BlogShareBlockProps> = ({
 }) => {
   const [copied, setCopied] = useState(false);
 
-  // Compute full URL on client if not explicitly passed
   const currentUrl =
     url || (typeof window !== "undefined" ? window.location.href : "");
 
@@ -35,63 +34,53 @@ export const BlogShareBlock: React.FC<BlogShareBlockProps> = ({
   )}`;
 
   const emailHref = `mailto:?subject=${encodeURIComponent(
-    `Interesting Dental Article: ${title}`
+    `Dental article: ${title}`
   )}&body=${encodeURIComponent(
     `I thought you might find this article from GuruOm Dental helpful:\n\n${title}\n\nRead here: ${currentUrl}`
   )}`;
 
   return (
-    <div
-      aria-label="Share article options"
-      className={`p-5 rounded-3xl bg-white border border-line shadow-soft space-y-3 ${className}`}
-    >
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-ink pb-2.5 border-b border-line">
-        <Share2 className="w-4 h-4 text-brand" />
-        <span>Share This Guide</span>
-      </div>
+    <div aria-label="Share article options" className={`space-y-3 ${className}`}>
+      <p className="text-sm font-semibold text-ink pb-2 border-b border-line">
+        Share this article
+      </p>
 
-      <div className="grid grid-cols-3 gap-2">
-        {/* Copy Link Button */}
+      <div className="flex flex-wrap gap-2">
         <button
           type="button"
           onClick={handleCopy}
           aria-label={copied ? "Link copied to clipboard" : "Copy article link"}
-          className="flex flex-col items-center justify-center p-2.5 rounded-2xl border border-line bg-surface hover:bg-surface-alt hover:border-brand/40 text-ink transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-line bg-white hover:bg-surface text-xs font-medium text-ink transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent cursor-pointer"
         >
           {copied ? (
-            <CheckCheck className="w-4 h-4 text-success mb-1" />
+            <CheckCheck className="w-3.5 h-3.5 text-success" aria-hidden="true" />
           ) : (
-            <Copy className="w-4 h-4 text-brand mb-1" />
+            <Copy className="w-3.5 h-3.5 text-ink-muted" aria-hidden="true" />
           )}
-          <span className="text-[11px] font-medium">
-            {copied ? "Copied" : "Copy"}
-          </span>
+          <span>{copied ? "Copied link" : "Copy link"}</span>
         </button>
 
-        {/* WhatsApp Share */}
         <a
           href={whatsappHref}
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Share this guide via WhatsApp"
-          className="flex flex-col items-center justify-center p-2.5 rounded-2xl border border-line bg-surface hover:bg-success/10 hover:border-success/30 text-ink hover:text-success transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-line bg-white hover:bg-surface text-xs font-medium text-ink transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
-          <MessageCircle className="w-4 h-4 text-success mb-1" />
-          <span className="text-[11px] font-medium">WhatsApp</span>
+          <MessageCircle className="w-3.5 h-3.5 text-success" aria-hidden="true" />
+          <span>WhatsApp</span>
         </a>
 
-        {/* Email Share */}
         <a
           href={emailHref}
           aria-label="Share this guide via Email"
-          className="flex flex-col items-center justify-center p-2.5 rounded-2xl border border-line bg-surface hover:bg-surface-alt hover:border-brand/40 text-ink hover:text-brand transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-line bg-white hover:bg-surface text-xs font-medium text-ink transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
-          <Mail className="w-4 h-4 text-brand mb-1" />
-          <span className="text-[11px] font-medium">Email</span>
+          <Mail className="w-3.5 h-3.5 text-ink-muted" aria-hidden="true" />
+          <span>Email</span>
         </a>
       </div>
 
-      {/* Screen Reader Notification */}
       <div aria-live="polite" className="sr-only">
         {copied ? "Article link copied to clipboard" : ""}
       </div>

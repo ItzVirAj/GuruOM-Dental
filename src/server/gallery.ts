@@ -3,7 +3,9 @@ import { createHash } from "node:crypto";
 import { asc, eq } from "drizzle-orm";
 import { getDb } from "@/src/db/client";
 import { galleryCards, media } from "@/src/db/schema";
-import { galleryContent, type GalleryItem } from "@/data/home";
+import { galleryContent, labGalleryContent, type GalleryItem } from "@/data/home";
+
+export type GallerySection = "gallery" | "lab";
 
 export function galleryRevision(items: GalleryItem[]) {
   const values = items.map(({ id, title, label, mediaId, imageSlot }) =>
@@ -11,15 +13,16 @@ export function galleryRevision(items: GalleryItem[]) {
   return createHash("sha256").update(JSON.stringify(values)).digest("hex");
 }
 
-export async function loadGallery() {
+export async function loadGallery(section: GallerySection = "gallery") {
   const db = getDb();
-  let items = galleryContent.items;
+  let items = section === "lab" ? labGalleryContent.items : galleryContent.items;
   if (db) {
     const rows = await db.select({
       id: galleryCards.id, title: galleryCards.title, label: galleryCards.label,
       imageSlot: galleryCards.imageSlot, mediaId: galleryCards.mediaId,
       publicId: media.publicId, alt: media.alt, decorative: media.decorative,
     }).from(galleryCards).leftJoin(media, eq(media.id, galleryCards.mediaId))
+      .where(eq(galleryCards.section, section))
       .orderBy(asc(galleryCards.position));
     items = rows.map(row => ({
       id: row.id, title: row.title, label: row.label,

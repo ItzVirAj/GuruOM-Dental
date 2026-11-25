@@ -1,14 +1,15 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { loginAction, type ActionState } from "@/src/server/auth/actions";
-import { Lock, Mail, ArrowRight, ShieldCheck, AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 
 const initialState: ActionState = {};
 
 export function LoginForm() {
   const [state, formAction, isPending] = useActionState(loginAction, initialState);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -18,84 +19,83 @@ export function LoginForm() {
   }, [state.redirectUrl, router]);
 
   return (
-    <form action={formAction} className="space-y-5">
+    <form action={formAction} className="space-y-6">
       {state.error && (
         <div
           role="alert"
           aria-live="polite"
-          className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-start gap-3"
+          className="rounded-xl border border-danger/30 border-l-4 border-l-danger bg-white px-4 py-3.5 text-sm sm:text-base text-ink flex items-start gap-3 shadow-soft"
         >
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+          <AlertCircle className="w-5 h-5 text-danger shrink-0 mt-0.5" aria-hidden="true" />
           <span className="leading-relaxed">{state.error}</span>
         </div>
       )}
 
-      <div className="space-y-1.5">
+      <div className="space-y-2.5">
         <label
           htmlFor="email"
-          className="block text-xs font-semibold text-ink uppercase tracking-wider"
+          className="block text-sm sm:text-base font-medium text-ink"
         >
-          Owner Email
+          Email address
         </label>
-        <div className="relative">
-          <Mail className="w-4 h-4 text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            autoComplete="username"
-            placeholder="owner@guruomdental.com"
-            className="w-full bg-surface border border-line rounded-xl pl-10 pr-4 py-3 text-sm text-ink placeholder:text-ink-muted/50 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand transition-all"
-          />
-        </div>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          required
+          autoComplete="username"
+          placeholder="owner@guruomdental.com"
+          className="w-full h-14 rounded-xl border border-line bg-white px-4 text-base text-ink placeholder:text-ink-muted/60 focus:outline-none focus:ring-2 focus:ring-accent focus:border-brand-dark transition-colors"
+        />
       </div>
 
-      <div className="space-y-1.5">
+      <div className="space-y-2.5">
         <label
           htmlFor="password"
-          className="block text-xs font-semibold text-ink uppercase tracking-wider"
+          className="block text-sm sm:text-base font-medium text-ink"
         >
-          Master Password
+          Password
         </label>
         <div className="relative">
-          <Lock className="w-4 h-4 text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             id="password"
             name="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             required
             autoComplete="current-password"
-            placeholder="••••••••••••••••"
-            className="w-full bg-surface border border-line rounded-xl pl-10 pr-4 py-3 text-sm text-ink placeholder:text-ink-muted/50 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand transition-all font-mono"
+            placeholder="Enter your password"
+            className="w-full h-14 rounded-xl border border-line bg-white pl-4 pr-14 text-base text-ink placeholder:text-ink-muted/60 focus:outline-none focus:ring-2 focus:ring-accent focus:border-brand-dark transition-colors"
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-pressed={showPassword}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 inline-flex h-10 w-10 items-center justify-center rounded-lg text-ink-muted hover:text-ink hover:bg-surface transition-colors focus:outline-none focus:ring-2 focus:ring-accent"
+          >
+            {showPassword ? (
+              <EyeOff className="w-5 h-5" aria-hidden="true" />
+            ) : (
+              <Eye className="w-5 h-5" aria-hidden="true" />
+            )}
+          </button>
         </div>
       </div>
 
       <button
         type="submit"
         disabled={isPending}
-        className="w-full mt-2 inline-flex items-center justify-center gap-2 bg-brand text-white font-semibold py-3.5 px-6 rounded-xl text-sm shadow-brand/20 shadow-md hover:bg-brand-dark active:scale-[0.99] disabled:opacity-60 transition-all cursor-pointer"
+        className="w-full h-14 mt-2 inline-flex items-center justify-center gap-2.5 rounded-xl bg-brand-dark px-6 text-base font-semibold text-white hover:bg-brand active:scale-[0.995] disabled:opacity-60 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-surface"
       >
         {isPending ? (
           <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            <span>Verifying Credentials...</span>
+            <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+            <span>Signing in…</span>
           </>
         ) : (
-          <>
-            <span>Authenticate</span>
-            <ArrowRight className="w-4 h-4" />
-          </>
+          <span>Sign in</span>
         )}
       </button>
-
-      <div className="pt-2 text-center">
-        <p className="text-[11px] text-ink-muted inline-flex items-center gap-1.5">
-          <ShieldCheck className="w-3.5 h-3.5 text-teal" />
-          <span>Strict Single-Owner Policy &amp; Rate-Limited</span>
-        </p>
-      </div>
     </form>
   );
 }

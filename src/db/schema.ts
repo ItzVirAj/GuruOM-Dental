@@ -625,14 +625,19 @@ export const accountLockoutsRelations = relations(accountLockouts, ({ one }) => 
 }));
 
 
-export const galleryCards = pgTable("gallery_cards", {
-  id: text("id").primaryKey(),
-  title: varchar("title", { length: 120 }).notNull(),
-  label: varchar("label", { length: 50 }).notNull(),
-  imageSlot: text("image_slot"),
-  mediaId: uuid("media_id").references(() => media.id),
-  position: integer("position").notNull(),
-});
+export const galleryCards = pgTable(
+  "gallery_cards",
+  {
+    id: text("id").primaryKey(),
+    section: text("section").notNull().default("gallery"),
+    title: varchar("title", { length: 120 }).notNull(),
+    label: varchar("label", { length: 50 }).notNull(),
+    imageSlot: text("image_slot"),
+    mediaId: uuid("media_id").references(() => media.id),
+    position: integer("position").notNull(),
+  },
+  (table) => [index("idx_gallery_cards_section").on(table.section)]
+);
 
 export const homeImageSlots = pgTable("home_image_slots", {
   slot: text("slot").primaryKey(),

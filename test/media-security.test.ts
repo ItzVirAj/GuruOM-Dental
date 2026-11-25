@@ -5,6 +5,7 @@ import {
   getNearestAllowedWidth,
   ALLOWED_IMAGE_WIDTHS,
   ALLOWED_CLOUDINARY_TRANSFORMATIONS,
+  cleanPublicId,
   coverUrl,
   mediaThumbUrl,
 } from "../src/lib/media/cloudinary-loader";
@@ -270,6 +271,22 @@ describe("Media Security & Integrity Pipeline", () => {
         expect(roundTripped[0].layout).toBe("wide");
         expect(roundTripped[0].alt).toBe("Dental implant placement schematic");
       }
+    });
+  });
+
+  describe("8. Cloudinary URL folder preservation", () => {
+    it("extracts full nested publicId from secureUrl and transformed Cloudinary URLs", () => {
+      expect(
+        cleanPublicId(
+          "https://res.cloudinary.com/daijhwmiz/image/upload/v1795593046/guruom-dev/2026-11/0f8f21e9-eee4-490b-bb7c-5f0ee5c67f39.webp"
+        )
+      ).toBe("guruom-dev/2026-11/0f8f21e9-eee4-490b-bb7c-5f0ee5c67f39");
+
+      expect(
+        cleanPublicId(
+          "https://res.cloudinary.com/daijhwmiz/image/upload/f_auto,q_auto,c_limit,w_1280/guruom-dev/2026-11/sample-id.webp"
+        )
+      ).toBe("guruom-dev/2026-11/sample-id");
     });
   });
 });

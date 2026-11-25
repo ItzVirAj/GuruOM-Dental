@@ -10,14 +10,23 @@ import Placeholder from "@tiptap/extension-placeholder";
 import CharacterCount from "@tiptap/extension-character-count";
 
 import { ContentBlock, isSafeLink, calculateReadingTimeMinutes } from "@/src/lib/blog-content";
-import { blocksToEditorDoc, editorDocToBlocks } from "@/src/lib/editor/converters";
+import { blocksToEditorDoc, editorDocToBlocks, type EmbeddedVideoMeta } from "@/src/lib/editor/converters";
 import { sanitizePastedHtml } from "@/src/lib/editor/sanitize-paste";
+import {
+  extractYouTubePasteFromClipboard,
+  findInlineYouTubeLinksInEditor,
+  insertVideoAtSectionInEditor,
+} from "@/src/lib/editor/youtube-url";
 import { Callout } from "@/src/lib/editor/nodes/callout";
 import { LegacyImage } from "@/src/lib/editor/nodes/legacy-image";
 import { ImageNode } from "@/src/lib/editor/nodes/image-node";
 import { VideoNode } from "@/src/lib/editor/nodes/video-node";
 import { MediaPickerModal, SelectedMediaPayload } from "@/components/editor/media-picker-modal";
 import { VideoPickerModal, SelectedVideoPayload } from "@/components/editor/video-picker-modal";
+import {
+  YouTubePasteModal,
+  type PastedYouTubeContext,
+} from "@/components/editor/youtube-paste-modal";
 import cloudinaryLoader from "@/src/lib/media/cloudinary-loader";
 import { clientResizeImage } from "@/src/lib/media/client-resize";
 import { uploadMediaAction } from "@/src/server/owner/media/actions";
@@ -147,6 +156,7 @@ interface PostEditorClientProps {
   } | null;
   revisions: RevisionItem[];
   categories: { slug: string; label: string }[];
+  embeddedVideos?: Record<string, EmbeddedVideoMeta>;
   baseOwnerPath?: string;
   postsListHref?: string;
 }
@@ -159,6 +169,7 @@ export function PostEditorClient({
   workingCopy,
   revisions: initialRevisions,
   categories,
+  embeddedVideos,
   baseOwnerPath,
   postsListHref,
 }: PostEditorClientProps) {
@@ -178,6 +189,7 @@ export function PostEditorClient({
   const [publishWithoutCover, setPublishWithoutCover] = useState<boolean>(!post.coverMediaId && !post.coverSlot);
   const [mediaPickerTarget, setMediaPickerTarget] = useState<"editor" | "cover" | "legacy" | null>(null);
   const [isVideoPickerOpen, setIsVideoPickerOpen] = useState(false);
+  const [pastedYouTubeContext, setPastedYouTubeContext] = useState<PastedYouTubeContext | null>(null);
   const replaceLegacyNodeRef = useRef<((media: SelectedMediaPayload) => void) | null>(null);
 
   const handleInsertVideo = (videoPayload: SelectedVideoPayload) => {
@@ -192,7 +204,29 @@ export function PostEditorClient({
           thumbnailUrl: videoPayload.thumbnailUrl,
           youtubeId: videoPayload.youtubeId,
           status: videoPayload.status,
+          visible: videoPayload.visible,
         },
+      })
+      .run();
+  };
+
+  const handleInsertVideoAtSection = (
+    videoPayload: SelectedVideoPayload & { caption?: string },
+    ctx: PastedYouTubeContext
+  ) => {
+    insertVideoAtSectionInEditor(editor, videoPayload, ctx);
+    showToastMsg(`Added video to "${ctx.sectionTitle}"`);
+  };
+
+  const handlePasteAsTextLink = (ctx: PastedYouTubeContext) => {
+    if (!editor) return;
+    editor
+      .chain()
+      .focus()
+      .insertContentAt(ctx.cursorPos, {
+        type: "text",
+        text: ctx.url,
+        marks: [{ type: "link", attrs: { href: ctx.url } }],
       })
       .run();
   };
@@ -284,7 +318,7 @@ export function PostEditorClient({
       ImageNode,
       VideoNode,
     ],
-    content: blocksToEditorDoc(post.content),
+    content: blocksToEditorDoc(post.content, embeddedVideos),
     editorProps: {
       transformPastedHTML(html) {
         return sanitizePastedHtml(html);
@@ -309,6 +343,46 @@ export function PostEditorClient({
             return true;
           }
         }
+
+        const detectedYouTube = extractYouTubePasteFromClipboard(event.clipboardData);
+        if (detectedYouTube) {
+          event.preventDefault();
+          const { state } = view;
+          const { $from } = state.selection;
+
+          // Resolve the nearest preceding section heading before the paste position
+          let sectionTitle = "Article Introduction";
+          const searchEndPos = $from.depth >= 1 ? $from.before(1) : $from.pos;
+          state.doc.nodesBetween(0, Math.max(0, searchEndPos + 1), (node) => {
+            if (node.type.name === "heading" && node.textContent.trim()) {
+              sectionTitle = node.textContent.trim();
+            }
+          });
+
+          const blockText = $from.parent.textContent.trim();
+          const isEmptyBlock = blockText.length === 0 && $from.depth >= 1;
+          const afterPos = $from.depth >= 1 ? $from.after(1) : $from.pos;
+          const insertFrom = isEmptyBlock ? $from.before(1) : afterPos;
+          const insertTo = afterPos;
+
+          const afterLineSnippet = blockText
+            ? blockText.length > 72
+              ? `${blockText.slice(0, 72)}…`
+              : blockText
+            : "";
+
+          setPastedYouTubeContext({
+            url: detectedYouTube.url,
+            youtubeId: detectedYouTube.youtubeId,
+            sectionTitle,
+            afterLineSnippet,
+            insertFrom,
+            insertTo,
+            cursorPos: state.selection.from,
+          });
+          return true;
+        }
+
         return false;
       },
     },
@@ -758,7 +832,7 @@ export function PostEditorClient({
     if (d.coverMediaId) setCoverMediaId(d.coverMediaId as string);
     if (d.coverAltOverride) setCoverAltOverride(d.coverAltOverride as string);
     if (d.content && editor) {
-      editor.commands.setContent(blocksToEditorDoc(d.content));
+      editor.commands.setContent(blocksToEditorDoc(d.content, embeddedVideos));
     }
     setRecoveryBanner(null);
     setIsDirty(true);
@@ -778,7 +852,7 @@ export function PostEditorClient({
     if (typeof s.excerpt === "string") setExcerpt(s.excerpt);
     if (typeof s.categorySlug === "string") setCategorySlug(s.categorySlug);
     if (Array.isArray(s.content) && editor) {
-      editor.commands.setContent(blocksToEditorDoc(s.content as ContentBlock[]));
+      editor.commands.setContent(blocksToEditorDoc(s.content as ContentBlock[], embeddedVideos));
     }
     setPreviewRevision(null);
     setShowRevisions(false);
@@ -787,6 +861,7 @@ export function PostEditorClient({
   };
 
   const currentBlocks = editor ? editorDocToBlocks(editor.getJSON()) : post.content;
+  const inlineYouTubeLinks = findInlineYouTubeLinksInEditor(editor);
   const wordCount = editor?.storage.characterCount.words() || 0;
   const readingTime = calculateReadingTimeMinutes(currentBlocks);
 
@@ -1249,6 +1324,46 @@ export function PostEditorClient({
                 </div>
               )}
             </div>
+
+            {/* Detected inline YouTube links prompt (converts pasted/saved raw URLs in paragraphs into section video embeds) */}
+            {inlineYouTubeLinks.length > 0 && (
+              <div className="mb-4 rounded-xl border border-accent/40 bg-accent-soft px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                  <Video className="w-4 h-4 text-accent-deep shrink-0 mt-0.5" />
+                  <div className="text-xs text-ink min-w-0">
+                    <p className="font-semibold">
+                      {inlineYouTubeLinks.length === 1
+                        ? "YouTube link detected in your article text"
+                        : `${inlineYouTubeLinks.length} YouTube links detected in your article text`}
+                    </p>
+                    <p className="text-ink-muted truncate mt-0.5">
+                      Raw links render only as text on the live page — convert to play inline in &ldquo;{inlineYouTubeLinks[0].sectionTitle}&rdquo;.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const first = inlineYouTubeLinks[0];
+                    setPastedYouTubeContext({
+                      url: first.url,
+                      youtubeId: first.youtubeId,
+                      sectionTitle: first.sectionTitle,
+                      afterLineSnippet: first.afterLineSnippet,
+                      insertFrom: first.insertPos,
+                      insertTo: first.insertPos,
+                      cursorPos: first.removeFrom,
+                      removeFrom: first.removeFrom,
+                      removeTo: first.removeTo,
+                      blockBefore: first.blockBefore,
+                    });
+                  }}
+                  className="px-3.5 py-1.5 rounded-lg bg-brand-dark hover:bg-brand text-white text-xs font-semibold transition-colors cursor-pointer shrink-0"
+                >
+                  Convert link to video embed
+                </button>
+              </div>
+            )}
 
             {/* TipTap Editor ProseMirror Canvas */}
             <div
@@ -2298,6 +2413,15 @@ export function PostEditorClient({
         isOpen={isVideoPickerOpen}
         onClose={() => setIsVideoPickerOpen(false)}
         onSelect={handleInsertVideo}
+      />
+
+      {/* Smart Paste-to-Section YouTube Modal */}
+      <YouTubePasteModal
+        key={pastedYouTubeContext ? `${pastedYouTubeContext.url}-${pastedYouTubeContext.cursorPos}` : "closed"}
+        context={pastedYouTubeContext}
+        onClose={() => setPastedYouTubeContext(null)}
+        onInsertVideo={handleInsertVideoAtSection}
+        onPasteAsTextLink={handlePasteAsTextLink}
       />
     </div>
   );

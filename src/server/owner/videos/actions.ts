@@ -44,6 +44,48 @@ export async function previewVideoLinkAction(url: string) {
     await enforceRateLimit("owner_video_preview");
 
     const parsed = parseYouTubeUrl(url);
+    const db = getDb();
+
+    let existingVideo: {
+      id: string;
+      title: string;
+      thumbnailUrl: string;
+      status: "draft" | "published";
+    } | null = null;
+
+    if (db) {
+      const [found] = await db
+        .select({
+          id: videos.id,
+          title: videos.title,
+          status: videos.status,
+          thumbnailUrl: media.secureUrl,
+        })
+        .from(videos)
+        .innerJoin(media, eq(videos.thumbnailMediaId, media.id))
+        .where(and(eq(videos.youtubeId, parsed.youtubeId), isNull(videos.deletedAt)))
+        .limit(1);
+
+      if (found) {
+        existingVideo = {
+          id: found.id,
+          title: found.title,
+          thumbnailUrl: found.thumbnailUrl,
+          status: found.status,
+        };
+      }
+    }
+
+    if (existingVideo) {
+      return {
+        youtubeId: parsed.youtubeId,
+        startSeconds: parsed.startSeconds,
+        title: existingVideo.title,
+        channelName: undefined,
+        existingVideo,
+      };
+    }
+
     const oembed = await fetchOEmbed(parsed.youtubeId);
 
     return {
@@ -51,6 +93,7 @@ export async function previewVideoLinkAction(url: string) {
       startSeconds: parsed.startSeconds,
       title: oembed.title,
       channelName: oembed.authorName,
+      existingVideo: null,
     };
   });
 }
@@ -62,11 +105,12 @@ export interface CreateVideoInput {
   categorySlug?: string | null;
   startSeconds?: number | null;
   uploadedOn?: string | null;
+  status?: "draft" | "published";
 }
 
 /**
  * 2. createVideoAction(input)
- * Creates a new draft video, imports its thumbnail, and saves it.
+ * Creates a new draft or published video, imports its thumbnail, and saves it.
  */
 export async function createVideoAction(input: CreateVideoInput) {
   return withOwner(async ({ user: owner }) => {
@@ -132,19 +176,25 @@ export async function createVideoAction(input: CreateVideoInput) {
 
     const newId = crypto.randomUUID();
     const now = new Date();
+    const targetStatus: "draft" | "published" =
+      input.status === "published" && finalTitle.length > 0 && thumbMedia.id
+        ? "published"
+        : "draft";
+    const storedDescription =
+      finalDescription || (targetStatus === "published" ? finalTitle : "");
 
     await db.insert(videos).values({
       id: newId,
       youtubeId: parsed.youtubeId,
       slug: targetSlug,
       title: finalTitle,
-      description: finalDescription,
+      description: storedDescription,
       channelName: oembed.authorName?.slice(0, 120) || null,
       thumbnailMediaId: thumbMedia.id,
       categorySlug: input.categorySlug || null,
       startSeconds: effectiveStart,
       uploadedOn: input.uploadedOn || null,
-      status: "draft",
+      status: targetStatus,
       featured: false,
       sortOrder: nextSortOrder,
       version: 1,
@@ -157,17 +207,20 @@ export async function createVideoAction(input: CreateVideoInput) {
       action: "video.create",
       entityType: "video",
       entityId: newId,
-      summary: `Created draft video "${finalTitle}" (${parsed.youtubeId})`,
+      summary: `Created ${targetStatus} video "${finalTitle}" (${parsed.youtubeId})`,
       ip,
       userAgent,
     });
 
-    await revalidateVideos();
+    await revalidateVideos(targetStatus === "published" ? targetSlug : undefined);
 
     return {
       id: newId,
       slug: targetSlug,
       title: finalTitle,
+      thumbnailUrl: thumbMedia.publicId,
+      youtubeId: parsed.youtubeId,
+      status: targetStatus,
     };
   });
 }

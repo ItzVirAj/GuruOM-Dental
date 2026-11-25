@@ -15,16 +15,30 @@ import {
 } from "@/components/sections/home";
 
 import { loadGallery } from "@/src/server/gallery";
-import { galleryContent } from "@/data/home";
+import { galleryContent, labGalleryContent } from "@/data/home";
 import { HomeImageProvider } from "@/components/ui/HomeImageContext";
 import { loadHomeImages } from "@/src/server/home-images";
 import { connection } from "next/server";
 
 async function HomepageGallery() {
   await connection();
-  const gallery = await loadGallery().catch(() => null);
-  if (!gallery) return null;
-  return <GalleryStrip content={{ ...galleryContent, items: gallery.items }} />;
+  const [gallery, labGallery] = await Promise.all([
+    loadGallery("gallery").catch(() => null),
+    loadGallery("lab").catch(() => null),
+  ]);
+  const hasPrimaryGallery = Boolean(gallery && gallery.items.length > 0);
+  return (
+    <>
+      {gallery && <GalleryStrip content={{ ...galleryContent, items: gallery.items }} />}
+      {labGallery && (
+        <GalleryStrip
+          content={{ ...labGalleryContent, items: labGallery.items }}
+          headingId="lab-photos-heading"
+          tone={hasPrimaryGallery ? "alt" : "surface"}
+        />
+      )}
+    </>
+  );
 }
 
 export const instant = false;

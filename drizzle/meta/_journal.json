@@ -57,6 +57,13 @@
       "when": 1795588397151,
       "tag": "0007_home_image_slots",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795593835747,
+      "tag": "0008_flawless_sersi",
+      "breakpoints": true
     }
   ]
 }

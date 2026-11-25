@@ -141,6 +141,7 @@ export const youtubeBlockSchema = z.object({
   videoId: z.string().uuid("videoId must be a valid UUID"),
   url: z.never({ message: "Raw YouTube URLs are forbidden; reference videos by videoId only." }).optional(),
   src: z.never({ message: "Raw iframe HTML or src is forbidden." }).optional(),
+  visible: z.boolean().optional(),
   caption: z.string().max(300).transform(normalizeText).optional(),
   captionRuns: z.array(inlineRunSchema).optional(),
 });

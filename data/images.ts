@@ -217,6 +217,38 @@ export const plannedImages: Record<string, ImageSlot> = {
     label: "Gallery: Relaxation Suite (800x600)",
     recommendedSize: "800x600",
   },
+  labGallery1: {
+    id: "labGallery1",
+    src: "",
+    alt: "Ahilyanagar Dental Lab photo 1",
+    ratio: "4/3",
+    label: "Lab Photos: Ahilyanagar Lab 1 (800x600)",
+    recommendedSize: "800x600",
+  },
+  labGallery2: {
+    id: "labGallery2",
+    src: "",
+    alt: "Ahilyanagar Dental Lab photo 2",
+    ratio: "4/3",
+    label: "Lab Photos: Ahilyanagar Lab 2 (800x600)",
+    recommendedSize: "800x600",
+  },
+  labGallery3: {
+    id: "labGallery3",
+    src: "",
+    alt: "Ahilyanagar Dental Lab photo 3",
+    ratio: "4/3",
+    label: "Lab Photos: Ahilyanagar Lab 3 (800x600)",
+    recommendedSize: "800x600",
+  },
+  labGallery4: {
+    id: "labGallery4",
+    src: "",
+    alt: "Ahilyanagar Dental Lab photo 4",
+    ratio: "4/3",
+    label: "Lab Photos: Ahilyanagar Lab 4 (800x600)",
+    recommendedSize: "800x600",
+  },
 
   // Services (1-8)
   service1: {

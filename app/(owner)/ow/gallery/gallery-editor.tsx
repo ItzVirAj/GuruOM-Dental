@@ -11,7 +11,19 @@ import { saveGallery } from "@/src/server/owner/gallery/actions";
 const button = "rounded-lg border border-line px-3 py-2 text-sm font-semibold hover:bg-surface-alt disabled:opacity-50";
 const input = "mt-1 block w-full rounded-lg border border-line bg-white px-3 py-2 text-base";
 
-export function GalleryEditor({ initial }: { initial: { items: GalleryItem[]; revision: string } }) {
+export function GalleryEditor({
+  initial,
+  section = "gallery",
+  heading = "Gallery cards",
+  emptyNotice = "The homepage gallery is hidden when you publish zero cards.",
+  pickerSubject = "gallery",
+}: {
+  initial: { items: GalleryItem[]; revision: string };
+  section?: "gallery" | "lab";
+  heading?: string;
+  emptyNotice?: string;
+  pickerSubject?: string;
+}) {
   const [items, setItems] = useState(initial.items);
   const [revision, setRevision] = useState(initial.revision);
   const [picker, setPicker] = useState<string | null>(null);
@@ -67,7 +79,7 @@ export function GalleryEditor({ initial }: { initial: { items: GalleryItem[]; re
     setJustPublished(false);
     setMessage(null);
     try {
-      const result = await saveGallery(items, revision, hasRemovedPhotos && deletePhotos);
+      const result = await saveGallery(items, revision, hasRemovedPhotos && deletePhotos, section);
       if ("revision" in result && result.revision) {
         setRevision(result.revision);
         setDirty(false);
@@ -98,7 +110,7 @@ export function GalleryEditor({ initial }: { initial: { items: GalleryItem[]; re
         <fieldset disabled={saving} className="min-w-0">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-bold">Gallery cards</h2>
+              <h2 className="text-xl font-bold">{heading}</h2>
               <p className="mt-1 text-sm text-ink-muted">{items.length} {items.length === 1 ? "card" : "cards"}{dirty && " · Unpublished changes"}</p>
             </div>
             <div className="flex gap-2">
@@ -140,7 +152,7 @@ export function GalleryEditor({ initial }: { initial: { items: GalleryItem[]; re
               </p>
             )}
           </div>
-          {!items.length && <p>The homepage gallery is hidden when you publish zero cards.</p>}
+          {!items.length && <p>{emptyNotice}</p>}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((card, index) => (
               <article key={card.id} aria-label={`Gallery card ${index + 1}`} className="space-y-3 rounded-2xl border border-line bg-white p-4">
@@ -163,7 +175,7 @@ export function GalleryEditor({ initial }: { initial: { items: GalleryItem[]; re
           </div>
         </fieldset>
       </form>
-      {picker && <MediaPickerModal isOpen title={picker === "new" ? "Add gallery image" : "Replace gallery image"} defaultAspect="4/5" onClose={() => setPicker(null)} onSelect={selectImage} />}
+      {picker && <MediaPickerModal isOpen title={picker === "new" ? `Add ${pickerSubject} image` : `Replace ${pickerSubject} image`} defaultAspect="4/5" onClose={() => setPicker(null)} onSelect={selectImage} />}
     </>
   );
 }

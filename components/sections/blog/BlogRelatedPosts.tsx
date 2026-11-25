@@ -2,13 +2,12 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowRight, Clock, Calendar } from "lucide-react";
+import { Clock, Calendar } from "lucide-react";
 import type { BlogPost } from "@/src/server/blog/types";
 import { formatDate } from "@/src/lib/blog-format";
 import Image from "next/image";
 import { SmartImage } from "@/components/ui/SmartImage";
 import cloudinaryLoader from "@/src/lib/media/cloudinary-loader";
-import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
 
 export interface BlogRelatedPostsProps {
@@ -19,27 +18,27 @@ export const BlogRelatedPosts: React.FC<BlogRelatedPostsProps> = ({ posts }) => 
   if (posts.length === 0) return null;
 
   return (
-    <section aria-labelledby="related-posts-heading" className="py-14 sm:py-16 bg-surface/50 border-t border-line">
+    <section
+      aria-labelledby="related-posts-heading"
+      className="py-14 sm:py-16 bg-surface border-t border-line"
+    >
       <Container>
         <div className="space-y-8">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-end justify-between gap-4 pb-5 border-b border-line">
             <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-accent-deep block">
-                Recommended Reading
-              </span>
+              <p className="text-xs font-medium text-ink-muted">Further reading</p>
               <h3
                 id="related-posts-heading"
-                className="text-display-sm sm:text-display-md font-display text-ink tracking-tight mt-1"
+                className="font-just-serif text-2xl sm:text-3xl font-normal text-brand-dark tracking-[-0.02em] mt-1"
               >
-                Related Articles
+                Related articles
               </h3>
             </div>
             <Link
               href="/blog"
-              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-brand hover:underline underline-offset-4"
+              className="text-xs font-semibold text-ink underline underline-offset-4 decoration-line hover:decoration-ink transition-colors"
             >
-              <span>View all articles</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              Browse all journal articles
             </Link>
           </div>
 
@@ -52,11 +51,11 @@ export const BlogRelatedPosts: React.FC<BlogRelatedPostsProps> = ({ posts }) => 
               return (
                 <article
                   key={post.slug}
-                  className="group relative flex flex-col justify-between rounded-3xl bg-white border border-line overflow-hidden shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-card hover:border-brand/40"
+                  className="group flex flex-col justify-between rounded-xl bg-white border border-line overflow-hidden hover:border-brand-dark/50 transition-colors"
                 >
                   <Link
                     href={`/blog/${post.slug}`}
-                    className="flex flex-col flex-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 rounded-3xl"
+                    className="flex flex-col flex-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   >
                     <div className="relative w-full aspect-[16/10] overflow-hidden bg-surface-alt">
                       {post.coverMedia ? (
@@ -64,7 +63,11 @@ export const BlogRelatedPosts: React.FC<BlogRelatedPostsProps> = ({ posts }) => 
                           loader={cloudinaryLoader}
                           src={post.coverMedia.publicId}
                           alt={post.coverAltOverride || post.coverMedia.alt || post.title}
-                          role={post.coverMedia.decorative && !post.coverAltOverride ? "presentation" : undefined}
+                          role={
+                            post.coverMedia.decorative && !post.coverAltOverride
+                              ? "presentation"
+                              : undefined
+                          }
                           fill
                           placeholder={post.coverMedia.blurDataUrl ? "blur" : "empty"}
                           blurDataURL={post.coverMedia.blurDataUrl || undefined}
@@ -83,35 +86,30 @@ export const BlogRelatedPosts: React.FC<BlogRelatedPostsProps> = ({ posts }) => 
 
                     <div className="p-5 flex flex-col flex-1 justify-between">
                       <div>
-                        <div className="flex items-center justify-between gap-2 mb-2">
-                          {categoryLabel && (
-                            <Badge variant="outline" size="sm">
-                              {categoryLabel}
-                            </Badge>
-                          )}
-                          <span className="text-[11px] text-ink-muted flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-brand" aria-hidden="true" />
+                        <div className="flex items-center justify-between gap-2 mb-2 text-xs text-ink-muted">
+                          <span>{categoryLabel || "Journal"}</span>
+                          <span className="inline-flex items-center gap-1">
+                            <Clock className="w-3 h-3" aria-hidden="true" />
                             <span>{readTime} min</span>
                           </span>
                         </div>
 
-                        <h4 className="font-display font-semibold text-ink text-base tracking-tight group-hover:text-brand transition-colors line-clamp-2">
+                        <h4 className="font-just-serif font-normal text-ink text-lg leading-snug group-hover:text-accent-deep transition-colors line-clamp-2">
                           {post.title}
                         </h4>
 
-                        <p className="mt-1.5 text-xs text-ink-muted line-clamp-2 leading-relaxed">
+                        <p className="mt-2 text-xs text-ink-muted line-clamp-2 leading-relaxed font-body">
                           {post.excerpt}
                         </p>
                       </div>
 
-                      <div className="mt-5 pt-3 border-t border-line/60 flex items-center justify-between text-xs">
-                        <span className="text-ink-muted flex items-center gap-1.5 text-[11px]">
-                          <Calendar className="w-3.5 h-3.5 text-brand" />
+                      <div className="mt-5 pt-3 border-t border-line flex items-center justify-between text-xs text-ink-muted">
+                        <span className="inline-flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
                           <span>{formattedDate}</span>
                         </span>
-                        <span className="font-semibold text-brand flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                          <span>Read</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
+                        <span className="font-semibold text-ink group-hover:underline underline-offset-4">
+                          Read article
                         </span>
                       </div>
                     </div>

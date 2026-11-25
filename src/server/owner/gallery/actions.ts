@@ -1,15 +1,17 @@
 "use server";
 
-import { and, asc, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { galleryContent, type GalleryItem } from "@/data/home";
+import { galleryContent, labGalleryContent, type GalleryItem } from "@/data/home";
 import { getTransactionDb } from "@/src/db/client";
 import { galleryCards, homeImageSlots, media, mediaDeletions, postMedia, posts, postRevisions, postWorkingCopies, videos } from "@/src/db/schema";
-import { galleryRevision } from "@/src/server/gallery";
+import { galleryRevision, type GallerySection } from "@/src/server/gallery";
 import { requireOwner } from "@/src/server/auth/guard";
 import { getClientIp } from "@/src/server/auth/ip";
 import { checkRateLimit } from "@/src/server/security/rate-limit";
+
+const sectionSchema = z.enum(["gallery", "lab"]);
 
 const cardsSchema = z.array(z.object({
   id: z.string().min(1).max(64), title: z.string().trim().min(1).max(120),
@@ -17,16 +19,25 @@ const cardsSchema = z.array(z.object({
   imageSlot: z.string().optional(),
 }));
 
-export async function saveGallery(items: GalleryItem[], expectedRevision: string, deleteRemovedPhotos = false) {
+export async function saveGallery(
+  items: GalleryItem[],
+  expectedRevision: string,
+  deleteRemovedPhotos = false,
+  section: GallerySection = "gallery",
+) {
   await requireOwner();
   const limit = await checkRateLimit("owner_mutation", await getClientIp());
   if (!limit.allowed) return { error: "Please wait before saving again." };
+  const parsedSection = sectionSchema.safeParse(section);
+  if (!parsedSection.success) return { error: "Unknown gallery section." };
+  const targetSection = parsedSection.data;
   const parsed = cardsSchema.safeParse(items);
   if (!parsed.success) return { error: "Check the title and badge on each card." };
   const cards = parsed.data;
+  const defaultItems = targetSection === "lab" ? labGalleryContent.items : galleryContent.items;
   if (new Set(cards.map(card => card.id)).size !== cards.length ||
       cards.some(card => card.mediaId ? card.imageSlot !== undefined :
-        !galleryContent.items.some(original => original.id === card.id && original.imageSlot === card.imageSlot))) {
+        !defaultItems.some(original => original.id === card.id && original.imageSlot === card.imageSlot))) {
     return { error: "Select an image for each new card." };
   }
   const client = getTransactionDb(process.env.DATABASE_URL);
@@ -34,7 +45,9 @@ export async function saveGallery(items: GalleryItem[], expectedRevision: string
   try {
     const result = await client.db.transaction(async tx => {
       await tx.execute(sql`LOCK TABLE gallery_cards IN SHARE ROW EXCLUSIVE MODE`);
-      const current = await tx.select().from(galleryCards).orderBy(asc(galleryCards.position));
+      const current = await tx.select().from(galleryCards)
+        .where(eq(galleryCards.section, targetSection))
+        .orderBy(asc(galleryCards.position));
       if (galleryRevision(current.map(c => ({ ...c, mediaId: c.mediaId ?? undefined, imageSlot: c.imageSlot ?? undefined }))) !== expectedRevision) {
         return { error: "The gallery changed in another session. Reload before saving." };
       }
@@ -44,8 +57,10 @@ export async function saveGallery(items: GalleryItem[], expectedRevision: string
           .where(and(inArray(media.id, ids), isNull(media.deletedAt))).for("share");
         if (assets.length !== ids.length) return { error: "An image was removed from the library. Choose a replacement." };
       }
-      await tx.delete(galleryCards);
-      if (cards.length) await tx.insert(galleryCards).values(cards.map((card, position) => ({ ...card, position })));
+      await tx.delete(galleryCards).where(eq(galleryCards.section, targetSection));
+      if (cards.length) {
+        await tx.insert(galleryCards).values(cards.map((card, position) => ({ ...card, section: targetSection, position })));
+      }
       let queued = 0;
       let retained = 0;
       if (deleteRemovedPhotos === true) {
@@ -56,6 +71,7 @@ export async function saveGallery(items: GalleryItem[], expectedRevision: string
           await tx.execute(sql`LOCK TABLE home_image_slots IN SHARE MODE`);
           const unused = await tx.delete(media).where(and(
             inArray(media.id, removed),
+            sql`NOT EXISTS (SELECT 1 FROM ${galleryCards} WHERE ${galleryCards.mediaId} = ${media.id})`,
             sql`NOT EXISTS (SELECT 1 FROM ${homeImageSlots} WHERE ${homeImageSlots.mediaId} = ${media.id})`,
             sql`NOT EXISTS (SELECT 1 FROM ${postMedia} WHERE ${postMedia.mediaId} = ${media.id})`,
             sql`NOT EXISTS (SELECT 1 FROM ${posts} WHERE ${posts.coverMediaId} = ${media.id}

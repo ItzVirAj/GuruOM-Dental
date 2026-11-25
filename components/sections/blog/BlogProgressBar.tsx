@@ -37,12 +37,9 @@ export const BlogProgressBar: React.FC = () => {
   return (
     <div
       aria-hidden="true"
-      className="fixed top-[var(--nav-h,5rem)] left-0 right-0 h-1 z-40 pointer-events-none bg-transparent"
+      className="fixed top-[var(--nav-h,5rem)] left-0 right-0 h-[2.5px] z-40 pointer-events-none bg-transparent"
     >
-      <div
-        ref={barRef}
-        className="h-full bg-accent transition-none"
-      />
+      <div ref={barRef} className="h-full bg-accent transition-none" />
     </div>
   );
 };

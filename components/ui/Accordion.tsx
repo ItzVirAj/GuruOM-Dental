@@ -17,6 +17,7 @@ export interface AccordionProps {
   headingLevel?: "h2" | "h3" | "h4";
   defaultOpenId?: string | null;
   className?: string;
+  titleClassName?: string;
   onItemToggle?: (id: string | null) => void;
 }
 
@@ -25,6 +26,7 @@ export const Accordion: React.FC<AccordionProps> = ({
   headingLevel = "h3",
   defaultOpenId = null,
   className = "",
+  titleClassName = "font-display text-base sm:text-lg font-bold",
   onItemToggle,
 }) => {
   const [openId, setOpenId] = useState<string | null>(defaultOpenId);
@@ -156,7 +158,7 @@ export const Accordion: React.FC<AccordionProps> = ({
                 onKeyDown={(e) => handleKeyDown(e, index)}
                 className="group flex w-full items-center justify-between gap-4 py-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-xl px-3 hover:bg-surface-alt/40"
               >
-                <span className="font-display text-base sm:text-lg font-bold text-ink group-hover:text-brand transition-colors">
+                <span className={`${titleClassName} text-ink group-hover:text-brand transition-colors`}>
                   {item.title}
                 </span>
 
@@ -193,7 +195,7 @@ export const Accordion: React.FC<AccordionProps> = ({
               }}
               className="px-3 pb-4 pt-1"
             >
-              <div className="text-sm sm:text-base text-ink-muted leading-relaxed font-body">
+              <div className="text-body text-ink-muted">
                 {item.content}
               </div>
             </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { List, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { ScrollTrigger } from "@/lib/gsap";
 
 export interface TocItem {
@@ -22,7 +22,6 @@ export const BlogTableOfContents: React.FC<BlogTableOfContentsProps> = ({
   const [activeId, setActiveId] = useState<string>(items[0]?.id || "");
   const [isOpen, setIsOpen] = useState(false);
 
-  // Setup ScrollTrigger heading tracking
   useEffect(() => {
     if (items.length === 0) return;
 
@@ -56,7 +55,6 @@ export const BlogTableOfContents: React.FC<BlogTableOfContentsProps> = ({
     const targetEl = document.getElementById(id);
     if (!targetEl) return;
 
-    // Use Lenis smooth scroll if active on window, else native scrollIntoView
     // @ts-expect-error Lenis instance attached to window or smooth scroll
     if (typeof window !== "undefined" && window.lenis && typeof window.lenis.scrollTo === "function") {
       // @ts-expect-error Lenis call
@@ -66,27 +64,22 @@ export const BlogTableOfContents: React.FC<BlogTableOfContentsProps> = ({
       window.scrollTo({ top: y, behavior: "smooth" });
     }
 
-    // Set browser hash cleanly without jarring jump
     window.history.replaceState(null, "", `#${id}`);
   };
 
   if (items.length === 0) return null;
 
-  // Mobile Disclosure Variant (Top of article on < lg)
   if (isMobileDisclosure) {
     return (
-      <div className="lg:hidden w-full mb-8 rounded-2xl border border-line bg-surface/50 overflow-hidden">
+      <div className="lg:hidden w-full mb-8 rounded-xl border border-line bg-surface overflow-hidden">
         <button
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
-          className="w-full px-4 py-3.5 flex items-center justify-between text-left focus:outline-none focus:ring-2 focus:ring-brand"
+          className="w-full px-4 py-3 flex items-center justify-between text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent cursor-pointer"
           aria-expanded={isOpen}
           aria-controls="mobile-toc-list"
         >
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-ink">
-            <List className="w-4 h-4 text-brand" />
-            <span>On This Page</span>
-          </div>
+          <span className="text-sm font-semibold text-ink">On this page</span>
           {isOpen ? (
             <ChevronUp className="w-4 h-4 text-ink-muted" />
           ) : (
@@ -98,7 +91,7 @@ export const BlogTableOfContents: React.FC<BlogTableOfContentsProps> = ({
           <nav
             id="mobile-toc-list"
             aria-label="Table of contents"
-            className="px-4 pb-4 pt-1 border-t border-line/60 space-y-1.5 text-xs"
+            className="px-4 pb-4 pt-2 border-t border-line space-y-1.5 text-sm"
           >
             {items.map((item) => {
               const isCurrent = activeId === item.id;
@@ -108,11 +101,11 @@ export const BlogTableOfContents: React.FC<BlogTableOfContentsProps> = ({
                   href={`#${item.id}`}
                   onClick={(e) => handleScrollTo(e, item.id)}
                   aria-current={isCurrent ? "true" : undefined}
-                  className={`block py-1.5 transition-colors ${
-                    item.level === 3 ? "pl-4 text-[11px]" : "font-medium"
+                  className={`block py-1 transition-colors ${
+                    item.level === 3 ? "pl-4 text-xs" : ""
                   } ${
                     isCurrent
-                      ? "text-brand font-semibold"
+                      ? "text-brand-dark font-semibold"
                       : "text-ink-muted hover:text-ink"
                   }`}
                 >
@@ -126,18 +119,13 @@ export const BlogTableOfContents: React.FC<BlogTableOfContentsProps> = ({
     );
   }
 
-  // Desktop Sticky Sidebar Variant
   return (
-    <nav
-      aria-label="Table of contents"
-      className="p-5 rounded-3xl bg-white border border-line shadow-soft space-y-3"
-    >
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-ink pb-2.5 border-b border-line">
-        <List className="w-4 h-4 text-brand" />
-        <span>On This Page</span>
-      </div>
+    <nav aria-label="Table of contents" className="space-y-3">
+      <p className="text-sm font-semibold text-ink pb-2 border-b border-line">
+        On this page
+      </p>
 
-      <ul className="space-y-1 text-xs">
+      <ul className="space-y-1 text-sm border-l border-line">
         {items.map((item) => {
           const isCurrent = activeId === item.id;
           return (
@@ -146,20 +134,14 @@ export const BlogTableOfContents: React.FC<BlogTableOfContentsProps> = ({
                 href={`#${item.id}`}
                 onClick={(e) => handleScrollTo(e, item.id)}
                 aria-current={isCurrent ? "true" : undefined}
-                className={`group flex items-start py-1.5 transition-all duration-200 ${
-                  item.level === 3 ? "pl-3.5 text-[11px]" : "font-medium"
+                className={`block -ml-px border-l-2 py-1.5 transition-colors ${
+                  item.level === 3 ? "pl-5 text-xs" : "pl-3.5"
                 } ${
                   isCurrent
-                    ? "text-brand font-semibold translate-x-1"
-                    : "text-ink-muted hover:text-ink"
+                    ? "border-accent text-ink font-semibold"
+                    : "border-transparent text-ink-muted hover:text-ink hover:border-line"
                 }`}
               >
-                <span
-                  aria-hidden="true"
-                  className={`mr-2 w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 transition-colors ${
-                    isCurrent ? "bg-brand" : "bg-transparent group-hover:bg-line"
-                  }`}
-                />
                 <span className="line-clamp-2">{item.text}</span>
               </a>
             </li>

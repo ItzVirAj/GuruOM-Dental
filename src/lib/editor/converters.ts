@@ -112,10 +112,21 @@ function extractPlainTextFromNodes(nodes?: TipTapNode[]): string {
     .join("");
 }
 
+export interface EmbeddedVideoMeta {
+  id: string;
+  title: string;
+  thumbnailUrl: string;
+  youtubeId: string;
+  status: "draft" | "published";
+}
+
 /**
  * Converts ContentBlock[] to a TipTap document.
  */
-export function blocksToEditorDoc(blocks: ContentBlock[]): TipTapDoc {
+export function blocksToEditorDoc(
+  blocks: ContentBlock[],
+  embeddedVideos?: Record<string, EmbeddedVideoMeta>
+): TipTapDoc {
   const content: TipTapNode[] = [];
 
   for (const block of blocks) {
@@ -212,10 +223,20 @@ export function blocksToEditorDoc(blocks: ContentBlock[]): TipTapDoc {
         break;
       }
       case "youtube": {
+        const meta = embeddedVideos?.[block.videoId];
         content.push({
           type: "youtube",
           attrs: {
             videoId: block.videoId,
+            ...(meta
+              ? {
+                  title: meta.title,
+                  thumbnailUrl: meta.thumbnailUrl,
+                  youtubeId: meta.youtubeId,
+                  status: meta.status,
+                }
+              : {}),
+            visible: block.visible !== false,
             caption: block.caption,
             captionRuns: block.captionRuns,
           },
@@ -380,6 +401,7 @@ export function editorDocToBlocks(doc: TipTapDoc | unknown): ContentBlock[] {
         const videoId = typeof node.attrs?.videoId === "string" ? normalizeText(node.attrs.videoId) : "";
         if (!videoId) continue;
 
+        const visibleAttr = node.attrs?.visible;
         const caption = typeof node.attrs?.caption === "string" ? normalizeText(node.attrs.caption) : undefined;
         const captionRuns = Array.isArray(node.attrs?.captionRuns)
           ? (node.attrs.captionRuns as InlineRun[])
@@ -390,6 +412,7 @@ export function editorDocToBlocks(doc: TipTapDoc | unknown): ContentBlock[] {
         blocks.push({
           type: "youtube",
           videoId,
+          ...(visibleAttr === false ? { visible: false } : {}),
           ...(caption ? { caption } : {}),
           ...(captionRuns ? { captionRuns } : {}),
         });

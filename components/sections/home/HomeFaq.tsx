@@ -15,7 +15,7 @@ export const HomeFaq: React.FC = () => {
     id: item.id,
     title: item.question,
     content: (
-      <p className="text-sm text-ink-muted leading-relaxed pt-1">
+      <p className="text-body font-body text-ink-muted pt-1">
         {item.answer}
       </p>
     ),
@@ -45,14 +45,18 @@ export const HomeFaq: React.FC = () => {
             >
               Common questions.
             </h2>
-            <p className="mt-2 text-sm sm:text-base text-ink-muted max-w-lg mx-auto">
+            <p className="mt-2 text-body font-body text-ink-muted max-w-lg mx-auto">
               Everything you need to know about your visits, emergency support, insurance, and clinical hygiene.
             </p>
           </div>
 
           {/* Accordion */}
           <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-10 border border-line shadow-soft">
-            <Accordion items={accordionItems} headingLevel="h3" />
+            <Accordion
+              items={accordionItems}
+              headingLevel="h3"
+              titleClassName="font-body text-base sm:text-lg font-semibold leading-snug"
+            />
           </div>
 
           {/* Footer Assistance */}

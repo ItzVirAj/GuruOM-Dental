@@ -44,10 +44,20 @@ export function getCloudName(): string {
 export function cleanPublicId(raw: string): string {
   if (!raw) return "";
   let clean = raw.trim();
-  // If a full Cloudinary URL was accidentally passed, extract the public_id
-  const match = clean.match(/res\.cloudinary\.com\/[^/]+\/image\/upload\/(?:(?:v\d+|[^/]+)\/)*(.*?)(?:\.[a-zA-Z0-9]+)?$/);
-  if (match && match[1]) {
-    clean = match[1];
+  // If a full Cloudinary URL was passed, extract the public_id preserving folder paths
+  const uploadMarker = /res\.cloudinary\.com\/[^/]+\/image\/upload\/(.+)$/i;
+  const uploadMatch = clean.match(uploadMarker);
+  if (uploadMatch?.[1]) {
+    let tail = uploadMatch[1];
+    // Strip optional transformations + version segment (e.g. "f_auto,q_auto/v1795593046/" or "v1795593046/")
+    const versionMatch = tail.match(/^(?:[^/]+\/)*?v\d+\/(.+)$/);
+    if (versionMatch?.[1]) {
+      tail = versionMatch[1];
+    } else {
+      // No version segment: strip leading transformation segments (comma-separated or key_value params)
+      tail = tail.replace(/^(?:[a-z]{1,4}_[^/]+\/)+/i, "");
+    }
+    clean = tail.replace(/\.[a-zA-Z0-9]+$/, "");
   }
   // Strip leading slash
   clean = clean.replace(/^\/+/, "");
